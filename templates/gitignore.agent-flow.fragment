@@ -3,7 +3,7 @@
 .claude/*
 !.claude/commands/
 .claude/commands/*
-!.claude/commands/startproject.md
+!.claude/commands/flow-start.md
 !.claude/commands/flow-plan.md
 !.claude/commands/flow-impl.md
 !.claude/commands/flow-integration-test.md
@@ -12,8 +12,8 @@
 !.claude/rules/*.md
 !.claude/skills/
 .claude/skills/*
-!.claude/skills/startproject/
-!.claude/skills/startproject/**
+!.claude/skills/flow-start/
+!.claude/skills/flow-start/**
 !.claude/skills/tdd/
 !.claude/skills/tdd/**
 !.claude/skills/team-implement/
@@ -47,8 +47,8 @@
 !.codex/hooks/*.py
 !.codex/skills/
 .codex/skills/*
-!.codex/skills/startproject/
-!.codex/skills/startproject/**
+!.codex/skills/flow-start/
+!.codex/skills/flow-start/**
 !.codex/skills/team-implement/
 !.codex/skills/team-implement/**
 !.codex/skills/team-review/

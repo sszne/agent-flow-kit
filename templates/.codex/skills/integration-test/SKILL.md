@@ -8,7 +8,7 @@ description: |
 
 # Integration Test
 
-Claude workflow for the Playwright integration evidence gate.
+Codex-native Playwright integration evidence gate.
 
 Webwright decision: keep Playwright Test as the official pass/fail runner. Use Webwright-style code-as-action only as a scenario-crafting optimization for long browser flows, then promote the stable path into a deterministic Playwright Test spec.
 
@@ -18,7 +18,9 @@ Use this skill to verify implemented behavior through a real browser, preserve s
 
 ## Operating Rules
 
-- Read `.claude/rules/`, `.claude/docs/DESIGN.md`, the frozen `docs/flow/{feature_name}/plan.md`, and the implementation report.
+- Activate `context-loader` first.
+- Read the frozen `docs/flow/{feature_name}/plan.md` and the implementation report.
+- Use the local base URL documented in `.claude/rules/dev-environment.md`; prefer `http://localhost` when cookies/session behavior matters.
 - Use Playwright Test for the official gate.
 - For long or brittle flows, craft exploratory Playwright scripts in Webwright style to reduce step-by-step browser interaction, then convert the stable path into a Playwright Test spec.
 - Save evidence under `docs/flow/{feature_name}/integration-test/{run_id}/`.

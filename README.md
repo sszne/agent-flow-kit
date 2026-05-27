@@ -9,6 +9,7 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - CI matrix gate for required plan matrices
 - onboarding skills for new repositories
 - Playwright integration-test evidence gate
+- Integration Coverage Contract that maps each business flow to happy, exception, permission, boundary, side-effect, and regression coverage
 
 ## Onboarding Sequence
 
@@ -26,6 +27,10 @@ docs/agent-flow/project-structure.md
 docs/agent-flow/business-flows.md
 docs/agent-flow/integration-scenarios.md
 ```
+
+Behavior-changing work is blocked until these onboarding documents exist.
+The CI matrix gate also rejects risky changes when the required plan sections are
+empty, contain template placeholders, or rely on vague waivers.
 
 ## Install
 
@@ -57,6 +62,9 @@ After install, review:
 - `.codex/hooks/*.py`
 - `.claude/docs/DESIGN.md`
 
+The default `.agent-flow/config.json` is tuned for common Next.js repositories.
+Adjust the path lists when installing into another stack.
+
 If the target repo already has `.claude/settings.json`, the installer merges the Agent Flow hook snippet and writes a timestamped backup before updating it.
 
 The installer validates that entry skills and hook scripts are present in the kit before copying files. If `SKILL.md` files are missing from the distributed kit, installation fails instead of creating a partial workflow.
@@ -67,7 +75,7 @@ The installer validates that entry skills and hook scripts are present in the ki
 Project survey
   -> Business-flow discovery
   -> Integration-scenario design
-  -> /flow-plan
+  -> /flow-start or /flow-plan
   -> /flow-impl or team-implement
   -> /flow-integration-test
   -> team-review
@@ -76,3 +84,20 @@ Project survey
 ## Webwright Decision
 
 Playwright Test remains the deterministic pass/fail gate. Webwright-style code-as-action can be used to craft long browser scenarios, but the stable path must be promoted to a Playwright Test spec with assertions and evidence output.
+
+## Residual Risk Countermeasures
+
+The workflow reduces bugs and regressions, but some risks require domain
+knowledge, runtime parity, test infrastructure, and reviewer discipline. See
+`docs/agent-flow-residual-risk-countermeasures.md` after installation for the
+recommended countermeasures and concrete environment examples.
+`/flow-plan` uses this document as the basis for Residual Risk Preflight
+warnings before a behavior-changing plan is frozen.
+
+## Bug Feedback Loop
+
+Bug and regression reports should improve the project-specific flow. See
+`docs/agent-flow-bug-feedback-loop.md` after installation. When a previous plan
+exists, `/flow-plan` classifies where the prior flow failed and adds flow
+improvement tasks when possible. If the bug cannot be prevented by flow changes,
+it is recorded in `docs/agent-flow/bug-knowledge.md`.

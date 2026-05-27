@@ -1,0 +1,23 @@
+name: Agent Flow Matrix Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  matrix-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin "${{ github.base_ref }}" --depth=1
+
+      - name: Require frozen plan matrices for behavior changes
+        run: python3 scripts/agent-flow-matrix-gate.py --base "origin/${{ github.base_ref }}"

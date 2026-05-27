@@ -1,0 +1,27 @@
+{
+  "name": "agent-flow-kit",
+  "version": "0.1.0",
+  "description": "Transferable Claude/Codex agent-flow workflow with onboarding skills, hooks, planning gates, review gates, and Playwright integration evidence gates.",
+  "entry_skills": [
+    "agent-flow-onboarding",
+    "project-structure-survey",
+    "business-flow-discovery",
+    "integration-scenario-design",
+    "flow-start",
+    "team-implement",
+    "team-review",
+    "integration-test"
+  ],
+  "required_onboarding_docs": [
+    "docs/agent-flow/project-structure.md",
+    "docs/agent-flow/business-flows.md",
+    "docs/agent-flow/integration-scenarios.md"
+  ],
+  "canonical_flow": [
+    "agent-flow-onboarding",
+    "flow-start or flow-plan",
+    "flow-impl or team-implement",
+    "flow-integration-test",
+    "team-review"
+  ]
+}
