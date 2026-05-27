@@ -1,0 +1,120 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/check-codex-before-write.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/integration-test-quality-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/suggest-gemini-research.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/check-codex-after-plan.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/error-to-codex.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/post-test-analysis.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/integration-test-quality-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/log-cli-tools.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/lint-on-save.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/post-implementation-review.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/integration-test-quality-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\": {\"additionalContext\": \"Context compaction triggered. Key context: Check CLAUDE.md for project rules, .claude/docs/DESIGN.md for design decisions, .claude/rules/ for coding standards.\"}}'"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/agent-router.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/agent-flow-onboarding-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/integration-test-quality-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
