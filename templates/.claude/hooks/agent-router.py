@@ -4,6 +4,7 @@ UserPromptSubmit hook: Route to appropriate agent based on user intent.
 
 Routing rules:
 - Multimodal files (PDF/video/audio/image) → Gemini CLI (HIGHEST PRIORITY)
+- Existing behavior changes / bug fixes / regressions → /flow-plan (safety gate)
 - Codebase understanding / large analysis → Opus subagent (1M context)
 - External research / survey → Opus subagent
 - Planning, design, complex code → Codex CLI
@@ -77,6 +78,28 @@ OPUS_RESEARCH_TRIGGERS = {
     ],
 }
 
+FLOW_PLAN_REQUIRED_TRIGGERS = {
+    "bug_or_regression": [
+        "バグ", "不具合", "エラー", "デグレ", "リグレッション", "障害", "失敗", "壊れ",
+        "bug", "regression", "incident", "failure", "broken", "not working",
+    ],
+    "existing_behavior_change": [
+        "修正", "変更", "改修", "削除", "置き換え", "既存", "影響", "対応", "改善",
+        "fix", "change", "modify", "update", "delete", "replace", "existing",
+        "refactor", "migration", "schema",
+    ],
+    "business_flow_sensitive": [
+        "注文", "会社注文", "dealer", "ディーラー", "価格", "料金", "請求", "決済",
+        "メール", "pdf", "出荷", "検索", "ステータス", "認証", "権限", "スキーマ",
+        "order", "pricing", "billing", "payment", "mail", "shipment", "search",
+        "status", "auth", "permission", "schema",
+    ],
+}
+
+
+FLOW_PLAN_EXPLICIT_PATTERN = re.compile(r"/flow-plan\b", re.IGNORECASE)
+FLOW_START_EXPLICIT_PATTERN = re.compile(r"/flow-start\b", re.IGNORECASE)
+
 
 def detect_multimodal_files(prompt: str) -> str | None:
     """Detect multimodal file references in the prompt. Returns matched file path or None."""
@@ -113,6 +136,43 @@ def detect_agent(prompt: str) -> tuple[str | None, str, bool]:
     return None, "", False
 
 
+def detect_flow_plan_requirement(prompt: str) -> tuple[bool, str, str]:
+    """Return whether the prompt should be routed through /flow-plan."""
+    if FLOW_PLAN_EXPLICIT_PATTERN.search(prompt):
+        return False, "", ""
+
+    prompt_lower = prompt.lower()
+    for category, triggers in FLOW_PLAN_REQUIRED_TRIGGERS.items():
+        for trigger in triggers:
+            if trigger.lower() in prompt_lower:
+                return True, category, trigger
+
+    return False, "", ""
+
+
+def flow_plan_message(category: str, trigger: str, prompt: str) -> str:
+    """Build safety guidance for prompts that should use /flow-plan."""
+    if FLOW_START_EXPLICIT_PATTERN.search(prompt):
+        route = (
+            "The user explicitly mentioned /flow-start, but this request appears to touch "
+            "existing behavior or business-flow-sensitive work. Switch to /flow-plan unless "
+            "codebase analysis proves it is pure greenfield discovery."
+        )
+    else:
+        route = (
+            "Route this request through /flow-plan before implementation. Do not proceed with "
+            "behavior-changing edits until a frozen docs/flow/{feature_name}/plan.md exists."
+        )
+
+    return (
+        f"[Agent Flow Safety Gate] Detected '{trigger}' ({category}). {route} "
+        "Use /flow-start only for new-feature discovery or greenfield scope shaping. "
+        "If the work changes an existing runtime path, bug, regression, refactor, auth/schema/status/order/search/mail/PDF/job flow, "
+        "the canonical entry point is /flow-plan. The plan must resolve ambiguity, run residual-risk preflight, "
+        "and include business-flow, regression-surface, test-design, and integration-coverage sections when behavior changes."
+    )
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -122,6 +182,7 @@ def main():
         if len(prompt) < 10:
             sys.exit(0)
 
+        needs_flow_plan, flow_category, flow_trigger = detect_flow_plan_requirement(prompt)
         agent, trigger, is_multimodal = detect_agent(prompt)
 
         if is_multimodal:
@@ -138,6 +199,15 @@ def main():
                 }
             }
             print(json.dumps(output))
+
+        elif needs_flow_plan:
+            output = {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": flow_plan_message(flow_category, flow_trigger, prompt),
+                }
+            }
+            print(json.dumps(output, ensure_ascii=False))
 
         elif agent == "codex":
             output = {

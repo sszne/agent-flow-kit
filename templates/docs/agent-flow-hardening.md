@@ -90,6 +90,8 @@ docs/flow/{feature_name}/integration-test/{run_id}/
 - `.gitignore` now tracks selected workflow contract files under `.claude/`, `.codex/`, and `docs/flow/**/plan.md` while leaving local logs/caches ignored.
 - `/flow-start` is positioned for new-feature discovery and greenfield feature slices.
 - `/flow-plan` is positioned as the canonical entry point for modifications, bug fixes, regressions, and business-flow-sensitive work.
+- `agent-router.py` biases risky prompts to `/flow-plan` even when the user does not explicitly type `/flow-plan`.
+- `flow-plan-required-gate.py` blocks behavior-affecting edits until a frozen `docs/flow/{feature}/plan.md` exists.
 - `/flow-plan` requires business-flow, regression-surface, test-design matrices, and an Integration Coverage Contract.
 - `/flow-impl` stops before coding if required matrices or the Integration Coverage Contract are missing.
 - Claude and Codex hook configuration both call the shared repo-local integration-test quality gate.
@@ -106,7 +108,7 @@ docs/flow/{feature_name}/integration-test/{run_id}/
 | Entry point | Required use | Strength | Weakness | Decision |
 | --- | --- | --- | --- | --- |
 | `/flow-start` | New features, greenfield slices, ambiguous product exploration | Good at broad discovery and parallel codebase mapping | Can over-expand scope for focused modifications | Keep as discovery/kickoff only |
-| `/flow-plan` | Existing behavior changes, bug fixes, regressions, refactors, business-flow-sensitive work | Stronger requirement/design/test traceability and readiness gate | Heavier than needed for pure exploration | Make mandatory for modifications |
+| `/flow-plan` | Existing behavior changes, bug fixes, regressions, refactors, business-flow-sensitive work | Stronger requirement/design/test traceability and readiness gate | Heavier than needed for pure exploration | Make mandatory for modifications and inject safety routing when detected |
 
 ## Review Gate Decision
 

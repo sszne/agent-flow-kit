@@ -6,12 +6,29 @@
         "hooks": [
           {
             "type": "command",
+            "command": "sh -c 'project_dir=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; hook=\"$project_dir/.claude/hooks/agent-router.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "sh -c 'project_dir=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; hook=\"$project_dir/.claude/hooks/agent-flow-onboarding-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
             "timeout": 5
           },
           {
             "type": "command",
             "command": "sh -c 'project_dir=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; hook=\"$project_dir/.claude/hooks/integration-test-quality-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'project_dir=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; hook=\"$project_dir/.claude/hooks/flow-plan-required-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
             "timeout": 5
           }
         ]

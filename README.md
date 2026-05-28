@@ -69,6 +69,23 @@ If the target repo already has `.claude/settings.json`, the installer merges the
 
 The installer validates that entry skills and hook scripts are present in the kit before copying files. If `SKILL.md` files are missing from the distributed kit, installation fails instead of creating a partial workflow.
 
+## Safe Routing
+
+Installed hooks bias toward `/flow-plan` for safety. When a user prompt looks
+like an existing behavior change, bug fix, regression, refactor, auth/schema
+change, or business-flow-sensitive task, `agent-router.py` injects a safety
+gate reminder that `/flow-plan` is the canonical entry point before
+implementation.
+
+In addition, `flow-plan-required-gate.py` blocks edits to behavior-affecting
+paths unless a frozen `docs/flow/{feature_name}/plan.md` exists. The default
+path list is tuned for common Next.js repositories and can be customized in
+`.agent-flow/config.json`.
+
+Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
+If discovery shows that an existing runtime path will change, switch to
+`/flow-plan` before freezing the plan or editing behavior-changing files.
+
 ## Gate Order
 
 ```text

@@ -6,6 +6,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/flow-plan-required-gate.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "sh -c 'project_dir=\"${CODEX_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"; hook=\"$project_dir/.claude/hooks/check-codex-before-write.py\"; if [ -f \"$hook\" ]; then python3 \"$hook\"; fi'",
             "timeout": 10
           },
