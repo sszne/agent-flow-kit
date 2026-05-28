@@ -128,3 +128,12 @@ Bug and regression reports should improve the project-specific flow. See
 exists, `/flow-plan` classifies where the prior flow failed and adds flow
 improvement tasks when possible. If the bug cannot be prevented by flow changes,
 it is recorded in `docs/agent-flow/bug-knowledge.md`.
+
+## Flow Knowledge Updates
+
+Onboarding documents are intentionally broad. During `/flow-plan`, requirement
+questions may uncover new project-specific business flows, exception paths,
+permission rules, side effects, or integration scenarios. When that knowledge is
+reusable beyond the current feature, `/flow-plan` records a Flow Knowledge Update
+and adds tasks to update `docs/agent-flow/business-flows.md` and/or
+`docs/agent-flow/integration-scenarios.md` before implementation.

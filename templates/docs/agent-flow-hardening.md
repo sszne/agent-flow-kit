@@ -93,6 +93,7 @@ docs/flow/{feature_name}/integration-test/{run_id}/
 - `agent-router.py` biases risky prompts to `/flow-plan` even when the user does not explicitly type `/flow-plan`.
 - `flow-plan-required-gate.py` blocks behavior-affecting edits until a frozen `docs/flow/{feature}/plan.md` exists.
 - `/flow-plan` requires business-flow, regression-surface, test-design matrices, and an Integration Coverage Contract.
+- `/flow-plan` includes Flow Knowledge Update so newly confirmed reusable business-flow and integration-scenario knowledge is written back to `docs/agent-flow/*` instead of staying only in a feature plan.
 - `/flow-impl` stops before coding if required matrices or the Integration Coverage Contract are missing.
 - `/flow-impl` can omit arguments after `/flow-plan`; it resolves the latest `docs/flow/*/plan.md` as the implementation target.
 - Claude and Codex hook configuration both call the shared repo-local integration-test quality gate.

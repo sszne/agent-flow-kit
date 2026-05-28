@@ -20,6 +20,7 @@ User requirements from interactive questioning are combined with codebase analys
 - Business Flow Matrix rows MUST carry enough domain knowledge for test design: normal path, error/exception paths, permission or ownership paths, boundary paths, side effects, and required integration coverage.
 - Test Design Matrix rows MUST trace back to business flows and classify each case as happy, validation, permission, missing relation, boundary, side effect, regression, migration, or browser evidence.
 - Behavior-changing work MUST NOT proceed unless `docs/agent-flow/project-structure.md`, `docs/agent-flow/business-flows.md`, and `docs/agent-flow/integration-scenarios.md` exist. If they are missing, run `agent-flow-onboarding` first.
+- When requirement questioning confirms new reusable business-flow knowledge, update `docs/agent-flow/business-flows.md` and/or `docs/agent-flow/integration-scenarios.md`, or document why the knowledge is feature-local and should stay only in this plan.
 - Waivers are only valid when they include a concrete reason or blocker. Vague entries such as `N/A`, `manual`, `low risk`, `TBD`, or `later` are not acceptable for uncovered required coverage.
 - Before requirements questioning, run the Residual Risk Preflight. If the request may involve business-flow gaps, natural-language plan ambiguity, external/runtime dependency gaps, weak test infrastructure, or waiver/reviewer risk, show a warning and capture required countermeasures in the plan.
 - For bug reports or regressions, run the Bug Feedback Review. If a previous `docs/flow/{feature}/plan.md` exists, identify which part of the prior flow failed and improve the project flow when possible. If the bug cannot be prevented by flow changes, append the lesson to `docs/agent-flow/bug-knowledge.md`.
@@ -136,7 +137,31 @@ If any risk applies:
 - Add required setup or blocker tasks before implementation tasks.
 - Do not freeze the plan if a required environment or domain answer is missing and no concrete blocker is acceptable.
 
-### Step 6: Requirements questioning
+### Step 6: Flow Knowledge Update Check
+
+Before requirements questioning and again after user answers, compare the request and confirmed answers with `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md`.
+
+Classify whether the plan discovers reusable project knowledge:
+
+| Knowledge type | Examples | Required response |
+| --- | --- | --- |
+| New business flow | New login gate, onboarding path, order status transition, operator workflow, external-service setup flow | Add or update a row in `docs/agent-flow/business-flows.md` |
+| New exception or permission path | Role-specific block, cross-tenant behavior, missing setup state, partial external verification | Add exception/permission/boundary details to the relevant business-flow row |
+| New side effect or external dependency | Mail/PDF/job/webhook/cache/search/indexing/payment/provider call | Add side effect and regression risk to business-flow docs |
+| New integration scenario | Multi-step browser flow, auth redirect, external provider mock/sandbox path, safe test delivery | Add or update `docs/agent-flow/integration-scenarios.md` |
+| Feature-local knowledge only | One-off copy, temporary experiment, unreusable admin-only task | Keep in the plan and write the reason in Flow Knowledge Update |
+
+If reusable knowledge is found:
+
+- Add a DIRECT task before implementation to update `docs/agent-flow/business-flows.md` and/or `docs/agent-flow/integration-scenarios.md`.
+- Reflect the same knowledge in the plan's Business Flow Matrix, Regression Surface Matrix, Test Design Matrix, and Integration Coverage Contract.
+- Do not freeze the plan until the update target and task are explicit.
+
+If no reusable knowledge is found:
+
+- Document "No reusable project-level flow knowledge discovered" with a concrete reason in the plan.
+
+### Step 7: Requirements questioning
 
 Use the Requirements Question Template below. Ask a maximum of 5 questions in selection format. Order by recommendation priority. Only ask questions where the answer is genuinely ambiguous -- skip questions with obvious answers.
 
@@ -156,11 +181,11 @@ When questions are needed, present:
 - A short "Assumptions not yet safe" list.
 - Up to 5 requirement questions using the Requirements Question Template.
 
-### Step 7: Iterate
+### Step 8: Iterate
 
-If ambiguity remains after user answers, return to Step 3. Repeat until all requirements are clear.
+If ambiguity remains after user answers, return to Step 3. Repeat until all requirements are clear. Re-run the Flow Knowledge Update Check whenever answers add or change business-flow, exception, permission, side-effect, or integration-scenario knowledge.
 
-### Step 8: Escalation check
+### Step 9: Escalation check
 
 Evaluate whether this feature requires EARS formal notation using the following criteria:
 
@@ -175,9 +200,9 @@ Evaluate whether this feature requires EARS formal notation using the following 
 
 If EARS is needed, write requirements using the EARS Notation Template below. Otherwise, write acceptance criteria as a checklist.
 
-### Step 9: Write plan.md "Requirements" section
+### Step 10: Write plan.md "Requirements" section
 
-Create `docs/flow/{feature_name}/plan.md` and write the Requirements section (sections 1.1-1.5 of the plan template).
+Create `docs/flow/{feature_name}/plan.md` and write the Requirements section (sections 1.1-1.6 of the plan template).
 
 ---
 
@@ -225,6 +250,7 @@ Generate additional sections based on these conditions:
 | Regression Surface Matrix | Always for behavior-changing work |
 | Test Design Matrix | Always for TDD tasks and risky DIRECT tasks |
 | Integration Coverage Contract | Always for behavior-changing work |
+| Flow Knowledge Update | Always for behavior-changing work; required when confirmed answers add reusable business-flow, exception, permission, side-effect, or integration-scenario knowledge |
 | Residual Risk Preflight | Always when any residual risk category applies |
 | Playwright Integration Test Plan | Visible browser behavior OR multi-step business workflow |
 
@@ -239,6 +265,7 @@ Break the implementation into tasks:
 - Put Red test tasks before implementation tasks for TDD work
 - Include explicit verification tasks for browser, migration, mail/PDF/job, or build checks when applicable
 - Put required residual-risk setup tasks before implementation tasks, for example test harness setup, sandbox credentials, seed/reset, or domain confirmation
+- Put required `docs/agent-flow/*` knowledge update tasks before implementation tasks when Flow Knowledge Update identifies reusable project knowledge
 - Put required flow-improvement or bug-knowledge tasks before implementation tasks for bug/regression work
 
 ### Step 14: Write plan.md "Design" and "Tasks" sections
@@ -509,6 +536,7 @@ include the results in plan.md only where useful.
 | Exception paths | What validation failures, permission failures, missing relations, external failures, and boundary values must be preserved? | Existing validation, policies, error handling, service failure paths, tests |
 | Residual risk | Does the request touch undocumented business rules, natural-language ambiguity, external/runtime dependencies, weak test infrastructure, or waiver/reviewer risk? | `docs/agent-flow-residual-risk-countermeasures.md`, onboarding docs, runtime/test config, user answers |
 | Bug feedback | Is this a bug/regression with a previous plan or known bug pattern? Which flow step failed? | Prior `docs/flow/*`, implementation reports, integration evidence, review notes, `docs/agent-flow/bug-knowledge.md` |
+| Flow knowledge update | Did questioning confirm reusable business-flow, exception, permission, side-effect, or integration-scenario knowledge missing from onboarding docs? | `docs/agent-flow/business-flows.md`, `docs/agent-flow/integration-scenarios.md`, user answers |
 | Regression surfaces | What adjacent shared flows can break even if not directly edited? | Shared partials/scripts/services/actions/schema/tests |
 | Minimal scope | What is the smallest codebase-conforming change that satisfies the intent? | Existing patterns and alternatives considered |
 | Open questions | Which unknowns would cause implementation rework or business-rule guesses? | Questions to user; block freeze until resolved |
@@ -563,14 +591,34 @@ Bug knowledge update:
 - Target: `docs/agent-flow/bug-knowledge.md`
 - Entry summary: {trigger, symptoms, root cause, why flow did/did not catch it, future response}
 
-### 1.6 Requirements List
+### 1.6 Flow Knowledge Update
+<!-- Required for behavior-changing work. Capture whether confirmed requirement answers should update project-level business-flow docs. -->
+
+| Item | Result |
+| --- | --- |
+| Existing business-flow docs reviewed | Yes/No: `docs/agent-flow/business-flows.md` |
+| Existing integration-scenario docs reviewed | Yes/No: `docs/agent-flow/integration-scenarios.md` |
+| New reusable business flow found | Yes/No: {flow name or reason} |
+| New exception / permission / boundary path found | Yes/No: {path or reason} |
+| New side effect / external dependency found | Yes/No: {side effect or reason} |
+| New integration scenario found | Yes/No: {scenario or reason} |
+| Feature-local only | Yes/No: {why it should remain only in this plan} |
+
+Required documentation updates:
+
+| Target document | Update needed? | Summary of update | Task ID |
+| --- | --- | --- | --- |
+| `docs/agent-flow/business-flows.md` | Yes/No | {business-flow row, exception path, permission path, side effect, regression risk} | TASK-{NNN} or N/A |
+| `docs/agent-flow/integration-scenarios.md` | Yes/No | {scenario, setup, assertions, evidence, mock/sandbox requirement} | TASK-{NNN} or N/A |
+
+### 1.7 Requirements List
 <!-- EARS notation if escalated, otherwise acceptance criteria checklist -->
 
 #### Acceptance Criteria
 - [ ] {Criterion}
 - [ ] {Criterion}
 
-### 1.7 Scope
+### 1.8 Scope
 **In scope:**
 - {Item}
 
@@ -706,6 +754,8 @@ Evidence output:
 - [ ] Residual Risk Preflight is documented, or explicitly unnecessary because no residual-risk category applies beyond normal behavior-change risk
 - [ ] Triggered residual-risk warnings have countermeasures, setup tasks, or concrete blockers
 - [ ] Bug Feedback Review is documented for bug/regression work, or explicitly unnecessary because this is not a bug/regression request
+- [ ] Flow Knowledge Update is documented for behavior-changing work, including target docs or a concrete feature-local reason
+- [ ] Required `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md` update tasks are included before implementation when reusable flow knowledge is found
 - [ ] Flow improvement or bug-knowledge tasks are included when a prior flow gap or non-preventable bug pattern is identified
 - [ ] Business ambiguity has been resolved through user answers or explicitly blocked
 - [ ] Design decisions are consistent with requirements
