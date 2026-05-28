@@ -43,10 +43,36 @@ Dry run:
 python3 agent-flow-kit/install.py --target /path/to/repo --dry-run
 ```
 
+The dry run classifies existing differing files instead of reporting only
+`skip existing`:
+
+- `recommend overwrite`: portable workflow assets such as commands, hooks,
+  skills, `.codex/hooks.json`, CI workflow, and matrix-gate scripts. These are
+  intended to track the kit. Runtime impact is limited to lightweight
+  hook/script dispatch; apply when the new workflow gate is desired.
+- `preserve local (manual-merge)`: target-local config, repository instructions,
+  design docs, environment/testing rules, and historical flow docs. These often
+  contain stack-specific decisions and should be merged intentionally instead of
+  overwritten.
+- `preserve local`: unknown existing paths outside the portable allowlist.
+
 Install:
 
 ```bash
 python3 agent-flow-kit/install.py --target /path/to/repo
+```
+
+Apply the recommended existing-file updates while still preserving local
+project docs/config:
+
+```bash
+python3 agent-flow-kit/install.py --target /path/to/repo --apply-recommended-updates
+```
+
+Preview that recommended update set without writing:
+
+```bash
+python3 agent-flow-kit/install.py --target /path/to/repo --dry-run --apply-recommended-updates
 ```
 
 Overwrite existing workflow files:
@@ -77,6 +103,9 @@ the existing entry instead of registering duplicates.
 
 With `--force`, unchanged files are skipped instead of backed up again. Changed
 files still receive `*.agent-flow-backup-*` backups before overwrite.
+
+Prefer `--apply-recommended-updates` for normal kit upgrades. Use `--force` only
+when you intentionally want to replace target-local guidance as well.
 
 The installer validates that entry skills and hook scripts are present in the kit before copying files. If `SKILL.md` files are missing from the distributed kit, installation fails instead of creating a partial workflow.
 

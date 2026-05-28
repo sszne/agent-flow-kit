@@ -8,6 +8,7 @@ import json
 import re
 import shutil
 import sys
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +20,61 @@ MANIFEST = KIT_ROOT / "manifest.json"
 GITIGNORE_MARKER_START = "# >>> agent-flow-kit"
 GITIGNORE_MARKER_END = "# <<< agent-flow-kit"
 HOOK_SCRIPT_PATTERN = re.compile(r"\.claude/hooks/([A-Za-z0-9_.-]+\.py)")
+
+
+SAFE_UPDATE_PREFIXES = (
+    ".claude/commands/",
+    ".claude/hooks/",
+    ".claude/skills/",
+    ".codex/hooks/",
+    ".codex/skills/",
+)
+
+SAFE_UPDATE_FILES = {
+    ".codex/hooks.json",
+    ".github/workflows/agent-flow-matrix.yml",
+    "scripts/agent-flow-matrix-gate.py",
+}
+
+LOCAL_FIRST_FILES = {
+    ".agent-flow/config.json",
+    ".claude/docs/DESIGN.md",
+    ".claude/rules/dev-environment.md",
+    ".claude/rules/testing.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "docs/agent-flow-hardening.md",
+    "docs/agent-flow-integration-test.md",
+    "docs/flow/agent-flow-hardening/plan.md",
+}
+
+LOCAL_FIRST_PREFIXES = (
+    ".claude/docs/",
+    ".claude/rules/",
+    "docs/flow/",
+)
+
+
+@dataclass
+class InstallStats:
+    created: int = 0
+    updated: int = 0
+    unchanged: int = 0
+    recommended_updates: int = 0
+    preserved_local: int = 0
+    manual_merges: int = 0
+    gitignore_changed: int = 0
+    settings_changed: int = 0
+
+    def print_summary(self) -> None:
+        print("\nSummary:")
+        print(f"- created: {self.created}")
+        print(f"- updated: {self.updated}")
+        print(f"- unchanged: {self.unchanged}")
+        print(f"- recommended updates: {self.recommended_updates}")
+        print(f"- preserved local/manual merge: {self.preserved_local + self.manual_merges}")
+        print(f"- settings changes: {self.settings_changed}")
+        print(f"- gitignore changes: {self.gitignore_changed}")
 
 
 def iter_template_files() -> list[Path]:
@@ -59,6 +115,40 @@ def target_path(target: Path, template_file: Path) -> Path:
     return target / relative
 
 
+def relative_template_path(src: Path) -> str:
+    return str(src.relative_to(TEMPLATES)).replace("\\", "/")
+
+
+def is_safe_update_path(relative: str) -> bool:
+    return relative in SAFE_UPDATE_FILES or any(
+        relative.startswith(prefix) for prefix in SAFE_UPDATE_PREFIXES
+    )
+
+
+def is_local_first_path(relative: str) -> bool:
+    return relative in LOCAL_FIRST_FILES or any(
+        relative.startswith(prefix) for prefix in LOCAL_FIRST_PREFIXES
+    )
+
+
+def classify_existing_update(relative: str) -> tuple[str, str]:
+    """Classify an existing differing target file for recommended updates."""
+    if is_safe_update_path(relative):
+        return (
+            "safe-overwrite",
+            "portable workflow asset; runtime cost is limited to lightweight hook/script dispatch",
+        )
+    if is_local_first_path(relative):
+        return (
+            "manual-merge",
+            "target-local config, project docs, or workflow history may contain repo-specific decisions",
+        )
+    return (
+        "preserve-local",
+        "not in the portable workflow allowlist; review before overwrite",
+    )
+
+
 def backup(path: Path) -> Path:
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     backup_path = path.with_name(f"{path.name}.agent-flow-backup-{timestamp}")
@@ -66,30 +156,67 @@ def backup(path: Path) -> Path:
     return backup_path
 
 
-def copy_file(src: Path, dst: Path, *, force: bool, dry_run: bool) -> None:
+def copy_file(
+    src: Path,
+    dst: Path,
+    *,
+    force: bool,
+    dry_run: bool,
+    apply_recommended_updates: bool,
+    stats: InstallStats,
+) -> None:
     if src.name == "gitignore.agent-flow.fragment":
         return
 
-    if dst.exists() and not force:
-        print(f"skip existing: {dst}")
-        return
     if dst.exists() and same_file_content(src, dst):
         print(f"skip unchanged: {dst}")
+        stats.unchanged += 1
         return
+
+    relative = relative_template_path(src)
+    if dst.exists() and not force:
+        classification, reason = classify_existing_update(relative)
+        if classification == "safe-overwrite":
+            stats.recommended_updates += 1
+            if not apply_recommended_updates:
+                print(
+                    f"recommend overwrite: {dst} "
+                    f"({reason}; pass --apply-recommended-updates to apply)"
+                )
+                return
+            if dry_run:
+                print(f"recommended overwrite: {dst} ({reason})")
+                return
+        else:
+            if classification == "manual-merge":
+                stats.manual_merges += 1
+            else:
+                stats.preserved_local += 1
+            print(f"preserve local ({classification}): {dst} ({reason})")
+            return
 
     if dry_run:
         action = "overwrite" if dst.exists() else "create"
         print(f"{action}: {dst}")
+        if dst.exists():
+            stats.updated += 1
+        else:
+            stats.created += 1
         return
 
+    existed = dst.exists()
     dst.parent.mkdir(parents=True, exist_ok=True)
-    if dst.exists():
+    if existed:
         backup(dst)
     shutil.copy2(src, dst)
     print(f"installed: {dst}")
+    if existed:
+        stats.updated += 1
+    else:
+        stats.created += 1
 
 
-def install_gitignore(target: Path, *, dry_run: bool) -> None:
+def install_gitignore(target: Path, *, dry_run: bool, stats: InstallStats) -> None:
     fragment_path = TEMPLATES / "gitignore.agent-flow.fragment"
     fragment = fragment_path.read_text(encoding="utf-8").strip()
     block = f"{GITIGNORE_MARKER_START}\n{fragment}\n{GITIGNORE_MARKER_END}\n"
@@ -97,9 +224,11 @@ def install_gitignore(target: Path, *, dry_run: bool) -> None:
     current = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
     if GITIGNORE_MARKER_START in current:
         print("skip existing .gitignore agent-flow block")
+        stats.unchanged += 1
         return
     if dry_run:
         print(f"append agent-flow block: {gitignore}")
+        stats.gitignore_changed += 1
         return
     if gitignore.exists():
         backup(gitignore)
@@ -108,6 +237,7 @@ def install_gitignore(target: Path, *, dry_run: bool) -> None:
             file.write("\n")
         file.write("\n" + block)
     print(f"updated: {gitignore}")
+    stats.gitignore_changed += 1
 
 
 def load_json(path: Path) -> dict:
@@ -193,7 +323,7 @@ def merge_hooks(settings: dict, snippet: dict) -> bool:
     return changed
 
 
-def install_claude_settings(target: Path, *, dry_run: bool) -> None:
+def install_claude_settings(target: Path, *, dry_run: bool, stats: InstallStats) -> None:
     settings_path = target / ".claude" / "settings.json"
     snippet = load_json(CLAUDE_SETTINGS_HOOKS)
     current = load_json(settings_path) if settings_path.exists() else {}
@@ -201,10 +331,12 @@ def install_claude_settings(target: Path, *, dry_run: bool) -> None:
 
     if not changed:
         print("skip existing .claude/settings.json agent-flow hooks")
+        stats.unchanged += 1
         return
     if dry_run:
         action = "merge" if settings_path.exists() else "create"
         print(f"{action}: {settings_path}")
+        stats.settings_changed += 1
         return
 
     settings_path.parent.mkdir(parents=True, exist_ok=True)
@@ -215,6 +347,7 @@ def install_claude_settings(target: Path, *, dry_run: bool) -> None:
         encoding="utf-8",
     )
     print(f"updated: {settings_path}")
+    stats.settings_changed += 1
 
 
 def main() -> int:
@@ -222,6 +355,15 @@ def main() -> int:
     parser.add_argument("--target", required=True, help="Repository root to install into")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files with backups")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be installed")
+    parser.add_argument(
+        "--apply-recommended-updates",
+        action="store_true",
+        help=(
+            "Update existing files classified as portable workflow assets while "
+            "preserving target-local docs and config. Combine with --dry-run to "
+            "preview the recommended update set."
+        ),
+    )
     args = parser.parse_args()
 
     target = Path(args.target).expanduser().resolve()
@@ -233,10 +375,20 @@ def main() -> int:
         return 1
 
     validate_templates()
+    stats = InstallStats()
     for src in iter_template_files():
-        copy_file(src, target_path(target, src), force=args.force, dry_run=args.dry_run)
-    install_claude_settings(target, dry_run=args.dry_run)
-    install_gitignore(target, dry_run=args.dry_run)
+        copy_file(
+            src,
+            target_path(target, src),
+            force=args.force,
+            dry_run=args.dry_run,
+            apply_recommended_updates=args.apply_recommended_updates,
+            stats=stats,
+        )
+    install_claude_settings(target, dry_run=args.dry_run, stats=stats)
+    install_gitignore(target, dry_run=args.dry_run, stats=stats)
+
+    stats.print_summary()
 
     print("\nNext steps:")
     print("1. Review .agent-flow/config.json for project-specific paths.")
