@@ -4,6 +4,9 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 
 ## Rules
 
+- `$ARGUMENTS` is optional. If empty, resolve the plan from the most recently modified `docs/flow/*/plan.md` and treat its parent directory name as `{feature_name}`.
+- If `$ARGUMENTS` is provided, interpret it as either `{feature_name}` or a direct `docs/flow/{feature_name}/plan.md` path.
+- Always announce the resolved plan path before implementation starts. If no plan can be resolved, stop and ask the user which plan to implement.
 - The plan (`docs/flow/{feature_name}/plan.md`) MUST have a frozen tag (`<!-- frozen: v{N} ... -->`). If not frozen, abort and instruct the user to run `/flow-plan` first.
 - Execute tasks one at a time in dependency order. NEVER batch multiple tasks together.
 - TDD tasks follow Red-Green-Refactor strictly.
@@ -26,6 +29,7 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 ## Prerequisites
 
 - `/flow-plan` has been completed and plan.md is frozen.
+- Either `$ARGUMENTS` identifies the plan, or at least one `docs/flow/*/plan.md` exists so the latest plan can be resolved.
 
 ## Directory Structure
 
@@ -36,6 +40,30 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 ---
 
 ## Phase 4: IMPLEMENT
+
+### Step 0: Resolve target plan
+
+Resolve the implementation target before reading the plan:
+
+1. If `$ARGUMENTS` is empty:
+   - Find all `docs/flow/*/plan.md` files.
+   - Select the most recently modified plan file.
+   - Set `{feature_name}` to the selected plan's parent directory name.
+   - Announce: `Resolved /flow-impl target: docs/flow/{feature_name}/plan.md`.
+2. If `$ARGUMENTS` points to a plan file path such as `docs/flow/foo/plan.md`:
+   - Use that file directly.
+   - Set `{feature_name}` to the parent directory name.
+3. Otherwise:
+   - Treat `$ARGUMENTS` as `{feature_name}`.
+   - Use `docs/flow/{feature_name}/plan.md`.
+
+Stop and ask the user when:
+
+- no `docs/flow/*/plan.md` exists,
+- the resolved plan path does not exist,
+- multiple candidate plans have the same latest modified timestamp and the intended target is ambiguous.
+
+Do not ask for `{feature_name}` merely because `$ARGUMENTS` is empty when a latest plan can be resolved.
 
 ### Step 1: Load plan and verify frozen status
 

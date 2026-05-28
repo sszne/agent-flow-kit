@@ -86,6 +86,10 @@ Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
 If discovery shows that an existing runtime path will change, switch to
 `/flow-plan` before freezing the plan or editing behavior-changing files.
 
+`/flow-impl` can be run immediately after `/flow-plan` without arguments. When
+no argument is provided, it resolves the most recently modified
+`docs/flow/*/plan.md` and uses that plan as the implementation target.
+
 ## Gate Order
 
 ```text

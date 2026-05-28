@@ -94,6 +94,7 @@ docs/flow/{feature_name}/integration-test/{run_id}/
 - `flow-plan-required-gate.py` blocks behavior-affecting edits until a frozen `docs/flow/{feature}/plan.md` exists.
 - `/flow-plan` requires business-flow, regression-surface, test-design matrices, and an Integration Coverage Contract.
 - `/flow-impl` stops before coding if required matrices or the Integration Coverage Contract are missing.
+- `/flow-impl` can omit arguments after `/flow-plan`; it resolves the latest `docs/flow/*/plan.md` as the implementation target.
 - Claude and Codex hook configuration both call the shared repo-local integration-test quality gate.
 - Codex has a native `team-implement` skill for frozen plan execution.
 - `team-review` is now the required review gate for behavior-changing work; `/review` is supplemental for small low-risk checks.
