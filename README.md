@@ -66,6 +66,12 @@ The default `.agent-flow/config.json` is tuned for common Next.js repositories.
 Adjust the path lists when installing into another stack.
 
 If the target repo already has `.claude/settings.json`, the installer merges the Agent Flow hook snippet and writes a timestamped backup before updating it.
+The merge treats repo-local hook scripts such as `.claude/hooks/agent-router.py`
+as the same hook even if the shell wrapper changed, so repeated installs update
+the existing entry instead of registering duplicates.
+
+With `--force`, unchanged files are skipped instead of backed up again. Changed
+files still receive `*.agent-flow-backup-*` backups before overwrite.
 
 The installer validates that entry skills and hook scripts are present in the kit before copying files. If `SKILL.md` files are missing from the distributed kit, installation fails instead of creating a partial workflow.
 

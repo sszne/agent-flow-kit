@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from datetime import datetime
@@ -17,6 +18,7 @@ CLAUDE_SETTINGS_HOOKS = KIT_ROOT / "references" / "claude-settings-hooks.json"
 MANIFEST = KIT_ROOT / "manifest.json"
 GITIGNORE_MARKER_START = "# >>> agent-flow-kit"
 GITIGNORE_MARKER_END = "# <<< agent-flow-kit"
+HOOK_SCRIPT_PATTERN = re.compile(r"\.claude/hooks/([A-Za-z0-9_.-]+\.py)")
 
 
 def iter_template_files() -> list[Path]:
@@ -65,6 +67,9 @@ def copy_file(src: Path, dst: Path, *, force: bool, dry_run: bool) -> None:
     if dst.exists() and not force:
         print(f"skip existing: {dst}")
         return
+    if dst.exists() and same_file_content(src, dst):
+        print(f"skip unchanged: {dst}")
+        return
 
     if dry_run:
         action = "overwrite" if dst.exists() else "create"
@@ -106,8 +111,38 @@ def load_json(path: Path) -> dict:
         raise SystemExit(f"Invalid JSON in {path}: {exc}") from exc
 
 
+def same_file_content(left: Path, right: Path) -> bool:
+    try:
+        return left.read_bytes() == right.read_bytes()
+    except OSError:
+        return False
+
+
 def hook_key(hook: dict) -> tuple[str, str]:
-    return str(hook.get("type", "")), str(hook.get("command", ""))
+    command = str(hook.get("command", ""))
+    script_match = HOOK_SCRIPT_PATTERN.search(command)
+    if script_match:
+        return str(hook.get("type", "")), f".claude/hooks/{script_match.group(1)}"
+    return str(hook.get("type", "")), command
+
+
+def dedupe_hooks(hooks: list[dict]) -> bool:
+    """Remove duplicate hook entries with the same semantic identity."""
+    seen: set[tuple[str, str]] = set()
+    deduped: list[dict] = []
+    changed = False
+
+    for hook in hooks:
+        key = hook_key(hook)
+        if key in seen:
+            changed = True
+            continue
+        seen.add(key)
+        deduped.append(hook)
+
+    if changed:
+        hooks[:] = deduped
+    return changed
 
 
 def merge_hooks(settings: dict, snippet: dict) -> bool:
@@ -128,12 +163,26 @@ def merge_hooks(settings: dict, snippet: dict) -> bool:
                 changed = True
                 continue
 
-            existing = {hook_key(hook) for hook in target_entry.setdefault("hooks", [])}
+            target_hooks = target_entry.setdefault("hooks", [])
+            changed = dedupe_hooks(target_hooks) or changed
+            existing = {hook_key(hook): index for index, hook in enumerate(target_hooks)}
             for hook in snippet_entry.get("hooks", []):
-                if hook_key(hook) not in existing:
-                    target_entry["hooks"].append(hook)
-                    existing.add(hook_key(hook))
-                    changed = True
+                key = hook_key(hook)
+                if key in existing:
+                    index = existing[key]
+                    if target_hooks[index] != hook:
+                        target_hooks[index] = hook
+                        changed = True
+                    continue
+
+                target_hooks.append(hook)
+                existing[key] = len(target_hooks) - 1
+                changed = True
+
+    for target_entries in settings_hooks.values():
+        for target_entry in target_entries:
+            if dedupe_hooks(target_entry.setdefault("hooks", [])):
+                changed = True
 
     return changed
 
