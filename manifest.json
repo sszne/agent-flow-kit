@@ -12,6 +12,9 @@
     "team-review",
     "integration-test"
   ],
+  "support_skills": [
+    "context-loader"
+  ],
   "required_onboarding_docs": [
     "docs/agent-flow/project-structure.md",
     "docs/agent-flow/business-flows.md",

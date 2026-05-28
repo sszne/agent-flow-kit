@@ -95,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\": {\"additionalContext\": \"Context compaction triggered. Key context: Check CLAUDE.md for project rules, .claude/docs/DESIGN.md for design decisions, .claude/rules/ for coding standards.\"}}'"
+            "command": "echo '{\"hookSpecificOutput\": {\"additionalContext\": \"Context compaction triggered. Key context: Check AGENTS.md or CLAUDE.md for agent-flow rules, .claude/docs/DESIGN.md for design decisions, .claude/rules/ for coding standards, and docs/agent-flow/ for project flow knowledge.\"}}'"
           }
         ]
       }

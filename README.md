@@ -6,6 +6,9 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 
 - repo-local `.claude/` commands, rules, hooks, and skills
 - repo-local `.codex/` hooks and skills
+- repo-local `CLAUDE.md` / `AGENTS.md` guidance plus a local
+  `context-loader` skill so installed workflows do not depend on machine-global
+  instructions
 - CI matrix gate for required plan matrices
 - onboarding skills for new repositories
 - Playwright integration-test evidence gate
@@ -55,6 +58,8 @@ python3 agent-flow-kit/install.py --target /path/to/repo --force
 After install, review:
 
 - `.agent-flow/config.json`
+- `CLAUDE.md`
+- `AGENTS.md`
 - `.claude/settings.json`
 - `.claude/skills/*/SKILL.md`
 - `.claude/hooks/*.py`
@@ -74,6 +79,11 @@ With `--force`, unchanged files are skipped instead of backed up again. Changed
 files still receive `*.agent-flow-backup-*` backups before overwrite.
 
 The installer validates that entry skills and hook scripts are present in the kit before copying files. If `SKILL.md` files are missing from the distributed kit, installation fails instead of creating a partial workflow.
+
+The kit includes only distribution-safe global guidance. In particular, it
+ships the local `context-loader` behavior and lightweight agent instructions,
+but it does not force a machine-specific advisory-only Codex role or personal
+global skills that could conflict with `/flow-impl` or `team-implement`.
 
 ## Safe Routing
 

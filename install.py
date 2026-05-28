@@ -22,14 +22,20 @@ HOOK_SCRIPT_PATTERN = re.compile(r"\.claude/hooks/([A-Za-z0-9_.-]+\.py)")
 
 
 def iter_template_files() -> list[Path]:
-    return sorted(path for path in TEMPLATES.rglob("*") if path.is_file())
+    return sorted(
+        path
+        for path in TEMPLATES.rglob("*")
+        if path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
+    )
 
 
 def validate_templates() -> None:
     manifest = load_json(MANIFEST)
     missing: list[str] = []
 
-    for skill in manifest.get("entry_skills", []):
+    for skill in manifest.get("entry_skills", []) + manifest.get("support_skills", []):
         for tool_dir in (".claude", ".codex"):
             skill_path = TEMPLATES / tool_dir / "skills" / skill / "SKILL.md"
             if not skill_path.exists():
