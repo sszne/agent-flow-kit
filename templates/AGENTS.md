@@ -7,6 +7,8 @@ or another coding agent.
 
 At the start of every non-trivial repository task, load the local context:
 
+- `AGENTS.md` first when working as Codex
+- `CLAUDE.md` only when it exists and the task is workflow-sensitive
 - `.claude/rules/*.md`
 - `.claude/docs/DESIGN.md`
 - `docs/agent-flow/project-structure.md`
@@ -18,6 +20,11 @@ At the start of every non-trivial repository task, load the local context:
 If these files are missing and the work changes behavior, run or request
 `agent-flow-onboarding` before implementation.
 
+Treat `.claude/` as shared Agent Flow documentation, not as Claude-only
+instructions. When a shared rule conflicts with Codex behavior, direct user
+instruction, or source evidence, prefer the active agent's entrypoint and the
+repo evidence.
+
 ## Flow Selection
 
 - Use `/flow-plan` for modifications to existing behavior, bug fixes,
@@ -26,6 +33,9 @@ If these files are missing and the work changes behavior, run or request
 - Use `/flow-start` for new-feature discovery or greenfield scope shaping.
 - If discovery shows an existing runtime path will change, switch to
   `/flow-plan` before freezing the plan.
+
+In Codex, `/flow-plan`, `/flow-impl`, and `/flow-integration-test` map to the
+same-named skills: `flow-plan`, `flow-impl`, and `flow-integration-test`.
 
 ## Implementation Gate
 

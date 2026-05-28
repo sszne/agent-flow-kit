@@ -84,6 +84,9 @@ The kit includes only distribution-safe global guidance. In particular, it
 ships the local `context-loader` behavior and lightweight agent instructions,
 but it does not force a machine-specific advisory-only Codex role or personal
 global skills that could conflict with `/flow-impl` or `team-implement`.
+The local `context-loader` is tool-neutral: Codex should prefer `AGENTS.md`,
+Claude should prefer `CLAUDE.md`, and `.claude/` is treated as shared Agent Flow
+documentation whose relevant parts are loaded proportionally.
 
 ## Safe Routing
 
@@ -117,6 +120,26 @@ Project survey
   -> /flow-integration-test
   -> team-review
 ```
+
+## Claude Code / Codex Usage
+
+The workflow names are intentionally aligned. Claude Code users can invoke the
+slash commands, while Codex users can invoke the same names as skills or plain
+instructions.
+
+| Goal | Claude Code | Codex |
+| --- | --- | --- |
+| Load local context | `context-loader` skill | `context-loader` skill |
+| New-feature discovery | `/flow-start {feature}` | `flow-start {feature}` |
+| Existing behavior plan | `/flow-plan {request}` | `flow-plan {request}` |
+| Implement latest frozen plan | `/flow-impl` | `flow-impl` |
+| Implement a specific plan | `/flow-impl {feature}` | `flow-impl {feature}` |
+| Browser evidence gate | `/flow-integration-test {feature}` | `flow-integration-test {feature}` |
+| Parallel implementation | `team-implement` skill | `team-implement` skill |
+| Review gate | `team-review` skill | `team-review` skill |
+
+Both tools write the same artifacts under `docs/flow/{feature_name}/` and read
+the same project knowledge under `docs/agent-flow/`.
 
 ## Webwright Decision
 

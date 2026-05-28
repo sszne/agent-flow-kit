@@ -8,6 +8,9 @@
     "business-flow-discovery",
     "integration-scenario-design",
     "flow-start",
+    "flow-plan",
+    "flow-impl",
+    "flow-integration-test",
     "team-implement",
     "team-review",
     "integration-test"

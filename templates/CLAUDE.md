@@ -7,6 +7,8 @@ control, and browser/integration evidence.
 
 Before non-trivial repository work, read:
 
+- `CLAUDE.md` first when working as Claude
+- `AGENTS.md` when Codex or cross-agent behavior may matter
 - `.claude/rules/*.md`
 - `.claude/docs/DESIGN.md`
 - `docs/agent-flow/project-structure.md`
@@ -16,6 +18,11 @@ Before non-trivial repository work, read:
 
 If behavior-changing work starts before the onboarding docs exist, run
 `agent-flow-onboarding` first or record the blocker.
+
+Treat `.claude/` as shared Agent Flow documentation. Load only the rules and
+docs relevant to the current task, and avoid importing tool-delegation or
+package-manager assumptions when they conflict with the active agent,
+repository evidence, or direct user instruction.
 
 ## Main Flow
 
@@ -33,6 +40,10 @@ business-flow-sensitive work.
 
 Use `/flow-start` only for new-feature discovery or greenfield scope shaping.
 If discovery touches an existing runtime path, switch to `/flow-plan`.
+
+Codex uses the same workflow names as skills: `flow-plan`, `flow-impl`, and
+`flow-integration-test`. Both tools write the same artifacts under
+`docs/flow/{feature_name}/`.
 
 ## Quality Gates
 
