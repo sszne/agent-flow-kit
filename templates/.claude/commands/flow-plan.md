@@ -17,6 +17,7 @@ User requirements from interactive questioning are combined with codebase analys
 - The plan is updated incrementally across phases. Do NOT batch work across phases.
 - Before writing the implementation design, explicitly analyze the user's request intent against the current codebase state and ask requirement questions when intent, business behavior, actors, data ownership, entrypoints, or success criteria are unclear.
 - If requirement questions are needed, stop after presenting the questions. Do not draft or freeze a plan that carries unresolved business ambiguity.
+- Do not silently skip requirement questioning. If no requirement questions are needed, write a source-backed "No Questions Rationale" in the plan before freezing and mention it in the user-facing summary.
 - For behavior-changing work, the plan MUST include Business Flow Matrix, Regression Surface Matrix, and Test Design Matrix before freeze.
 - Business Flow Matrix rows MUST carry enough domain knowledge for test design: normal path, error/exception paths, permission or ownership paths, boundary paths, side effects, and required integration coverage.
 - Test Design Matrix rows MUST trace back to business flows and classify each case as happy, validation, permission, missing relation, boundary, side effect, regression, migration, or browser evidence.
@@ -176,11 +177,27 @@ Questions are required when any of these are unclear:
 - Migration or data backfill expectations
 - Compatibility with an existing shared flow
 
+Questions may be skipped only when all of these are true:
+- Actor/scope, current behavior, desired behavior, and success criteria are directly supported by user wording or source evidence.
+- Affected screens, routes, APIs, jobs, mail/PDF/export paths, schema, shared services, and external dependencies have been inspected or ruled out.
+- Permission/ownership, exception paths, boundary values, lifecycle rules, and side effects can be described without guessing.
+- Migration, backfill, deploy/runtime enforcement, and existing-data compatibility are either not involved or source-backed.
+- Onboarding docs, existing plans, tests, and code do not conflict with the planned behavior.
+- Any remaining assumptions are source-backed, low-risk, explicitly out of scope, or recorded as concrete blockers/waivers.
+
+Do not treat "no obvious ambiguity" as enough. If questions are skipped, the No Questions Rationale must explain why implementation would not require a business-rule guess.
+
 When questions are needed, present:
 - A short "Understanding so far" summary.
 - A short "Confirmed from code" list with file/path evidence.
 - A short "Assumptions not yet safe" list.
 - Up to 5 requirement questions using the Requirements Question Template.
+
+When no questions are needed, do not proceed silently. Record:
+- Questioning decision: `No questions needed`
+- Evidence used: concrete files, routes, tests, schema, docs, or explicit user wording
+- Safe assumptions: any assumptions that remain but are low-risk or out of scope, with reason
+- User-facing summary: one short sentence explaining why planning can proceed without questions
 
 ### Step 8: Iterate
 
@@ -302,6 +319,7 @@ Verify traceability:
 - Every risky regression surface maps to Feature, Unit, Browser, Migration, or manual verification coverage
 - Every required integration scenario has deterministic setup, assertions, and evidence expectations
 - Visible browser workflows map to at least one Playwright scenario and major-step screenshots
+- Requirement questioning was performed, or No Questions Rationale is documented with source evidence
 
 ### Step 16: Issue classification
 
@@ -615,7 +633,15 @@ Required documentation updates:
 | `docs/agent-flow/business-flows.md` | Yes/No | {business-flow row, exception path, permission path, side effect, regression risk} | TASK-{NNN} or N/A |
 | `docs/agent-flow/integration-scenarios.md` | Yes/No | {scenario, setup, assertions, evidence, mock/sandbox requirement} | TASK-{NNN} or N/A |
 
-### 1.7 Requirements List
+### 1.7 Questioning Decision
+<!-- Required. If no questions were asked, this is the guardrail that prevents silent planning. -->
+
+- Requirement questions asked: Yes/No
+- No Questions Rationale: {If No, cite the source-backed reason questions were unnecessary}
+- User answers used: {If Yes, summarize answers; if No, write "No new user answers required"}
+- Remaining safe assumptions: {Assumptions that are source-backed, low-risk, or explicitly out of scope}
+
+### 1.8 Requirements List
 <!-- EARS notation if escalated, otherwise acceptance criteria checklist -->
 
 #### Acceptance Criteria
@@ -754,6 +780,7 @@ Evidence output:
 - [ ] Every requirement has at least one task
 - [ ] Every task maps to at least one requirement
 - [ ] User intent and current-state analysis is documented
+- [ ] Requirement questioning was performed, or No Questions Rationale is documented with source evidence
 - [ ] Required onboarding docs exist: `project-structure.md`, `business-flows.md`, and `integration-scenarios.md`
 - [ ] Residual Risk Preflight is documented, or explicitly unnecessary because no residual-risk category applies beyond normal behavior-change risk
 - [ ] Triggered residual-risk warnings have countermeasures, setup tasks, or concrete blockers

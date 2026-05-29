@@ -163,6 +163,17 @@ The workflow names are intentionally aligned. Claude Code users can invoke the
 slash commands, while Codex users can invoke the same names as skills or plain
 instructions.
 
+Codex users should prefer the `flow-plan` skill, not a separate lightweight
+prompt. If a legacy `~/.codex/prompts/flow-plan.md` or repo-local prompt exists,
+it should delegate to the skill and must preserve requirement questioning,
+Residual Risk Preflight, Flow Knowledge Update, the matrices, and the
+`flow-plan-review` handoff. When `flow-plan` skips questions, the plan must
+record a source-backed `No Questions Rationale` before it can be frozen.
+Questions may be skipped only when actor/scope, current behavior, desired
+behavior, success criteria, affected entrypoints, side effects, migration/data
+compatibility, and conflicts with existing docs/tests/code are all resolved by
+source evidence or explicit scope control.
+
 | Goal | Claude Code | Codex |
 | --- | --- | --- |
 | Load local context | `context-loader` skill | `context-loader` skill |

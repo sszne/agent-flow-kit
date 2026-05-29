@@ -26,6 +26,10 @@ readiness gate. Do not implement during this skill.
 - Do not leave business ambiguity unresolved. If actors, permissions, data
   ownership, current vs desired behavior, side effects, entrypoints, success
   criteria, or rollout assumptions are unclear, ask the user before freezing.
+- Do not silently skip requirement questioning. Before writing the plan,
+  classify whether questions are required. If none are required, record a
+  source-backed "No Questions Rationale" in the plan and in the user-facing
+  summary.
 - Behavior-changing work requires onboarding docs:
   - `docs/agent-flow/project-structure.md`
   - `docs/agent-flow/business-flows.md`
@@ -54,7 +58,8 @@ Phase 1: Scope
   -> bug feedback review when applicable
   -> residual risk preflight
   -> flow knowledge update check
-  -> ask user only required questions
+  -> classify requirement questions
+  -> ask user only required questions, or record No Questions Rationale
     ->
 Phase 2: Sketch
   select minimal existing-pattern design
@@ -66,6 +71,45 @@ Phase 3: Readiness
   -> verify readiness checklist
   -> freeze plan only when ambiguity and required gates are resolved
 ```
+
+## Requirement Questioning Decision
+
+Questioning is not optional; the agent must make an explicit decision before
+writing the plan.
+
+Questions are required when any of these are unclear:
+
+- target actor, role, permission, tenant, store, company, or customer scope,
+- desired business outcome, current behavior, desired behavior, or success
+  criteria,
+- data ownership, lifecycle, status transition, deletion/retention, migration,
+  backfill, or existing-data compatibility,
+- user-visible entrypoint, screen placement, wording, workflow order, or
+  operator/customer-facing copy,
+- side effects such as mail, PDF/export, jobs, notifications, audit logs,
+  cache/search updates, or external APIs,
+- compatibility with an existing business flow, integration scenario, auth
+  path, schema contract, or shared service.
+
+Questions may be skipped only when all of these are true:
+
+- actor/scope, current behavior, desired behavior, and success criteria are
+  directly supported by user wording or source evidence,
+- affected screens, routes, APIs, jobs, mail/PDF/export paths, schema, shared
+  services, and external dependencies have been inspected or ruled out,
+- permission/ownership, exception paths, boundary values, lifecycle rules, and
+  side effects can be described without guessing,
+- migration, backfill, deploy/runtime enforcement, and existing-data
+  compatibility are either not involved or source-backed,
+- onboarding docs, existing plans, tests, and code do not conflict with the
+  planned behavior,
+- any remaining assumptions are source-backed, low-risk, explicitly out of
+  scope, or recorded as concrete blockers/waivers.
+
+If questions are skipped, the plan must include a "No Questions Rationale" that
+cites the evidence used to avoid questions. Lack of obvious ambiguity is not
+enough; the rationale must explain why implementation would not require a
+business-rule guess.
 
 ## Required Plan Shape
 
@@ -80,7 +124,7 @@ Use this structure unless the target repo already has a stricter local template:
 ### 1.3 Goal
 ### 1.4 Scope / Non-Goals
 ### 1.5 Acceptance Criteria
-### 1.6 User Answers
+### 1.6 Questioning Decision And User Answers
 
 ## 2. Design
 ### 2.1 Affected Files And Modules
@@ -104,6 +148,7 @@ Use this structure unless the target repo already has a stricter local template:
 ## 4. Readiness
 - [ ] Requirements map to tasks
 - [ ] User intent and current-state analysis is documented
+- [ ] Requirement questioning was performed, or No Questions Rationale is documented with source evidence
 - [ ] Business/product ambiguity has been resolved or explicitly blocked
 - [ ] Required onboarding docs exist for behavior-changing work
 - [ ] Flow Knowledge Update target is explicit
@@ -126,4 +171,6 @@ If questions are needed, stop after presenting:
 - up to five prioritized questions.
 
 If no questions remain, write or update the plan and clearly state whether it is
-frozen or still blocked.
+frozen or still blocked. Include a short "No Questions Rationale" that cites the
+source evidence used to avoid questions, such as existing docs, routes, tests,
+schema, or explicit user wording.

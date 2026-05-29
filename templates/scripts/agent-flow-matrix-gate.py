@@ -392,6 +392,44 @@ def validate_integration_coverage_contract(plan_text: str, errors: list[str]) ->
             )
 
 
+def validate_questioning_decision(plan_text: str, errors: list[str]) -> None:
+    section = extract_section(plan_text, "Questioning Decision")
+    if not section.strip():
+        section = extract_section(plan_text, "Questioning Decision And User Answers")
+    if not section.strip():
+        errors.append(
+            "Plan must document requirement questioning or a source-backed No Questions Rationale."
+        )
+        return
+
+    if contains_placeholder(section):
+        errors.append("Questioning Decision still contains template placeholders.")
+
+    lower_section = section.lower()
+    if "requirement questions asked" not in lower_section and "questions asked" not in lower_section:
+        errors.append("Questioning Decision must state whether requirement questions were asked.")
+
+    if "user answers" not in lower_section:
+        errors.append("Questioning Decision must summarize user answers or state that none were required.")
+
+    no_questions_match = re.search(
+        r"(?:requirement\s+)?questions\s+asked\s*:\s*(no|いいえ|なし)",
+        lower_section,
+    )
+    if no_questions_match:
+        if "no questions rationale" not in lower_section:
+            errors.append("Questioning Decision must include No Questions Rationale when no questions were asked.")
+        elif any(
+            weak in lower_section
+            for weak in (
+                "no questions rationale: n/a",
+                "no questions rationale: -",
+                "no questions rationale: none",
+            )
+        ):
+            errors.append("No Questions Rationale must include concrete source evidence, not a weak placeholder.")
+
+
 def validate_plan_review(plan_path: str, plan_text: str, errors: list[str]) -> None:
     review_relative = plan_review_path(plan_path)
     review_file = REPO_ROOT / review_relative
@@ -545,6 +583,8 @@ def main() -> int:
 
     if "Integration Coverage Contract" in plan_text:
         validate_integration_coverage_contract(plan_text, errors)
+
+    validate_questioning_decision(plan_text, errors)
 
     has_migration_change = any(
         path in migration_files or any(path.startswith(prefix) for prefix in migration_prefixes)
