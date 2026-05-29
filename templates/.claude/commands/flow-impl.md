@@ -8,6 +8,10 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 - If `$ARGUMENTS` is provided, interpret it as either `{feature_name}` or a direct `docs/flow/{feature_name}/plan.md` path.
 - Always announce the resolved plan path before implementation starts. If no plan can be resolved, stop and ask the user which plan to implement.
 - The plan (`docs/flow/{feature_name}/plan.md`) MUST have a frozen tag (`<!-- frozen: v{N} ... -->`). If not frozen, abort and instruct the user to run `/flow-plan` first.
+- `docs/flow/{feature_name}/plan-review.md` MUST exist and approve the current
+  frozen plan. If missing, stale, `CHANGES_REQUIRED`, `BLOCKED`, or same-agent
+  without a concrete fallback reason, abort and instruct the user to run
+  `/flow-plan-review` first.
 - Execute tasks one at a time in dependency order. NEVER batch multiple tasks together.
 - TDD tasks follow Red-Green-Refactor strictly.
 - DIRECT tasks follow Execute-Verify.
@@ -29,6 +33,7 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 ## Prerequisites
 
 - `/flow-plan` has been completed and plan.md is frozen.
+- `/flow-plan-review` has approved the current frozen plan.
 - Either `$ARGUMENTS` identifies the plan, or at least one `docs/flow/*/plan.md` exists so the latest plan can be resolved.
 
 ## Directory Structure
@@ -69,12 +74,25 @@ Do not ask for `{feature_name}` merely because `$ARGUMENTS` is empty when a late
 
 Read `docs/flow/{feature_name}/plan.md`. Verify the `<!-- frozen: ... -->` tag exists. If missing, stop and inform the user.
 
+Read `docs/flow/{feature_name}/plan-review.md`. Verify:
+
+- it references the same `docs/flow/{feature_name}/plan.md`;
+- `Reviewed frozen marker` matches the current frozen marker from plan.md;
+- `Review status` is `APPROVED`;
+- `Plan author` is `codex`, `claude-code`, or `unknown`;
+- `Reviewer agent` is `codex` or `claude-code`;
+- reviewer and author are different unless `Same-agent fallback` contains a
+  concrete reason or blocker.
+
+If any check fails, stop before coding and run `/flow-plan-review`.
+
 Verify the plan includes the required quality gates:
 
 - Business Flow Matrix for behavior-changing work
 - Regression Surface Matrix for indirect effects
 - Test Design Matrix for TDD/risky tasks
 - Integration Coverage Contract for behavior-changing work
+- Approved, current `plan-review.md`
 - Agent-flow onboarding docs for behavior-changing work
 - Bug Feedback Review for bug/regression work
 - Migration/runtime enforcement notes when schema changes exist

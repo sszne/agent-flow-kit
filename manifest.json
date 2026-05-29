@@ -9,6 +9,7 @@
     "integration-scenario-design",
     "flow-start",
     "flow-plan",
+    "flow-plan-review",
     "flow-impl",
     "flow-integration-test",
     "team-implement",
@@ -26,6 +27,7 @@
   "canonical_flow": [
     "agent-flow-onboarding",
     "flow-start or flow-plan",
+    "flow-plan-review",
     "flow-impl or team-implement",
     "flow-integration-test",
     "team-review"

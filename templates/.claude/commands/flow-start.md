@@ -8,6 +8,8 @@ Project kickoff command for turning a rough feature request into an implementati
 - Use this command for new features, greenfield feature slices, or ambiguous product exploration.
 - For modifications to existing behavior, bug fixes, regressions, or work that touches existing order/dealer/company/mail/PDF/job/search/status/auth/schema flows, route to `/flow-plan` instead.
 - Save the resulting plan to `docs/flow/{feature_name}/plan.md`.
+- Include plan author metadata near the frozen marker:
+  `<!-- plan_author: claude-code -->`.
 - If `$ARGUMENTS` is empty, ask the user for the feature or project they want to plan before proceeding.
 - Reuse existing code paths, docs, and patterns before proposing new structures.
 - Before drafting the plan, explicitly analyze user intent against the current repository state and ask detailed requirement questions when actors, business outcome, scope, data ownership, entrypoints, success criteria, or rollout assumptions are unclear.
@@ -95,6 +97,7 @@ Run the workflow from `.claude/skills/flow-start/SKILL.md`:
 7. Design the minimal fitting approach
 8. Write `docs/flow/{feature_name}/plan.md`
 9. Freeze the plan only when it is coherent
+10. Run `/flow-plan-review` before implementation starts
 
 ### Step 6: Present the handoff
 
@@ -103,7 +106,7 @@ Report the following to the user:
 - What will change
 - Which areas are affected
 - Main risks
-- The exact next step
+- The exact next step: `/flow-plan-review` before `/flow-impl` or `team-implement`
 
 ---
 

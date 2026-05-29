@@ -30,6 +30,8 @@ This skill is plan-first and manager-led. The main Codex agent owns synthesis an
 - Ask concise questions in Japanese only when the answer materially changes behavior, data shape, or rollout risk.
 - Prefer minimal changes that fit existing conventions.
 - Save the plan to `docs/flow/{feature_name}/plan.md` so it can be handed to later implementation work.
+- Include plan author metadata near the frozen marker:
+  `<!-- plan_author: codex -->`.
 - Use parallel workers by default for codebase mapping and design inputs, but only the manager updates shared artifacts.
 - For behavior-changing work, include Business Flow Matrix, Regression Surface Matrix, and Test Design Matrix before freezing.
 - For behavior-changing work, include an Integration Coverage Contract that maps each affected flow to required happy, exception, permission, boundary, side-effect, and regression coverage or an explicit waiver.
@@ -258,6 +260,7 @@ Once the plan is internally consistent and ready for execution, add a frozen mar
 
 ```markdown
 <!-- frozen: v1 YYYY-MM-DD -->
+<!-- plan_author: codex -->
 ```
 
 If the user asks for changes, update the plan and refresh the frozen version only after re-checking consistency.
@@ -272,3 +275,4 @@ Report:
 - The exact next step
 
 If the user wants implementation immediately, continue into `/team-implement` style execution with the manager retaining artifact ownership.
+Do not start coding until `flow-plan-review` approves the current frozen plan.

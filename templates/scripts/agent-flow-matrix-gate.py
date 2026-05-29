@@ -74,6 +74,18 @@ REQUIRED_PLAN_MARKERS = (
     "Integration Coverage Contract",
 )
 
+REQUIRED_PLAN_REVIEW_MARKERS = (
+    "Missed Risk Review",
+    "DB / Schema / Migration Review",
+    "Auth / Permission / Tenant Review",
+    "Performance / Query / Load Review",
+    "Dependency / Runtime / External-Service Review",
+    "Test And Integration Coverage Review",
+    "Extra Review Items",
+    "Findings",
+    "Implementation Readiness Decision",
+)
+
 REQUIRED_ONBOARDING_DOCS = (
     "docs/agent-flow/project-structure.md",
     "docs/agent-flow/business-flows.md",
@@ -236,6 +248,10 @@ def is_plan(path: str) -> bool:
     return bool(re.fullmatch(r"docs/flow/[^/]+/plan\.md", path))
 
 
+def plan_review_path(plan_path: str) -> str:
+    return str(Path(plan_path).with_name("plan-review.md")).replace("\\", "/")
+
+
 def read_plan(paths: list[str]) -> str:
     parts: list[str] = []
     for raw_path in paths:
@@ -253,6 +269,51 @@ def extract_section(text: str, marker: str) -> str:
     if not next_heading:
         return text[heading.end() :]
     return text[heading.end() : heading.end() + next_heading.start()]
+
+
+def extract_frozen_marker(plan_text: str) -> str:
+    match = re.search(r"<!--\s*frozen:\s*[^>]*-->", plan_text)
+    if match:
+        return " ".join(match.group(0).split())
+    return ""
+
+
+def extract_plan_author(plan_text: str) -> str:
+    match = re.search(r"<!--\s*plan_author:\s*([A-Za-z0-9_-]+)\s*-->", plan_text)
+    if match:
+        return match.group(1).strip().lower()
+
+    frozen = extract_frozen_marker(plan_text).lower()
+    if "by codex" in frozen:
+        return "codex"
+    if "by claude" in frozen:
+        return "claude-code"
+    return "unknown"
+
+
+def normalize_metadata_value(value: str) -> str:
+    value = value.strip()
+    if value.startswith("`") and value.endswith("`"):
+        value = value[1:-1].strip()
+    return value
+
+
+def review_metadata(review_text: str) -> dict[str, str]:
+    metadata: dict[str, str] = {}
+    for line in review_text.splitlines():
+        match = re.match(r"^-\s+([^:]+):\s*(.+?)\s*$", line.strip())
+        if not match:
+            continue
+        key = match.group(1).strip().lower()
+        metadata[key] = normalize_metadata_value(match.group(2))
+    return metadata
+
+
+def has_concrete_fallback(value: str) -> bool:
+    fallback_lc = value.strip().lower()
+    if fallback_lc in WEAK_WAIVER_VALUES or fallback_lc in {"n/a", "na", "none", "-"}:
+        return False
+    return any(marker in fallback_lc for marker in WAIVER_REASON_MARKERS)
 
 
 def table_rows(section: str) -> list[list[str]]:
@@ -331,6 +392,84 @@ def validate_integration_coverage_contract(plan_text: str, errors: list[str]) ->
             )
 
 
+def validate_plan_review(plan_path: str, plan_text: str, errors: list[str]) -> None:
+    review_relative = plan_review_path(plan_path)
+    review_file = REPO_ROOT / review_relative
+    if not review_file.exists():
+        errors.append(
+            f"Behavior-affecting changes require approved plan review: {review_relative}."
+        )
+        return
+
+    review_text = review_file.read_text(encoding="utf-8")
+    metadata = review_metadata(review_text)
+    frozen_marker = extract_frozen_marker(plan_text)
+    plan_author = extract_plan_author(plan_text)
+
+    if not frozen_marker:
+        errors.append(f"{plan_path} has no frozen marker to review.")
+        return
+
+    required_fields = {
+        "reviewed plan",
+        "reviewed frozen marker",
+        "plan author",
+        "reviewer agent",
+        "review status",
+        "same-agent fallback",
+    }
+    missing_fields = sorted(field for field in required_fields if field not in metadata)
+    if missing_fields:
+        errors.append(
+            f"{review_relative} is missing required metadata: {', '.join(missing_fields)}."
+        )
+        return
+
+    reviewed_plan = metadata["reviewed plan"].strip("`")
+    if reviewed_plan != plan_path:
+        errors.append(
+            f"{review_relative} reviews {reviewed_plan}, but expected {plan_path}."
+        )
+
+    reviewed_frozen = " ".join(metadata["reviewed frozen marker"].split())
+    if reviewed_frozen != frozen_marker:
+        errors.append(
+            f"{review_relative} is stale: reviewed frozen marker does not match current plan."
+        )
+
+    status = metadata["review status"].strip("`").upper()
+    if status != "APPROVED":
+        errors.append(f"{review_relative} must be APPROVED, found {status}.")
+
+    review_plan_author = metadata["plan author"].strip("`").lower()
+    if review_plan_author not in {"codex", "claude-code", "unknown"}:
+        errors.append(
+            f"{review_relative} has invalid Plan author: {metadata['plan author']}."
+        )
+    if review_plan_author != plan_author:
+        errors.append(
+            f"{review_relative} plan author {review_plan_author} does not match "
+            f"{plan_path} author {plan_author}."
+        )
+
+    reviewer = metadata["reviewer agent"].strip("`").lower()
+    if reviewer not in {"codex", "claude-code"}:
+        errors.append(
+            f"{review_relative} has invalid Reviewer agent: {metadata['reviewer agent']}."
+        )
+
+    fallback = metadata["same-agent fallback"]
+    if reviewer == review_plan_author and review_plan_author != "unknown":
+        if not has_concrete_fallback(fallback):
+            errors.append(
+                f"{review_relative} is same-agent review without a concrete fallback reason."
+            )
+
+    for marker in REQUIRED_PLAN_REVIEW_MARKERS:
+        if marker not in review_text:
+            errors.append(f"{review_relative} is missing required review section: {marker}.")
+
+
 def fail(messages: list[str]) -> int:
     print("Agent flow matrix gate failed:", file=sys.stderr)
     for message in messages:
@@ -398,6 +537,11 @@ def main() -> int:
             errors.append(f"Plan is missing required section: {marker}.")
         else:
             validate_table_section(plan_text, marker, errors)
+
+    for plan_path in plan_paths:
+        path = REPO_ROOT / plan_path
+        if path.exists():
+            validate_plan_review(plan_path, path.read_text(encoding="utf-8"), errors)
 
     if "Integration Coverage Contract" in plan_text:
         validate_integration_coverage_contract(plan_text, errors)

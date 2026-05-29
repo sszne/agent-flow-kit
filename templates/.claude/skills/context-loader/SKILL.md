@@ -67,8 +67,8 @@ For tiny self-contained questions, load only the directly relevant files.
 - Behavior-changing work should start from `/flow-plan` unless the user is only
   doing new-feature discovery through `/flow-start`.
 - Implementation should follow a frozen plan with Business Flow Matrix,
-  Regression Surface Matrix, Test Design Matrix, and Integration Coverage
-  Contract when behavior changes.
+  Regression Surface Matrix, Test Design Matrix, Integration Coverage Contract,
+  and an approved current `plan-review.md` when behavior changes.
 - Visible or multi-step business workflows need Playwright integration evidence
   or a concrete blocker.
 - Waivers must include a concrete reason or blocker.

@@ -12,6 +12,7 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - CI matrix gate for required plan matrices
 - onboarding skills for new repositories
 - Playwright integration-test evidence gate
+- mandatory cross-agent `flow-plan-review` gate before implementation
 - Integration Coverage Contract that maps each business flow to happy, exception, permission, boundary, side-effect, and regression coverage
 
 ## Onboarding Sequence
@@ -134,8 +135,13 @@ Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
 If discovery shows that an existing runtime path will change, switch to
 `/flow-plan` before freezing the plan or editing behavior-changing files.
 
-`/flow-impl` can be run immediately after `/flow-plan` without arguments. When
-no argument is provided, it resolves the most recently modified
+`/flow-plan-review` must run after `/flow-plan` and before `/flow-impl` or
+`team-implement`. It writes `docs/flow/{feature_name}/plan-review.md`; Codex
+plans should be reviewed by Claude Code, and Claude Code plans should be
+reviewed by Codex unless a concrete same-agent fallback reason is recorded.
+
+`/flow-impl` can be run after `/flow-plan-review` without arguments. When no
+argument is provided, it resolves the most recently modified
 `docs/flow/*/plan.md` and uses that plan as the implementation target.
 
 ## Gate Order
@@ -145,6 +151,7 @@ Project survey
   -> Business-flow discovery
   -> Integration-scenario design
   -> /flow-start or /flow-plan
+  -> /flow-plan-review
   -> /flow-impl or team-implement
   -> /flow-integration-test
   -> team-review
@@ -161,6 +168,7 @@ instructions.
 | Load local context | `context-loader` skill | `context-loader` skill |
 | New-feature discovery | `/flow-start {feature}` | `flow-start {feature}` |
 | Existing behavior plan | `/flow-plan {request}` | `flow-plan {request}` |
+| Plan review gate | `/flow-plan-review {feature}` | `flow-plan-review {feature}` |
 | Implement latest frozen plan | `/flow-impl` | `flow-impl` |
 | Implement a specific plan | `/flow-impl {feature}` | `flow-impl {feature}` |
 | Browser evidence gate | `/flow-integration-test {feature}` | `flow-integration-test {feature}` |

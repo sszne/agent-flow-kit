@@ -34,8 +34,9 @@ repo evidence.
 - If discovery shows an existing runtime path will change, switch to
   `/flow-plan` before freezing the plan.
 
-In Codex, `/flow-plan`, `/flow-impl`, and `/flow-integration-test` map to the
-same-named skills: `flow-plan`, `flow-impl`, and `flow-integration-test`.
+In Codex, `/flow-plan`, `/flow-plan-review`, `/flow-impl`, and
+`/flow-integration-test` map to the same-named skills: `flow-plan`,
+`flow-plan-review`, `flow-impl`, and `flow-integration-test`.
 
 ## Implementation Gate
 
@@ -45,11 +46,17 @@ Do not start behavior-changing implementation unless the frozen plan contains:
 - Regression Surface Matrix
 - Test Design Matrix
 - Integration Coverage Contract
+- approved `docs/flow/{feature_name}/plan-review.md` for the current frozen plan
 - concrete waivers or blockers for any uncovered required coverage
 
 For bug/regression work, also require a Bug Feedback Review that classifies the
 prior flow failure or records why the issue could not be prevented by flow
 changes.
+
+`flow-plan-review` is mandatory for behavior-changing work. Use cross-agent
+review by default: Codex-created plans are reviewed by Claude Code, and
+Claude-created plans are reviewed by Codex. A same-agent review is acceptable
+only when `plan-review.md` records a concrete fallback reason or blocker.
 
 ## Test Quality
 

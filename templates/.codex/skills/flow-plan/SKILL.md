@@ -39,6 +39,10 @@ readiness gate. Do not implement during this skill.
   - Residual Risk Preflight when applicable
   - Bug Feedback Review for bug/regression work
   - Playwright Integration Test Plan for visible or multi-step workflows
+- Include plan author metadata near the frozen marker:
+  `<!-- plan_author: codex -->`.
+- Tell the user that `flow-plan-review` must approve the frozen plan before
+  `flow-impl` or `team-implement` starts.
 - Waivers must include a concrete reason or blocker. Reject vague entries such
   as `N/A`, `manual`, `low risk`, `TBD`, `later`, or blank cells.
 
@@ -108,7 +112,8 @@ Use this structure unless the target repo already has a stricter local template:
 - [ ] Integration Coverage Contract has concrete coverage or waivers
 - [ ] Validation commands are identified
 
-<!-- frozen: v1 YYYY-MM-DD by Codex -->
+<!-- frozen: v1 YYYY-MM-DD -->
+<!-- plan_author: codex -->
 ```
 
 ## User-Facing Behavior

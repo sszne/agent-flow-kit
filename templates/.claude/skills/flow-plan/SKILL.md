@@ -20,6 +20,10 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
   issue.
 - Same browser behavior: include Playwright Integration Test Plan for visible or
   multi-step workflows.
+- Same author metadata: Claude Code-authored plans include
+  `<!-- plan_author: claude-code -->`.
+- Same next gate: the frozen plan must pass `/flow-plan-review` before
+  `/flow-impl` or `team-implement`.
 
 When this skill is invoked in Claude Code, execute `/flow-plan` semantics rather
 than inventing a separate planning flow.

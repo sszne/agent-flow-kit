@@ -29,6 +29,7 @@ repository evidence, or direct user instruction.
 ```text
 agent-flow-onboarding
   -> /flow-start or /flow-plan
+  -> /flow-plan-review
   -> /flow-impl or team-implement
   -> /flow-integration-test
   -> team-review
@@ -41,8 +42,8 @@ business-flow-sensitive work.
 Use `/flow-start` only for new-feature discovery or greenfield scope shaping.
 If discovery touches an existing runtime path, switch to `/flow-plan`.
 
-Codex uses the same workflow names as skills: `flow-plan`, `flow-impl`, and
-`flow-integration-test`. Both tools write the same artifacts under
+Codex uses the same workflow names as skills: `flow-plan`, `flow-plan-review`,
+`flow-impl`, and `flow-integration-test`. Both tools write the same artifacts under
 `docs/flow/{feature_name}/`.
 
 ## Quality Gates
@@ -53,10 +54,16 @@ Behavior-changing plans need:
 - Regression Surface Matrix
 - Test Design Matrix
 - Integration Coverage Contract
+- approved `docs/flow/{feature_name}/plan-review.md` for the current frozen plan
 - concrete waivers or blockers for uncovered coverage
 
 Implementation should stay inside the frozen plan. If a new behavior or design
 choice appears, update the plan or ask the user before proceeding.
+
+Run `/flow-plan-review` after the plan is frozen and before implementation. Use
+cross-agent review by default: Claude Code-created plans are reviewed by Codex,
+and Codex-created plans are reviewed by Claude Code. A same-agent review must
+record a concrete fallback reason or blocker in `plan-review.md`.
 
 Visible or multi-step business workflows require Playwright integration evidence
 with screenshots, `index.html`, test review, and business-flow impact review.

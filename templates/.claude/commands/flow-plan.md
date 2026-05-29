@@ -13,6 +13,7 @@ User requirements from interactive questioning are combined with codebase analys
 - Code style reference: fetch from (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/code-style-review.md). If unavailable, skip and note in plan.
 - Plan template: use the template defined in this document (no external template fetch needed).
 - Save plan to `docs/flow/{feature_name}/plan.md`.
+- Include plan author metadata near the frozen marker: `<!-- plan_author: claude-code -->`.
 - The plan is updated incrementally across phases. Do NOT batch work across phases.
 - Before writing the implementation design, explicitly analyze the user's request intent against the current codebase state and ask requirement questions when intent, business behavior, actors, data ownership, entrypoints, or success criteria are unclear.
 - If requirement questions are needed, stop after presenting the questions. Do not draft or freeze a plan that carries unresolved business ambiguity.
@@ -316,8 +317,10 @@ If blocking issues exist, present a maximum of 3 to the user for resolution. Aft
 ### Step 18: Freeze and approve
 
 - Add `<!-- frozen: v1 {YYYY-MM-DD} -->` tag to the top of plan.md
+- Add `<!-- plan_author: claude-code -->` next to the frozen tag
 - Write the READINESS section (section 4 of the plan template)
-- Present the complete plan to the user for final approval
+- Present the complete plan to the user and instruct that `/flow-plan-review`
+  must approve it before `/flow-impl` or `team-implement`
 - If the user requests changes, remove the frozen tag, make changes, and restart from Step 15
 
 ---
@@ -549,6 +552,7 @@ include the results in plan.md only where useful.
 # {feature_name} Plan
 
 <!-- frozen: v{N} {YYYY-MM-DD} -->
+<!-- plan_author: claude-code -->
 
 ## 1. Requirements
 
@@ -758,6 +762,7 @@ Evidence output:
 - [ ] Required `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md` update tasks are included before implementation when reusable flow knowledge is found
 - [ ] Flow improvement or bug-knowledge tasks are included when a prior flow gap or non-preventable bug pattern is identified
 - [ ] Business ambiguity has been resolved through user answers or explicitly blocked
+- [ ] `/flow-plan-review` must be run after freeze and before implementation
 - [ ] Design decisions are consistent with requirements
 - [ ] Design policy and library-selection decisions are documented, or explicitly unnecessary because existing patterns decide them
 - [ ] Task dependencies have no cycles
