@@ -24,7 +24,7 @@ Run these before behavior-changing implementation starts in a new repository:
 3. `business-flow-discovery`
 4. `integration-scenario-design`
 
-Required outputs:
+Required Markdown outputs:
 
 ```text
 docs/agent-flow/project-structure.md
@@ -32,7 +32,16 @@ docs/agent-flow/business-flows.md
 docs/agent-flow/integration-scenarios.md
 ```
 
-Behavior-changing work is blocked until these onboarding documents exist.
+Companion business-flow diagram:
+
+```text
+docs/agent-flow/business-flows.drawio
+```
+
+Behavior-changing work is blocked until the three Markdown onboarding documents
+exist. The `.drawio` file is a companion diagram for human review of the
+business-flow inventory; `business-flows.md` remains the canonical matrix
+artifact.
 The CI matrix gate also rejects risky changes when the required plan sections are
 empty, contain template placeholders, or rely on vague waivers.
 

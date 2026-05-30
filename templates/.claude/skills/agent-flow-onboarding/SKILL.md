@@ -14,6 +14,7 @@ Run the onboarding sequence for a repo that will adopt agent-flow.
 
 - `docs/agent-flow/project-structure.md`
 - `docs/agent-flow/business-flows.md`
+- `docs/agent-flow/business-flows.drawio` (companion diagram for human review)
 - `docs/agent-flow/integration-scenarios.md`
 
 ## Sequence
@@ -24,6 +25,7 @@ Run the onboarding sequence for a repo that will adopt agent-flow.
 4. Report readiness:
    - architecture/domain/use cases documented,
    - business flows and regression surfaces documented,
+   - business-flow draw.io diagram created or a concrete blocker recorded,
    - integration-test scenarios documented,
    - open questions/blockers named.
 
@@ -31,3 +33,7 @@ Run the onboarding sequence for a repo that will adopt agent-flow.
 
 Do not start behavior-changing implementation until all three documents exist.
 If a document cannot be produced, record the blocker and treat behavior-changing work as blocked rather than waived.
+
+The draw.io diagram does not replace the three required Markdown documents. If
+the diagram cannot be produced, record the blocker in
+`docs/agent-flow/business-flows.md` and include it in the readiness report.
