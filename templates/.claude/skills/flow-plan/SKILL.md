@@ -15,6 +15,9 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
 - Same required gates: Business Flow Matrix, Regression Surface Matrix, Test
   Design Matrix, Integration Coverage Contract, Flow Knowledge Update, and
   Residual Risk Preflight when applicable.
+- Same runtime behavior: include Runtime Causality Gate when production-only,
+  deploy/runtime/provider, browser-network, auth/session, secret/binding,
+  remote data, or external-runtime symptoms may be involved.
 - Same bug/regression behavior: run Bug Feedback Review and update
   `docs/agent-flow/bug-knowledge.md` when flow improvement cannot prevent the
   issue.

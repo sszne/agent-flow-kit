@@ -14,6 +14,9 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - Playwright integration-test evidence gate
 - mandatory cross-agent `flow-plan-review` gate before implementation
 - Integration Coverage Contract that maps each business flow to happy, exception, permission, boundary, side-effect, and regression coverage
+- Runtime Causality Gate that forces production-only, deploy/runtime/provider,
+  browser-network, secret/binding, remote data, and auth/session symptoms to be
+  classified before speculative code changes
 
 ## Onboarding Sequence
 
@@ -42,6 +45,12 @@ Behavior-changing work is blocked until the three Markdown onboarding documents
 exist. The `.drawio` file is a companion diagram for human review of the
 business-flow inventory; `business-flows.md` remains the canonical matrix
 artifact.
+During onboarding, `project-structure-survey` inventories runtime-causality
+evidence sources such as deploy version checks, provider/runtime logs, smoke
+commands, env/secrets/bindings, remote data diagnostics, and provider sandbox
+availability. `integration-scenario-design` then records runtime/provider smoke
+scenarios so future `/flow-plan` runs can distinguish code defects from
+environment, data, deploy, or provider/runtime causes.
 The CI matrix gate also rejects risky changes when the required plan sections are
 empty, contain template placeholders, or rely on vague waivers.
 
@@ -210,6 +219,10 @@ knowledge, runtime parity, test infrastructure, and reviewer discipline. See
 recommended countermeasures and concrete environment examples.
 `/flow-plan` uses this document as the basis for Residual Risk Preflight
 warnings before a behavior-changing plan is frozen.
+When runtime-causality triggers are present, `/flow-plan` must also record
+active deployed version, browser symptom vs server outcome, runtime logs,
+representative shallow and valid paths, bindings/secrets, remote data state, and
+an evidence-backed classification before implementation tasks.
 
 ## Bug Feedback Loop
 

@@ -25,6 +25,7 @@ User requirements from interactive questioning are combined with codebase analys
 - When requirement questioning confirms new reusable business-flow knowledge, update `docs/agent-flow/business-flows.md` and/or `docs/agent-flow/integration-scenarios.md`, or document why the knowledge is feature-local and should stay only in this plan.
 - Waivers are only valid when they include a concrete reason or blocker. Vague entries such as `N/A`, `manual`, `low risk`, `TBD`, or `later` are not acceptable for uncovered required coverage.
 - Before requirements questioning, run the Residual Risk Preflight. If the request may involve business-flow gaps, natural-language plan ambiguity, external/runtime dependency gaps, weak test infrastructure, or waiver/reviewer risk, show a warning and capture required countermeasures in the plan.
+- Before proposing behavior-changing code for production-only, browser-network, deploy, auth/session, provider, secret/binding, remote data, or external-runtime symptoms, run the Runtime Causality Gate. Classify whether the likely cause is code, environment/ops, data, deploy artifact, provider/runtime, or inconclusive using runtime evidence when available.
 - For bug reports or regressions, run the Bug Feedback Review. If a previous `docs/flow/{feature}/plan.md` exists, identify which part of the prior flow failed and improve the project flow when possible. If the bug cannot be prevented by flow changes, append the lesson to `docs/agent-flow/bug-knowledge.md`.
 - Treat order, company-order, dealer-order, pricing, mail, PDF, shipment, search, status transition, auth, and schema changes as business-flow sensitive by default.
 - For visible browser behavior or multi-step business workflows, the plan MUST include a Playwright Integration Test Plan before freeze.
@@ -139,7 +140,47 @@ If any risk applies:
 - Add required setup or blocker tasks before implementation tasks.
 - Do not freeze the plan if a required environment or domain answer is missing and no concrete blocker is acceptable.
 
-### Step 6: Flow Knowledge Update Check
+### Step 6: Runtime Causality Gate
+
+Before implementation design, classify whether the symptom could be caused by
+environment/runtime state rather than source code. This gate is required when
+any of these triggers are present:
+
+- browser reports CORS, `ERR_FAILED`, network failure, or opaque 5xx symptoms,
+- the problem appears only in production/staging or cannot be reproduced
+  locally,
+- Cloudflare Workers/Pages/D1/R2/KV/Durable Objects, Vercel, AWS, GCP, Fly,
+  Supabase, Firebase, queues, search, cache, storage, mail, payment, auth
+  provider, webhook, or another external runtime is involved,
+- auth/session/cookie/password reset/secret/deploy artifact behavior is
+  involved,
+- logs or browser output mention `503`, `1102`, `exceededCpu`,
+  `exceededMemory`, timeout, worker exception, missing binding, migration
+  drift, stale deploy, or provider rejection,
+- setup, reset, migration, deploy, or command execution reports success, but
+  the follow-up use path still fails,
+- smoke checks cover only shallow paths such as preflight, invalid input,
+  unauthenticated `401`, or health checks while the valid happy path or
+  side-effect path is unproven.
+
+When triggered, add a `Runtime Causality Gate` section to the plan and fill:
+
+| Check | Evidence | Result |
+| --- | --- | --- |
+| Active deployed version | GitHub Actions, deploy log, release SHA, runtime script version | current / stale / unknown |
+| Browser symptom vs server outcome | DevTools plus server/runtime logs captured for the same request | browser symptom / app error / runtime limit |
+| Runtime log | wrangler tail, provider logs, app logs, queue logs, webhook logs | ok / exception / exceededCpu / timeout / provider error |
+| Representative paths | preflight, invalid path, valid happy path, side-effect path | shallow only / full path covered / blocked |
+| Environment bindings | secrets, env vars, DB/D1 binding, storage bucket, provider config | aligned / mismatch / unknown |
+| Remote data state | read-only query, admin diagnostic, migration status, seed/version marker | expected / stale / unknown |
+| Classification | evidence-backed conclusion | code defect / environment-ops defect / data defect / deploy artifact mismatch / provider-runtime defect / inconclusive |
+
+Do not treat browser CORS text as root-cause evidence by itself. If runtime
+evidence is unavailable, record a concrete blocker or add a setup task before
+code-changing tasks. If classification remains inconclusive, focus the plan on
+evidence gathering rather than speculative fixes.
+
+### Step 7: Flow Knowledge Update Check
 
 Before requirements questioning and again after user answers, compare the request and confirmed answers with `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md`.
 
@@ -163,7 +204,7 @@ If no reusable knowledge is found:
 
 - Document "No reusable project-level flow knowledge discovered" with a concrete reason in the plan.
 
-### Step 7: Requirements questioning
+### Step 8: Requirements questioning
 
 Use the Requirements Question Template below. Ask a maximum of 5 questions in selection format. Order by recommendation priority. Only ask questions where the answer is genuinely ambiguous -- skip questions with obvious answers.
 
@@ -199,11 +240,11 @@ When no questions are needed, do not proceed silently. Record:
 - Safe assumptions: any assumptions that remain but are low-risk or out of scope, with reason
 - User-facing summary: one short sentence explaining why planning can proceed without questions
 
-### Step 8: Iterate
+### Step 9: Iterate
 
 If ambiguity remains after user answers, return to Step 3. Repeat until all requirements are clear. Re-run the Flow Knowledge Update Check whenever answers add or change business-flow, exception, permission, side-effect, or integration-scenario knowledge.
 
-### Step 9: Escalation check
+### Step 10: Escalation check
 
 Evaluate whether this feature requires EARS formal notation using the following criteria:
 
@@ -218,9 +259,10 @@ Evaluate whether this feature requires EARS formal notation using the following 
 
 If EARS is needed, write requirements using the EARS Notation Template below. Otherwise, write acceptance criteria as a checklist.
 
-### Step 10: Write plan.md "Requirements" section
+### Step 11: Write plan.md "Requirements" section
 
-Create `docs/flow/{feature_name}/plan.md` and write the Requirements section (sections 1.1-1.6 of the plan template).
+Create `docs/flow/{feature_name}/plan.md` and write the Requirements section
+using the plan template.
 
 ---
 
@@ -228,7 +270,7 @@ Create `docs/flow/{feature_name}/plan.md` and write the Requirements section (se
 
 Goal: Design the implementation approach and decompose into tasks.
 
-### Step 10: Implementation questioning
+### Step 12: Implementation questioning
 
 Use the Implementation Question Template below. Present:
 - Entity structure options with Pros/Cons and code examples
@@ -249,11 +291,11 @@ Design policy and library-selection questions are required when:
 
 When no question is needed, document the reason in Design Decisions, for example: "No new library: existing repository/service pattern covers this use case."
 
-### Step 11: Iterate
+### Step 13: Iterate
 
-If implementation ambiguity remains, return to Step 8. Repeat until all design decisions are clear.
+If implementation ambiguity remains, return to Step 12. Repeat until all design decisions are clear.
 
-### Step 12: On-demand artifact check
+### Step 14: On-demand artifact check
 
 Generate additional sections based on these conditions:
 
@@ -270,6 +312,7 @@ Generate additional sections based on these conditions:
 | Integration Coverage Contract | Always for behavior-changing work |
 | Flow Knowledge Update | Always for behavior-changing work; required when confirmed answers add reusable business-flow, exception, permission, side-effect, or integration-scenario knowledge |
 | Residual Risk Preflight | Always when any residual risk category applies |
+| Runtime Causality Gate | Production-only, deploy/runtime/provider, browser-network, auth/session, secret/binding, remote data, or external-runtime symptoms |
 | Playwright Integration Test Plan | Visible browser behavior OR multi-step business workflow |
 
 ### Step 13: Task decomposition
@@ -613,7 +656,25 @@ Bug knowledge update:
 - Target: `docs/agent-flow/bug-knowledge.md`
 - Entry summary: {trigger, symptoms, root cause, why flow did/did not catch it, future response}
 
-### 1.6 Flow Knowledge Update
+### 1.6 Runtime Causality Gate
+<!-- Required when production-only, deploy/runtime/provider, browser-network, auth/session, secret/binding, remote data, or external-runtime symptoms may be involved. If not triggered, write "Not triggered: {source-backed reason}." -->
+
+| Check | Evidence | Result |
+| --- | --- | --- |
+| Active deployed version | {GitHub Actions/deploy log/release SHA/runtime script version or blocker} | current / stale / unknown |
+| Browser symptom vs server outcome | {DevTools + server/runtime logs for same request or blocker} | browser symptom / app error / runtime limit / unknown |
+| Runtime log | {wrangler tail/provider logs/app logs/queue logs/webhook logs or blocker} | ok / exception / exceededCpu / timeout / provider error / unknown |
+| Representative paths | {preflight/invalid/valid happy path/side-effect path evidence} | shallow only / full path covered / blocked |
+| Environment bindings | {secrets/env vars/DB binding/storage bucket/provider config evidence} | aligned / mismatch / unknown |
+| Remote data state | {read-only query/admin diagnostic/migration status/seed marker or blocker} | expected / stale / unknown |
+| Classification | {evidence-backed conclusion} | code defect / environment-ops defect / data defect / deploy artifact mismatch / provider-runtime defect / inconclusive |
+
+Required response:
+- If classification is `inconclusive`, implementation tasks must gather evidence before speculative code changes.
+- If runtime evidence is unavailable, record the blocker and the exact command, credential, or operator access needed.
+- Do not use browser CORS/network text alone as root-cause evidence.
+
+### 1.7 Flow Knowledge Update
 <!-- Required for behavior-changing work. Capture whether confirmed requirement answers should update project-level business-flow docs. -->
 
 | Item | Result |
@@ -633,7 +694,7 @@ Required documentation updates:
 | `docs/agent-flow/business-flows.md` | Yes/No | {business-flow row, exception path, permission path, side effect, regression risk} | TASK-{NNN} or N/A |
 | `docs/agent-flow/integration-scenarios.md` | Yes/No | {scenario, setup, assertions, evidence, mock/sandbox requirement} | TASK-{NNN} or N/A |
 
-### 1.7 Questioning Decision
+### 1.8 Questioning Decision
 <!-- Required. If no questions were asked, this is the guardrail that prevents silent planning. -->
 
 - Requirement questions asked: Yes/No
@@ -641,14 +702,14 @@ Required documentation updates:
 - User answers used: {If Yes, summarize answers; if No, write "No new user answers required"}
 - Remaining safe assumptions: {Assumptions that are source-backed, low-risk, or explicitly out of scope}
 
-### 1.8 Requirements List
+### 1.9 Requirements List
 <!-- EARS notation if escalated, otherwise acceptance criteria checklist -->
 
 #### Acceptance Criteria
 - [ ] {Criterion}
 - [ ] {Criterion}
 
-### 1.8 Scope
+### 1.10 Scope
 **In scope:**
 - {Item}
 
@@ -784,6 +845,8 @@ Evidence output:
 - [ ] Required onboarding docs exist: `project-structure.md`, `business-flows.md`, and `integration-scenarios.md`
 - [ ] Residual Risk Preflight is documented, or explicitly unnecessary because no residual-risk category applies beyond normal behavior-change risk
 - [ ] Triggered residual-risk warnings have countermeasures, setup tasks, or concrete blockers
+- [ ] Runtime Causality Gate is documented, or explicitly not triggered with source-backed reason
+- [ ] Triggered runtime-causality checks classify code/environment/data/deploy/provider/inconclusive before behavior-changing implementation tasks
 - [ ] Bug Feedback Review is documented for bug/regression work, or explicitly unnecessary because this is not a bug/regression request
 - [ ] Flow Knowledge Update is documented for behavior-changing work, including target docs or a concrete feature-local reason
 - [ ] Required `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md` update tasks are included before implementation when reusable flow knowledge is found

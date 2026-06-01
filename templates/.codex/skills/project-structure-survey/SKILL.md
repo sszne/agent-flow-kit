@@ -17,6 +17,10 @@ Create `docs/agent-flow/project-structure.md`.
 - Do not edit application code.
 - If a fact is inferred, label it as inferred.
 - Keep stale or missing areas explicit.
+- Inventory runtime-causality evidence sources: deploy platform, release/version
+  checks, runtime logs/tail commands, smoke commands, env/secrets/bindings,
+  remote data diagnostics, provider sandboxes, and production-only failure
+  modes. Label unknown access or missing commands as blockers.
 
 ## Workflow
 
@@ -25,7 +29,8 @@ Create `docs/agent-flow/project-structure.md`.
 3. Map domain models from schema/migrations/models/types.
 4. Map use cases from routes/controllers/screens/jobs/tests/docs.
 5. Map existing tests and verification commands.
-6. Write the document.
+6. Map runtime-causality evidence sources and blockers.
+7. Write the document.
 
 ## Output Template
 
@@ -53,6 +58,17 @@ Create `docs/agent-flow/project-structure.md`.
 ## Runtime / Operations
 | Concern | Evidence | Risk |
 | --- | --- | --- |
+
+## Runtime Causality Inventory
+| Signal | Evidence source / command | Known blocker | Notes |
+| --- | --- | --- | --- |
+| Active deployed version |  |  | GitHub Actions, release SHA, provider deployment ID, Worker script version, etc. |
+| Runtime logs |  |  | Provider logs, `wrangler tail`, app logs, queue logs, webhook logs, etc. |
+| Smoke / representative paths |  |  | Include shallow and valid happy/side-effect paths where available. |
+| Environment bindings |  |  | Secrets, env vars, database/D1 binding, storage bucket, provider config. |
+| Remote data diagnostics |  |  | Read-only queries, admin diagnostics, migration status, seed/version markers. |
+| Provider sandbox / mock boundary |  |  | External API sandbox, local fake, mock adapter, or unavailable reason. |
+| Production-only failure modes |  |  | CORS masking, opaque 5xx, timeout, CPU/memory, stale deploy, provider rejection. |
 
 ## Existing Test Surface
 | Level | Location/command | Coverage notes |

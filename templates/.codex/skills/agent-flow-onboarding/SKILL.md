@@ -27,6 +27,9 @@ Run the onboarding sequence for a repo that will adopt agent-flow.
    - business flows and regression surfaces documented,
    - business-flow draw.io diagram created or a concrete blocker recorded,
    - integration-test scenarios documented,
+   - runtime-causality evidence sources documented, including deploy/version
+     checks, runtime logs, smoke commands, bindings/secrets, remote data
+     diagnostics, provider sandboxes, or concrete blockers,
    - open questions/blockers named.
 
 ## Required Gate

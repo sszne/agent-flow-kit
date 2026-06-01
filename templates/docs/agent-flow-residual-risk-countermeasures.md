@@ -18,6 +18,7 @@ risks remain and what should be prepared to reduce them further.
 | Business flows are missed during discovery | The flow can ask for and structure knowledge, but it cannot know unstated business rules or hidden operator behavior | Domain-owner review, production examples, operation docs, issue history, logs, and mandatory onboarding docs |
 | CI cannot fully judge natural-language plan quality | The matrix gate can detect missing sections, placeholders, and weak waivers, but cannot prove semantic completeness | More structured plan fields, stable flow IDs, schema validation, and reviewer sign-off |
 | External APIs, async jobs, mail, PDF, auth, and migrations are hard to reproduce locally | The flow can require coverage, but the runtime may lack real dependencies or production-like data | Staging/sandbox environments, fakes, local service containers, deterministic seed data, and artifact capture |
+| Browser or client symptoms can hide runtime/data/deploy causes | CORS, opaque network failures, and shallow smoke checks can pass while the valid deployed path fails | Runtime Causality Gate with active deployment, server logs, representative paths, binding/secret, and remote-data checks |
 | Target project has weak test infrastructure | The flow can require tests, but cannot invent reliable factories, fixtures, auth helpers, or integration runners | Test harness investment before feature work, including DB reset, auth/session helpers, and external-boundary mocks |
 | Reviewers may accept incomplete coverage | The flow can add checklists and gates, but human reviewers can still miss weak assertions or bad waivers | Findings-first review discipline, required evidence links, anti-waiver rules, and ownership-based review |
 
@@ -45,6 +46,44 @@ When a risk applies, the plan should include:
 - additional requirement questions if needed,
 - required environment or setup task,
 - blocker or waiver reason if the risk cannot be resolved before implementation.
+
+## Runtime Causality Gate
+
+`/flow-plan` must run this gate before behavior-changing implementation design
+when symptoms may come from runtime state rather than source code.
+
+Trigger the gate for:
+
+- browser CORS, `ERR_FAILED`, opaque network failure, or 5xx symptoms,
+- production-only or staging-only behavior,
+- deploy platforms and external runtimes such as Cloudflare Workers/Pages/D1,
+  Vercel, AWS, GCP, Fly, Supabase, Firebase, queues, search, cache, storage,
+  mail, payment, auth providers, or webhooks,
+- auth/session/cookie/password reset/secret/binding/deploy artifact behavior,
+- `503`, `1102`, `exceededCpu`, `exceededMemory`, timeout, worker exception,
+  missing binding, migration drift, stale deploy, or provider rejection,
+- command/setup/reset/migration/deploy success followed by failure in the
+  follow-up use path,
+- smoke coverage that only proves shallow paths such as preflight, invalid
+  input, unauthenticated `401`, or health checks while the valid happy path or
+  side-effect path remains unproven.
+
+The plan should classify the likely cause before proposing code changes:
+
+| Check | Evidence | Result |
+| --- | --- | --- |
+| Active deployed version | Deploy log, release SHA, provider deployment ID, runtime script version | current / stale / unknown |
+| Browser symptom vs server outcome | Browser DevTools plus server/runtime logs for the same request | browser symptom / app error / runtime limit |
+| Runtime log | Provider logs, app logs, `wrangler tail`, queue logs, webhook logs | ok / exception / exceededCpu / timeout / provider error |
+| Representative paths | Preflight, invalid path, valid happy path, side-effect path | shallow only / full path covered / blocked |
+| Environment bindings | Secrets, env vars, DB/D1 binding, storage bucket, provider config | aligned / mismatch / unknown |
+| Remote data state | Read-only query, admin diagnostic, migration status, seed/version marker | expected / stale / unknown |
+| Classification | Evidence-backed conclusion | code defect / environment-ops defect / data defect / deploy artifact mismatch / provider-runtime defect / inconclusive |
+
+If classification is `inconclusive`, the first implementation tasks should
+gather evidence or create diagnostics. Do not let a browser CORS message or
+invalid-path smoke result become the sole root-cause proof for a valid-path
+production failure.
 
 ## 1. Missed Business Flows
 
