@@ -38,7 +38,7 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 | AFK-004 | Documentation review against business-flow docs | Happy, exception, permission, boundary, regression | Covered by future feature-specific plan checks | Automated scenario execution is out of scope because this flow writes planning docs |
 | AFK-005 | Matrix-gate validation and plan-review handoff | Happy, exception, permission, boundary, side effect, regression | SCN-007, SRV-005 | None for gate logic changes |
 | AFK-005 planning precision | Template and plan-review validation of `Questioning Decision`, `No Questions Rationale`, onboarding/UI precision, provider/auth/deploy evidence lanes, and bug prevention taxonomy | Happy, exception, permission, boundary, side effect, regression | SCN-009 | Automated semantic proof is out of scope because plans are natural-language artifacts; matrix gate and plan review remain required. |
-| AFK-006 | Plan-review marker validation | Happy, exception, regression | SCN-007, SRV-005 | Cross-agent execution may be blocked by unavailable opposite agent; same-agent fallback must record the blocker |
+| AFK-006 | Plan-review marker validation | Happy, exception, regression | SCN-007, SRV-005 | Cross-agent execution may be blocked by unavailable opposite agent; same-agent fallback must record the blocker. Clearly non-behavioral typo, formatting, or docs-only edits may skip review only when they do not alter workflow contracts, runtime behavior, test expectations, install behavior, CI gates, or user-facing behavior. |
 | AFK-007 | Feature-specific planned validation | Happy, exception, permission, boundary, side effect, regression | Defined in each feature plan | Feature-specific waiver required if omitted |
 | AFK-008 | Evidence artifact review when visible workflow exists | Happy, exception, permission, boundary, side effect, regression | SCN-008, PW-001 | Blocked only when no runnable browser/app exists; blocker must name surface |
 | AFK-009 | Gate smoke or fixture checks | Happy, exception, boundary, regression | SCN-003, SCN-007, SRV-003, SRV-005 | None for gate logic changes |
@@ -53,6 +53,12 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 - CLI evidence: command output in final report or implementation report.
 - Plan evidence: `docs/flow/{feature}/plan.md`.
 - Plan review evidence: `docs/flow/{feature}/plan-review.md`.
+- Plan review waiver: allowed only for clearly non-behavioral typo,
+  formatting-only, or docs-only work that does not alter workflow contracts,
+  runtime behavior, test expectations, install behavior, CI gates, or
+  user-facing behavior. Docs-only changes to Agent Flow rules, skill behavior,
+  gates, review policy, risky-path config, or required evidence still require
+  review.
 - Browser evidence root when applicable: `docs/flow/{feature}/integration-test/{run_id}/`.
 - Required browser files when applicable: `index.html`, `result.md`, `test-review.md`, `business-flow-impact.md`, `screenshots/`.
 

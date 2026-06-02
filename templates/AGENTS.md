@@ -58,6 +58,13 @@ review by default: Codex-created plans are reviewed by Claude Code, and
 Claude-created plans are reviewed by Codex. A same-agent review is acceptable
 only when `plan-review.md` records a concrete fallback reason or blocker.
 
+Do not require `flow-plan-review` for clearly non-behavioral work such as typo
+fixes, formatting-only edits, or docs-only changes that do not alter workflow
+contracts, runtime behavior, test expectations, install behavior, CI gates, or
+user-facing behavior. If a docs-only change updates Agent Flow rules, skill
+behavior, gates, review policy, risky-path config, or required evidence, treat
+it as behavior-changing workflow work and keep the review gate.
+
 ## Test Quality
 
 Test design must start from affected business flows and regression surfaces, not

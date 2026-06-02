@@ -12,7 +12,8 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - CI matrix gate for required plan matrices
 - onboarding skills for new repositories
 - Playwright integration-test evidence gate
-- mandatory cross-agent `flow-plan-review` gate before implementation
+- mandatory cross-agent `flow-plan-review` gate before behavior-changing
+  implementation
 - explicit `Questioning Decision` and source-backed `No Questions Rationale`
   requirements before a behavior-changing plan can freeze
 - Integration Coverage Contract that maps each business flow to happy, exception, permission, boundary, side-effect, and regression coverage
@@ -162,6 +163,13 @@ If discovery shows that an existing runtime path will change, switch to
 `team-implement`. It writes `docs/flow/{feature_name}/plan-review.md`; Codex
 plans should be reviewed by Claude Code, and Claude Code plans should be
 reviewed by Codex unless a concrete same-agent fallback reason is recorded.
+
+`/flow-plan-review` is not required for clearly non-behavioral work such as
+typo fixes, formatting-only edits, or docs-only changes that do not alter the
+workflow contract, runtime behavior, test expectations, install behavior, CI
+gates, or user-facing behavior. If a docs-only change updates Agent Flow rules,
+skill behavior, gates, review policy, risky-path config, or required evidence,
+treat it as behavior-changing workflow work and keep the plan-review gate.
 
 `/flow-impl` can be run after `/flow-plan-review` without arguments. When no
 argument is provided, it resolves the most recently modified

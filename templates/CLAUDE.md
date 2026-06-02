@@ -65,6 +65,13 @@ cross-agent review by default: Claude Code-created plans are reviewed by Codex,
 and Codex-created plans are reviewed by Claude Code. A same-agent review must
 record a concrete fallback reason or blocker in `plan-review.md`.
 
+Do not require `/flow-plan-review` for clearly non-behavioral work such as typo
+fixes, formatting-only edits, or docs-only changes that do not alter workflow
+contracts, runtime behavior, test expectations, install behavior, CI gates, or
+user-facing behavior. If a docs-only change updates Agent Flow rules, skill
+behavior, gates, review policy, risky-path config, or required evidence, treat
+it as behavior-changing workflow work and keep the review gate.
+
 Visible or multi-step business workflows require Playwright integration evidence
 with screenshots, `index.html`, test review, and business-flow impact review.
 

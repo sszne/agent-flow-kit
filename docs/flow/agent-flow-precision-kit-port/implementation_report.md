@@ -80,6 +80,15 @@ templates and Markdown documentation only.
 The pre-existing untracked `docs/flow/authenticated-todo-list/` directory was
 left untouched.
 
+## Follow-up Refinement
+
+Added a plan-review scope boundary after user feedback: clearly non-behavioral
+typo fixes, formatting-only edits, and docs-only changes do not require
+`flow-plan-review` when they do not alter workflow contracts, runtime behavior,
+test expectations, install behavior, CI gates, or user-facing behavior.
+Docs-only changes that update Agent Flow rules, skill behavior, gates, review
+policy, risky-path config, or required evidence still require review.
+
 ## Remaining Risks
 
 - No automated semantic test can prove natural-language plan completeness.

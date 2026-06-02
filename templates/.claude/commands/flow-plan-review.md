@@ -7,6 +7,13 @@ Plan Review Gate: cross-agent review for a frozen Agent Flow plan.
 - `$ARGUMENTS` is optional. If empty, resolve the most recently modified
   `docs/flow/*/plan.md`.
 - Review evidence MUST be saved to `docs/flow/{feature_name}/plan-review.md`.
+- Do not run this gate for clearly non-behavioral work such as typo fixes,
+  formatting-only edits, or docs-only changes that do not alter workflow
+  contracts, runtime behavior, test expectations, install behavior, CI gates,
+  or user-facing behavior.
+- If a docs-only change updates Agent Flow rules, skill behavior, gates, review
+  policy, risky-path config, or required evidence, treat it as
+  behavior-changing workflow work and run the review.
 - Cross-agent review is required by default:
   - plans authored by `codex` must be reviewed by `claude-code`;
   - plans authored by `claude-code` must be reviewed by `codex`;

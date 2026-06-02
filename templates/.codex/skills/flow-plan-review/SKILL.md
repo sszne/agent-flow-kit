@@ -24,6 +24,13 @@ code review.
 - Read the plan, local Agent Flow docs, relevant code/schema/tests, and any
   prior implementation or integration evidence that could affect risk.
 - Save the review to `docs/flow/{feature_name}/plan-review.md`.
+- Do not run this gate for clearly non-behavioral work such as typo fixes,
+  formatting-only edits, or docs-only changes that do not alter workflow
+  contracts, runtime behavior, test expectations, install behavior, CI gates,
+  or user-facing behavior.
+- If a docs-only change updates Agent Flow rules, skill behavior, gates, review
+  policy, risky-path config, or required evidence, treat it as
+  behavior-changing workflow work and run the review.
 - Cross-agent review is required by default:
   - review `claude-code` authored plans with `codex`;
   - Codex-authored plans should normally be reviewed by Claude Code instead;

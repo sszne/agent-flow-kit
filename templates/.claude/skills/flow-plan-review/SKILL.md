@@ -16,6 +16,13 @@ Use the repo-local `.claude/commands/flow-plan-review.md` command contract.
   modified `docs/flow/*/plan.md`.
 - Same gate: behavior-changing implementation must not start until the current
   frozen plan has an approved, non-stale `plan-review.md`.
+- Same non-behavior exception: typo fixes, formatting-only edits, and docs-only
+  changes do not need review when they do not alter workflow contracts, runtime
+  behavior, test expectations, install behavior, CI gates, or user-facing
+  behavior.
+- Same workflow-doc rule: docs-only changes still need review when they update
+  Agent Flow rules, skill behavior, gates, review policy, risky-path config, or
+  required evidence.
 - Same cross-agent rule: review Codex-authored plans with Claude Code and
   Claude-authored plans with Codex, unless a concrete same-agent fallback reason
   is recorded.
