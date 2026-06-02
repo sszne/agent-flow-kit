@@ -15,12 +15,22 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
 - Same required gates: Business Flow Matrix, Regression Surface Matrix, Test
   Design Matrix, Integration Coverage Contract, Flow Knowledge Update, and
   Residual Risk Preflight when applicable.
+- Same questioning behavior: include `Questioning Decision` in every plan and
+  require a source-backed `No Questions Rationale` when no questions are asked.
 - Same runtime behavior: include Runtime Causality Gate when production-only,
   deploy/runtime/provider, browser-network, auth/session, secret/binding,
   remote data, or external-runtime symptoms may be involved.
+- Same onboarding/UI behavior: confirm step names, order, exclusions, action
+  placement, resume/fallback path, and blocked evidence lanes before
+  implementation.
+- Same provider/auth/deploy behavior: distinguish local mock coverage,
+  deployed-artifact checks, real provider/device happy paths, valid
+  credential/session paths, and concrete blockers.
 - Same bug/regression behavior: run Bug Feedback Review and update
   `docs/agent-flow/bug-knowledge.md` when flow improvement cannot prevent the
   issue.
+- Same bug-knowledge behavior: classify matching prevention patterns before
+  task design when a bug/regression is preventable by better planning or tests.
 - Same browser behavior: include Playwright Integration Test Plan for visible or
   multi-step workflows.
 - Same author metadata: Claude Code-authored plans include

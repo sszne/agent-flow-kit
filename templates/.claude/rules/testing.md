@@ -11,6 +11,11 @@ Guidelines for testing behavior-changing work in this repository.
 - **Waivers must be concrete**: uncovered integration, browser, migration, side-effect, permission, or boundary coverage needs a clear reason or blocker. Vague waivers such as `manual`, `low risk`, `TBD`, `later`, or blank entries are not valid.
 - **Migration consistency must be verified**: when code depends on a new schema shape, verify migration enforcement and validate against the migrated runtime.
 - **Browser verification is required for visible behavior changes** unless a concrete blocker is reported.
+- **Provider/deploy happy paths need their own evidence lane**: local mocks,
+  invalid/preflight checks, unauthenticated `401`, and health endpoints are
+  useful but do not prove a real provider callback, deployed artifact, real
+  device/app context, valid credential/session path, mail delivery, storage
+  write, or other side effect.
 - **Playwright integration evidence is required for visible or multi-step business workflows**: capture major-step screenshots, generate an `index.html` evidence summary, run test review, and complete business-flow impact review before passing.
 - **Webwright-style browser work is only a scenario-crafting optimization**: use code-as-action exploratory scripts for long flows when it saves agent/browser turns, then promote the stable path into a deterministic Playwright Test spec.
 
@@ -36,6 +41,9 @@ For each feature, cover:
 5. Regression surfaces: existing routes, screens, APIs, shared partials/scripts, shared services/actions, schema-dependent paths, jobs, mail, PDFs.
 6. Integration scenarios: feature-level flows proving affected entrypoints still work together.
 7. Side effects: mail, PDF/export, jobs, audit logs, notifications, cache/search updates, and external API calls.
+8. Provider/deploy lanes: deployed artifact/version, real provider/device
+   happy path, valid credential/session smoke, and concrete blockers when these
+   cannot run.
 
 ## Integration Test Style
 
@@ -72,6 +80,9 @@ This matrix is the bridge between business knowledge and test design. Do not ski
 - [ ] Feature/integration coverage exists for affected routes, screens, APIs, shared logic, schema-dependent paths, jobs, mail, and PDFs.
 - [ ] Migration/schema changes were verified in a migrated runtime, including the enforcement path.
 - [ ] Browser verification was run for visible behavior, or a concrete blocker was reported.
+- [ ] Provider/auth/deploy risks distinguish local mock evidence from deployed
+      artifact, real provider/device, valid credential/session, and blocked
+      valid-path evidence.
 - [ ] Playwright major-step screenshots and `index.html` evidence exist for visible/multi-step workflows.
 - [ ] Test review and business-flow impact review passed before final review.
 - [ ] Tests are independent and deterministic.

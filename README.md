@@ -13,10 +13,15 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - onboarding skills for new repositories
 - Playwright integration-test evidence gate
 - mandatory cross-agent `flow-plan-review` gate before implementation
+- explicit `Questioning Decision` and source-backed `No Questions Rationale`
+  requirements before a behavior-changing plan can freeze
 - Integration Coverage Contract that maps each business flow to happy, exception, permission, boundary, side-effect, and regression coverage
 - Runtime Causality Gate that forces production-only, deploy/runtime/provider,
   browser-network, secret/binding, remote data, and auth/session symptoms to be
   classified before speculative code changes
+- provider/auth/deploy evidence lanes that separate local mocks from deployed
+  artifacts, real provider/device happy paths, valid credential/session paths,
+  and concrete blockers
 
 ## Onboarding Sequence
 
@@ -183,14 +188,21 @@ instructions.
 
 Codex users should prefer the `flow-plan` skill, not a separate lightweight
 prompt. If a legacy `~/.codex/prompts/flow-plan.md` or repo-local prompt exists,
-it should delegate to the skill and must preserve requirement questioning,
-Residual Risk Preflight, Flow Knowledge Update, the matrices, and the
-`flow-plan-review` handoff. When `flow-plan` skips questions, the plan must
-record a source-backed `No Questions Rationale` before it can be frozen.
-Questions may be skipped only when actor/scope, current behavior, desired
-behavior, success criteria, affected entrypoints, side effects, migration/data
-compatibility, and conflicts with existing docs/tests/code are all resolved by
-source evidence or explicit scope control.
+it should delegate to the skill and must preserve `Questioning Decision`,
+source-backed `No Questions Rationale`, Residual Risk Preflight, Flow Knowledge
+Update, the matrices, and the `flow-plan-review` handoff. Questions may be
+skipped only when actor/scope, current behavior, desired behavior, success
+criteria, affected entrypoints, side effects, migration/data compatibility, and
+conflicts with existing docs/tests/code are all resolved by source evidence or
+explicit scope control.
+
+For onboarding/setup UI work, `flow-plan` must confirm step names, order,
+excluded elements, action placement, resume/fallback behavior, and blocked
+evidence lanes before implementation. For provider/auth/deploy issues, local
+mocks and shallow checks such as preflight, invalid input, unauthenticated
+`401`, or health endpoints do not replace real provider/device, deployed
+artifact, valid credential/session, or side-effect evidence unless the plan
+records the concrete blocker.
 
 | Goal | Claude Code | Codex |
 | --- | --- | --- |

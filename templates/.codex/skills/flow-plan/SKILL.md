@@ -26,15 +26,15 @@ readiness gate. Do not implement during this skill.
 - Do not leave business ambiguity unresolved. If actors, permissions, data
   ownership, current vs desired behavior, side effects, entrypoints, success
   criteria, or rollout assumptions are unclear, ask the user before freezing.
-- Do not silently skip requirement questioning. Before writing the plan,
-  classify whether questions are required. If none are required, record a
-  source-backed "No Questions Rationale" in the plan and in the user-facing
-  summary.
+- Every plan must include a `Questioning Decision`. If no user questions are
+  asked, include a source-backed `No Questions Rationale`; do not rely on a
+  silent assumption that the request is obvious.
 - Behavior-changing work requires onboarding docs:
   - `docs/agent-flow/project-structure.md`
   - `docs/agent-flow/business-flows.md`
   - `docs/agent-flow/integration-scenarios.md`
 - A frozen plan for behavior-changing work must include:
+  - Questioning Decision and No Questions Rationale when no questions are asked
   - Business Flow Matrix
   - Regression Surface Matrix
   - Test Design Matrix
@@ -45,6 +45,15 @@ readiness gate. Do not implement during this skill.
     binding, remote data, or production-only symptoms may be involved
   - Bug Feedback Review for bug/regression work
   - Playwright Integration Test Plan for visible or multi-step workflows
+- Onboarding, setup, wizard, modal, or user-guidance UI plans must confirm step
+  names, step order, excluded elements, action placement, resume/fallback path,
+  and blocked evidence lanes before rich UI implementation.
+- Provider, auth, LIFF, LINE, Google, deploy, or smoke-test plans must separate
+  local mock coverage, deployed-artifact checks, real provider/device happy
+  paths, valid credential/session paths, and concrete blockers.
+- Bug/regression plans must search `docs/agent-flow/bug-knowledge.md`, classify
+  any matching prevention pattern, and add flow-improvement tasks before
+  implementation tasks when the bug is preventable by better planning or tests.
 - Include plan author metadata near the frozen marker:
   `<!-- plan_author: codex -->`.
 - Tell the user that `flow-plan-review` must approve the frozen plan before
@@ -57,12 +66,12 @@ readiness gate. Do not implement during this skill.
 ```text
 Phase 1: Scope
   load context -> inspect code/docs/tests -> analyze intent/current state
+  -> write questioning decision
   -> bug feedback review when applicable
   -> residual risk preflight
   -> runtime causality gate when applicable
   -> flow knowledge update check
-  -> classify requirement questions
-  -> ask user only required questions, or record No Questions Rationale
+  -> ask user only required questions
     ->
 Phase 2: Sketch
   select minimal existing-pattern design
@@ -75,10 +84,42 @@ Phase 3: Readiness
   -> freeze plan only when ambiguity and required gates are resolved
 ```
 
-## Requirement Questioning Decision
+## Questioning Decision Gate
 
-Questioning is not optional; the agent must make an explicit decision before
-writing the plan.
+Before writing or freezing the plan, explicitly decide whether user questions
+are required.
+
+Questions are required when any of these are unclear and cannot be resolved from
+source evidence, existing docs, or a direct user answer:
+
+- actor, role, store/tenant/customer scope, permission, or ownership,
+- current behavior versus desired behavior,
+- business outcome, success criteria, or completion signal,
+- data lifecycle, state transition, side effect, or external dependency,
+- visible step names, order, wording, placement, or user workflow,
+- provider/runtime/deploy lane needed to prove the actual risk.
+
+For detailed compatibility with older plans, this is the same gate previously
+called requirement questioning. The generated plan should use the canonical
+heading `Questioning Decision`.
+
+If no questions are asked, add a `Questioning Decision` section or table with:
+
+```markdown
+| Item | Decision |
+| --- | --- |
+| Questions asked | No |
+| Requirement questions asked | No |
+| No Questions Rationale | {source-backed reason the plan can be frozen without user input} |
+| User answers | None required / {answers already provided by user} |
+| Unsafe assumptions? | None blocking / {explicit blocker} |
+```
+
+Do not freeze a plan with unresolved ambiguity. If the only safe next step is
+evidence gathering, write the plan around that investigation instead of
+speculative implementation.
+
+## Detailed Questioning Criteria
 
 Questions are required when any of these are unclear:
 
@@ -113,6 +154,60 @@ If questions are skipped, the plan must include a "No Questions Rationale" that
 cites the evidence used to avoid questions. Lack of obvious ambiguity is not
 enough; the rationale must explain why implementation would not require a
 business-rule guess.
+
+## Onboarding And UI Guidance Plans
+
+When a request changes onboarding, setup guidance, a wizard, modal, tutorial,
+first-login rail, admin guide, or other visible multi-step instruction flow, the
+plan must confirm these before implementation:
+
+- user role and scope, such as owner, store manager, staff, customer, store, or
+  account,
+- current step model and requested step names,
+- required step order and completion semantics,
+- elements explicitly excluded, such as screenshots, docs links, old URL panels,
+  optional confirmations, or support links,
+- where each action appears relative to the instruction it supports,
+- resume/fallback route or modal reopening behavior,
+- safe recipient/provider boundaries for test sends or external actions,
+- browser/provider evidence lane and the exact blocker if it cannot run.
+
+## Provider, Auth, Deploy, And Smoke Evidence
+
+Local mock tests are required for deterministic coverage, but they are not full
+proof when the reported risk is a deployed artifact, provider callback, real
+device/app context, safe production credential, or valid session path.
+
+For these plans, map evidence lanes separately:
+
+- local mock/unit/integration coverage,
+- deployed bundle, release, Worker, or script version check,
+- real provider or sandbox happy path,
+- valid credential/session path when auth is in scope,
+- device or app context when device-specific provider behavior is in scope,
+- concrete blocker with required credential, environment, operator action, or
+  manual checklist when a lane is unavailable.
+
+Do not mark a provider/auth/deploy issue complete using only preflight, invalid
+input, unauthenticated `401`, or health checks if the valid path or side effect
+is the failure being planned.
+
+## Bug Knowledge Pattern Reuse
+
+For bug/regression work, search `docs/agent-flow/bug-knowledge.md` before task
+design and classify any matching prevention pattern:
+
+- requirement/questioning gap,
+- business-flow or matrix gap,
+- valid-path coverage gap,
+- runtime/deploy/provider evidence gap,
+- implementation drift,
+- UI-intent or action-placement gap,
+- non-preventable external/runtime/data behavior.
+
+If a matching preventable pattern exists, add a flow-improvement task before
+production implementation tasks. If the bug is not preventable by flow changes,
+append or update bug knowledge with future detection and response guidance.
 
 ## Runtime Causality Gate
 
@@ -169,10 +264,11 @@ Use this structure unless the target repo already has a stricter local template:
 ## 1. Requirements
 ### 1.1 Current State
 ### 1.2 Intent And Ambiguity Resolution
-### 1.3 Goal
-### 1.4 Scope / Non-Goals
-### 1.5 Acceptance Criteria
-### 1.6 Questioning Decision And User Answers
+### 1.3 Questioning Decision
+### 1.4 Goal
+### 1.5 Scope / Non-Goals
+### 1.6 Acceptance Criteria
+### 1.7 User Answers
 
 ## 2. Design
 ### 2.1 Affected Files And Modules
@@ -197,12 +293,19 @@ Use this structure unless the target repo already has a stricter local template:
 ## 4. Readiness
 - [ ] Requirements map to tasks
 - [ ] User intent and current-state analysis is documented
-- [ ] Requirement questioning was performed, or No Questions Rationale is documented with source evidence
+- [ ] Questioning Decision is documented
+- [ ] No Questions Rationale is source-backed when no questions were asked
 - [ ] Business/product ambiguity has been resolved or explicitly blocked
 - [ ] Required onboarding docs exist for behavior-changing work
 - [ ] Flow Knowledge Update target is explicit
 - [ ] Residual Risk Preflight warnings have countermeasures, setup tasks, or blockers
 - [ ] Runtime Causality Gate is complete or explicitly not triggered
+- [ ] Onboarding/UI plans confirm step names, order, exclusions, action
+      placement, resume/fallback path, and blocked evidence lanes
+- [ ] Provider/auth/deploy plans separate mock, deployed-artifact, real
+      provider/device, valid-path, and blocker evidence
+- [ ] Bug/regression work classifies matching `docs/agent-flow/bug-knowledge.md`
+      prevention patterns before task design
 - [ ] Business flows map to required tests or blockers
 - [ ] Integration Coverage Contract has concrete coverage or waivers
 - [ ] Validation commands are identified
