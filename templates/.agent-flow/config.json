@@ -68,6 +68,30 @@
     "postcss.config.js",
     "postcss.config.mjs"
   ],
+  "presentation_only_prefixes": [
+    "styles/",
+    "src/styles/",
+    "app/styles/",
+    "public/styles/"
+  ],
+  "presentation_only_extensions": [
+    ".css",
+    ".scss",
+    ".sass",
+    ".less",
+    ".pcss"
+  ],
+  "presentation_ui_extensions": [
+    ".html",
+    ".htm",
+    ".jsx",
+    ".tsx",
+    ".vue",
+    ".svelte",
+    ".blade.php",
+    ".erb",
+    ".twig"
+  ],
   "migration_affecting_prefixes": [
     "prisma/migrations/",
     "drizzle/",

@@ -22,6 +22,7 @@
 | Behavior-affecting edits should be blocked until a frozen flow plan exists | Prevents accidental direct implementation when `/flow-plan` was forgotten or skipped | Reminder-only prompt routing | YYYY-MM-DD |
 | Behavior-changing work must include an Integration Coverage Contract before implementation | Ensures every affected business flow maps happy, exception, permission, boundary, side-effect, and regression cases to integration/unit/browser/migration coverage or explicit waivers | Relying on broad test names without case-type traceability | YYYY-MM-DD |
 | Visible or multi-step workflows require Playwright integration-test evidence before final review | Makes browser verification auditable through screenshots, `index.html`, test review, and business-flow impact review | Informal browser checks only | YYYY-MM-DD |
+| Display-only minor style, layout, and visible text changes may skip `/flow-plan` | Keeps the gate focused on behavior and business-flow risk while allowing low-impact presentation fixes to move quickly | Requiring `/flow-plan` for every visual or copy edit | YYYY-MM-DD |
 
 ## TODO
 

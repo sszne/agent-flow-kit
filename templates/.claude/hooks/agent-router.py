@@ -96,6 +96,17 @@ FLOW_PLAN_REQUIRED_TRIGGERS = {
     ],
 }
 
+DISPLAY_ONLY_TRIGGERS = [
+    "表示のみ", "見た目", "スタイル", "レイアウト", "文言", "文章", "テキスト",
+    "コピー", "ラベル", "誤字", "typo", "style", "layout", "copy", "wording",
+    "text", "label", "display-only", "visual only",
+]
+
+DISPLAY_ONLY_HARD_RISK_TRIGGERS = (
+    FLOW_PLAN_REQUIRED_TRIGGERS["bug_or_regression"]
+    + FLOW_PLAN_REQUIRED_TRIGGERS["business_flow_sensitive"]
+)
+
 
 FLOW_PLAN_EXPLICIT_PATTERN = re.compile(r"/flow-plan\b", re.IGNORECASE)
 FLOW_START_EXPLICIT_PATTERN = re.compile(r"/flow-start\b", re.IGNORECASE)
@@ -142,6 +153,10 @@ def detect_flow_plan_requirement(prompt: str) -> tuple[bool, str, str]:
         return False, "", ""
 
     prompt_lower = prompt.lower()
+    if any(trigger.lower() in prompt_lower for trigger in DISPLAY_ONLY_TRIGGERS):
+        if not any(trigger.lower() in prompt_lower for trigger in DISPLAY_ONLY_HARD_RISK_TRIGGERS):
+            return False, "", ""
+
     for category, triggers in FLOW_PLAN_REQUIRED_TRIGGERS.items():
         for trigger in triggers:
             if trigger.lower() in prompt_lower:

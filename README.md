@@ -158,6 +158,15 @@ paths unless a frozen `docs/flow/{feature_name}/plan.md` exists. The default
 path list is tuned for common Next.js repositories and can be customized in
 `.agent-flow/config.json`.
 
+The required-plan gate intentionally passes display-only edits without a frozen
+plan when they are limited to minor style fixes, layout adjustments, or visible
+text changes. This exception is narrow: anything that changes runtime behavior,
+data flow, permissions, API behavior, workflow order, validation, side effects,
+tests, install behavior, CI gates, or Agent Flow contracts still requires
+`/flow-plan`. The hook and matrix gate can classify style files directly and
+allow simple UI markup edits such as `className`/`style`/visible text changes;
+ambiguous component edits stay blocked until a plan exists.
+
 Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
 If discovery shows that an existing runtime path will change, switch to
 `/flow-plan` before freezing the plan or editing behavior-changing files.

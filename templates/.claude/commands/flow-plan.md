@@ -7,6 +7,7 @@ User requirements from interactive questioning are combined with codebase analys
 - Never leave ambiguity. Investigate thoroughly before implementation starts.
 - Propose minimal necessary implementation based on existing source code.
 - Treat `/flow-plan` as the canonical entry point for modifications to existing behavior, bug fixes, regressions, and business-flow-sensitive work.
+- Do not force `/flow-plan` for display-only requests limited to minor style changes, layout adjustments, or visible text changes. Keep `/flow-plan` required when runtime behavior, data flow, permissions, API behavior, workflow order, validation, side effects, tests, install behavior, CI gates, or Agent Flow contracts may change.
 - Use `/flow-start` only when the work is primarily new-feature discovery or greenfield scope shaping. If the request modifies an existing runtime path, continue here.
 - Comments inside `<!-- -->` are AI instructions. `{}` denotes replacement text.
 - Architecture reference: fetch from (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/architecture.md). If unavailable, skip and note in plan.

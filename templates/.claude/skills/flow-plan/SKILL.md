@@ -20,6 +20,10 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
 - Same goal-confirmation behavior: confirm desired user experience, business
   outcome, root-cause target, and accepted completion signal before freeze; ask
   when the requester goal is ambiguous.
+- Same display-only boundary: do not force flow-plan for minor style changes,
+  layout adjustments, or visible text changes unless runtime behavior, data
+  flow, permissions, API behavior, workflow order, validation, side effects,
+  tests, install behavior, CI gates, or Agent Flow contracts may change.
 - Same runtime behavior: include Runtime Causality Gate when production-only,
   deploy/runtime/provider, browser-network, auth/session, secret/binding,
   remote data, or external-runtime symptoms may be involved.

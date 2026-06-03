@@ -22,6 +22,11 @@ readiness gate. Do not implement during this skill.
 - Activate `context-loader` first.
 - Treat `flow-plan` as the canonical entry point for existing behavior changes,
   bug fixes, regressions, refactors, and business-flow-sensitive work.
+- Do not force `flow-plan` for display-only requests that are limited to minor
+  style changes, layout adjustments, or visible text changes. Keep `flow-plan`
+  required when the change also touches runtime behavior, data flow,
+  permissions, API behavior, workflow order, validation, side effects, tests,
+  install behavior, CI gates, or Agent Flow contracts.
 - Prefer the smallest implementation that fits existing source patterns.
 - Do not leave business ambiguity unresolved. If actors, permissions, data
   ownership, current vs desired behavior, side effects, entrypoints, success

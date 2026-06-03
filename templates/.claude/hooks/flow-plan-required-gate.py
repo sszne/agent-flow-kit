@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -58,6 +59,39 @@ DEFAULT_BEHAVIOR_FILES = [
     "Dockerfile",
 ]
 
+DEFAULT_PRESENTATION_ONLY_PREFIXES = [
+    "styles/",
+    "src/styles/",
+    "app/styles/",
+    "public/styles/",
+]
+
+DEFAULT_PRESENTATION_ONLY_EXTENSIONS = [
+    ".css",
+    ".scss",
+    ".sass",
+    ".less",
+    ".pcss",
+]
+
+DEFAULT_PRESENTATION_UI_EXTENSIONS = [
+    ".html",
+    ".htm",
+    ".jsx",
+    ".tsx",
+    ".vue",
+    ".svelte",
+    ".blade.php",
+    ".erb",
+    ".twig",
+]
+
+PRESENTATION_ATTR_RE = re.compile(
+    r"(\b(?:class|className|style|aria-label|title|placeholder|alt|label)\s*=\s*)"
+    r"(\"[^\"]*\"|'[^']*'|\{[^{}\n]*(?:\"[^\"]*\"|'[^']*')[^{}\n]*\})"
+)
+TEXT_NODE_RE = re.compile(r">[^<>{}\n][^<>{}]*<")
+
 
 def project_dir() -> Path:
     """Resolve the active project directory."""
@@ -98,6 +132,95 @@ def is_behavior_affecting(path: str, config: dict) -> bool:
     prefixes = config.get("behavior_affecting_prefixes", DEFAULT_BEHAVIOR_PREFIXES)
     files = set(config.get("behavior_affecting_files", DEFAULT_BEHAVIOR_FILES))
     return normalized in files or any(normalized.startswith(prefix) for prefix in prefixes)
+
+
+def configured_tuple(config: dict, key: str, default: list[str]) -> tuple[str, ...]:
+    """Return a config list as a tuple of strings."""
+    values = config.get(key, default)
+    if not isinstance(values, list):
+        return tuple(default)
+    return tuple(str(value) for value in values)
+
+
+def is_style_path(path: str, config: dict) -> bool:
+    """Return whether a path is display-only by file type or style prefix."""
+    normalized = path.replace("\\", "/").lstrip("/")
+    prefixes = configured_tuple(config, "presentation_only_prefixes", DEFAULT_PRESENTATION_ONLY_PREFIXES)
+    extensions = configured_tuple(
+        config,
+        "presentation_only_extensions",
+        DEFAULT_PRESENTATION_ONLY_EXTENSIONS,
+    )
+    return normalized.endswith(extensions) or any(normalized.startswith(prefix) for prefix in prefixes)
+
+
+def is_ui_presentation_path(path: str, config: dict) -> bool:
+    """Return whether a path can contain verifiable display-only markup edits."""
+    normalized = path.replace("\\", "/").lstrip("/")
+    extensions = configured_tuple(
+        config,
+        "presentation_ui_extensions",
+        DEFAULT_PRESENTATION_UI_EXTENSIONS,
+    )
+    return normalized.endswith(extensions)
+
+
+def edit_pairs(tool_name: str, tool_input: dict) -> list[tuple[str, str]]:
+    """Extract old/new edit fragments when the hook input exposes them."""
+    if tool_name == "Edit":
+        return [
+            (
+                str(tool_input.get("old_string", "")),
+                str(tool_input.get("new_string", "")),
+            )
+        ]
+    if tool_name == "MultiEdit":
+        pairs: list[tuple[str, str]] = []
+        edits = tool_input.get("edits", [])
+        if isinstance(edits, list):
+            for edit in edits:
+                if isinstance(edit, dict):
+                    pairs.append((str(edit.get("old_string", "")), str(edit.get("new_string", ""))))
+        return pairs
+    return []
+
+
+def normalize_presentation_fragment(value: str) -> str:
+    """Erase allowed presentation-only tokens and preserve surrounding structure."""
+    normalized = PRESENTATION_ATTR_RE.sub(r"\1__PRESENTATION__", value)
+    normalized = TEXT_NODE_RE.sub(">__TEXT__<", normalized)
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def is_simple_visible_text(value: str) -> bool:
+    """Return whether a fragment is plain visible copy rather than code."""
+    text = value.strip().strip("\"'")
+    if not text or len(text) > 200 or "\n" in text:
+        return False
+    if re.search(r"[{}();=<>`]|=>|/api|https?://", text):
+        return False
+    return True
+
+
+def is_presentation_pair(old: str, new: str) -> bool:
+    """Return whether one edit pair is limited to style/layout/copy tokens."""
+    if not old or not new:
+        return False
+    if is_simple_visible_text(old) and is_simple_visible_text(new):
+        return True
+    return normalize_presentation_fragment(old) == normalize_presentation_fragment(new)
+
+
+def is_presentation_only_edit(file_path: str, tool_name: str, tool_input: dict, config: dict) -> bool:
+    """Return whether a direct edit can skip flow-plan as display-only work."""
+    if is_style_path(file_path, config):
+        return True
+
+    if not is_ui_presentation_path(file_path, config):
+        return False
+
+    pairs = edit_pairs(tool_name, tool_input)
+    return bool(pairs) and all(is_presentation_pair(old, new) for old, new in pairs)
 
 
 def frozen_plan_exists(cwd: Path) -> bool:
@@ -150,6 +273,9 @@ def main() -> None:
     if not is_behavior_affecting(file_path, config):
         return
 
+    if is_presentation_only_edit(file_path, tool_name, tool_input, config):
+        return
+
     if frozen_plan_exists(cwd):
         return
 
@@ -158,6 +284,8 @@ def main() -> None:
         f"`docs/flow/{{feature_name}}/plan.md` was found. Target file: `{file_path}`. "
         "Run `/flow-plan {feature_name}` first and freeze the plan before editing runtime, "
         "business-flow, schema, auth, UI, API, job, mail/PDF, search, or shared logic files. "
+        "Display-only edits may proceed without flow-plan only when they are limited to minor "
+        "style/layout changes or visible text changes that the gate can classify. "
         "For an intentional emergency bypass, set `AGENT_FLOW_ALLOW_DIRECT_EDIT=1` and document "
         "the reason in the final report."
     )

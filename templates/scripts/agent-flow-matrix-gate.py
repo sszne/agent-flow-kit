@@ -122,6 +122,39 @@ DEFAULT_BROWSER_RISKY_FILES = {
     "postcss.config.mjs",
 }
 
+DEFAULT_PRESENTATION_ONLY_PREFIXES = (
+    "styles/",
+    "src/styles/",
+    "app/styles/",
+    "public/styles/",
+)
+
+DEFAULT_PRESENTATION_ONLY_EXTENSIONS = (
+    ".css",
+    ".scss",
+    ".sass",
+    ".less",
+    ".pcss",
+)
+
+DEFAULT_PRESENTATION_UI_EXTENSIONS = (
+    ".html",
+    ".htm",
+    ".jsx",
+    ".tsx",
+    ".vue",
+    ".svelte",
+    ".blade.php",
+    ".erb",
+    ".twig",
+)
+
+PRESENTATION_ATTR_RE = re.compile(
+    r"(\b(?:class|className|style|aria-label|title|placeholder|alt|label)\s*=\s*)"
+    r"(\"[^\"]*\"|'[^']*'|\{[^{}\n]*(?:\"[^\"]*\"|'[^']*')[^{}\n]*\})"
+)
+TEXT_NODE_RE = re.compile(r">[^<>{}\n][^<>{}]*<")
+
 DEFAULT_MIGRATION_PREFIXES = (
     "prisma/migrations/",
     "drizzle/",
@@ -240,8 +273,108 @@ def changed_files(base: str | None) -> list[str]:
     return sorted(line for line in output.splitlines() if line)
 
 
+def diff_for_file(path: str, base: str | None) -> str:
+    if base:
+        merge_base = git(["merge-base", base, "HEAD"])
+        return git_optional(["diff", "--unified=0", f"{merge_base}...HEAD", "--", path])
+
+    diff = git_optional(["diff", "--unified=0", "HEAD", "--", path])
+    if diff:
+        return diff
+    return git_optional(["diff", "--unified=0", "--cached", "--", path])
+
+
 def is_risky(path: str, prefixes: tuple[str, ...], files: set[str]) -> bool:
     return path in files or any(path.startswith(prefix) for prefix in prefixes)
+
+
+def config_tuple(config: dict, key: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    values = config.get(key, list(default))
+    if not isinstance(values, list):
+        return default
+    return tuple(str(value) for value in values)
+
+
+def is_style_path(path: str, config: dict) -> bool:
+    prefixes = config_tuple(config, "presentation_only_prefixes", DEFAULT_PRESENTATION_ONLY_PREFIXES)
+    extensions = config_tuple(
+        config,
+        "presentation_only_extensions",
+        DEFAULT_PRESENTATION_ONLY_EXTENSIONS,
+    )
+    return path.endswith(extensions) or any(path.startswith(prefix) for prefix in prefixes)
+
+
+def is_ui_presentation_path(path: str, config: dict) -> bool:
+    extensions = config_tuple(
+        config,
+        "presentation_ui_extensions",
+        DEFAULT_PRESENTATION_UI_EXTENSIONS,
+    )
+    return path.endswith(extensions)
+
+
+def normalize_presentation_fragment(value: str) -> str:
+    normalized = PRESENTATION_ATTR_RE.sub(r"\1__PRESENTATION__", value)
+    normalized = TEXT_NODE_RE.sub(">__TEXT__<", normalized)
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def is_simple_visible_text(value: str) -> bool:
+    text = value.strip().strip("\"'")
+    if not text or len(text) > 200 or "\n" in text:
+        return False
+    if re.search(r"[{}();=<>`]|=>|/api|https?://", text):
+        return False
+    return True
+
+
+def diff_hunks(diff: str) -> list[tuple[list[str], list[str]]]:
+    hunks: list[tuple[list[str], list[str]]] = []
+    removed: list[str] = []
+    added: list[str] = []
+
+    for line in diff.splitlines():
+        if line.startswith(("---", "+++", "diff --git", "index ")):
+            continue
+        if line.startswith("@@"):
+            if removed or added:
+                hunks.append((removed, added))
+            removed = []
+            added = []
+            continue
+        if line.startswith("-"):
+            removed.append(line[1:])
+        elif line.startswith("+"):
+            added.append(line[1:])
+
+    if removed or added:
+        hunks.append((removed, added))
+    return hunks
+
+
+def is_presentation_hunk(removed: list[str], added: list[str]) -> bool:
+    old = "\n".join(removed)
+    new = "\n".join(added)
+    if old and new and normalize_presentation_fragment(old) == normalize_presentation_fragment(new):
+        return True
+    return (
+        len(removed) == 1
+        and len(added) == 1
+        and is_simple_visible_text(removed[0])
+        and is_simple_visible_text(added[0])
+    )
+
+
+def is_presentation_only_change(path: str, config: dict, base: str | None) -> bool:
+    if is_style_path(path, config):
+        return True
+    if not is_ui_presentation_path(path, config):
+        return False
+
+    diff = diff_for_file(path, base)
+    hunks = diff_hunks(diff)
+    return bool(hunks) and all(is_presentation_hunk(removed, added) for removed, added in hunks)
 
 
 def is_plan(path: str) -> bool:
@@ -539,8 +672,18 @@ def main() -> int:
 
     paths = changed_files(args.base)
     risky_paths = [path for path in paths if is_risky(path, risky_prefixes, risky_files)]
+    presentation_only_paths = [
+        path for path in risky_paths if is_presentation_only_change(path, config, args.base)
+    ]
+    risky_paths = [path for path in risky_paths if path not in presentation_only_paths]
     if not risky_paths:
-        print("Agent flow matrix gate: no behavior-affecting changes detected.")
+        if presentation_only_paths:
+            print(
+                "Agent flow matrix gate: display-only changes detected; flow-plan not required."
+            )
+            print("Display-only files: " + ", ".join(presentation_only_paths))
+        else:
+            print("Agent flow matrix gate: no behavior-affecting changes detected.")
         return 0
 
     plan_paths = [path for path in paths if is_plan(path)]

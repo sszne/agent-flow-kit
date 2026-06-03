@@ -39,6 +39,12 @@ Use `/flow-plan` for existing behavior changes, bug fixes, regressions,
 refactors, auth/schema/status/order/search/mail/PDF/job changes, and
 business-flow-sensitive work.
 
+Do not require `/flow-plan` when the requested change is display-only and is
+limited to minor style changes, layout adjustments, or visible text changes. If
+the same request touches runtime behavior, data flow, permissions, API behavior,
+workflow order, validation, side effects, tests, install behavior, CI gates, or
+Agent Flow contracts, keep `/flow-plan` required.
+
 Use `/flow-start` only for new-feature discovery or greenfield scope shaping.
 If discovery touches an existing runtime path, switch to `/flow-plan`.
 
