@@ -14,6 +14,9 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - Playwright integration-test evidence gate
 - mandatory cross-agent `flow-plan-review` gate before behavior-changing
   implementation
+- Goal Confirmation Gate that confirms the requester's desired user experience,
+  business outcome, root-cause target, and accepted completion signal before a
+  plan freezes when the goal is ambiguous
 - explicit `Questioning Decision` and source-backed `No Questions Rationale`
   requirements before a behavior-changing plan can freeze
 - Integration Coverage Contract that maps each business flow to happy, exception, permission, boundary, side-effect, and regression coverage
@@ -204,6 +207,14 @@ criteria, affected entrypoints, side effects, migration/data compatibility, and
 conflicts with existing docs/tests/code are all resolved by source evidence or
 explicit scope control.
 
+`flow-plan` must also confirm the requester's goal before freezing. When a bug
+or change request could mean several different outcomes, such as improving an
+error message, preserving user state, removing the root cause, adding
+diagnostics, or proving the deployed valid path, the agent asks which outcome is
+intended. The no-question path remains valid when the desired outcome and
+completion signal are explicit in the user request or unambiguously supported by
+source/runtime evidence.
+
 For onboarding/setup UI work, `flow-plan` must confirm step names, order,
 excluded elements, action placement, resume/fallback behavior, and blocked
 evidence lanes before implementation. For provider/auth/deploy issues, local
@@ -251,6 +262,9 @@ Bug and regression reports should improve the project-specific flow. See
 exists, `/flow-plan` classifies where the prior flow failed and adds flow
 improvement tasks when possible. If the bug cannot be prevented by flow changes,
 it is recorded in `docs/agent-flow/bug-knowledge.md`.
+For preventable requirement gaps, the review must distinguish the observed
+symptom from the requester's desired outcome, root-cause target, and completion
+signal before implementation tasks are accepted.
 
 ## Flow Knowledge Updates
 

@@ -26,6 +26,9 @@ readiness gate. Do not implement during this skill.
 - Do not leave business ambiguity unresolved. If actors, permissions, data
   ownership, current vs desired behavior, side effects, entrypoints, success
   criteria, or rollout assumptions are unclear, ask the user before freezing.
+- Confirm the requester's goal before freezing. If the desired user experience,
+  business outcome, root-cause target, or accepted completion signal is unclear,
+  ask the user instead of choosing one plausible interpretation.
 - Every plan must include a `Questioning Decision`. If no user questions are
   asked, include a source-backed `No Questions Rationale`; do not rely on a
   silent assumption that the request is obvious.
@@ -66,6 +69,7 @@ readiness gate. Do not implement during this skill.
 ```text
 Phase 1: Scope
   load context -> inspect code/docs/tests -> analyze intent/current state
+  -> confirm requester goal and completion signal
   -> write questioning decision
   -> bug feedback review when applicable
   -> residual risk preflight
@@ -84,6 +88,30 @@ Phase 3: Readiness
   -> freeze plan only when ambiguity and required gates are resolved
 ```
 
+## Goal Confirmation Gate
+
+Before writing or freezing the plan, identify the requester's intended outcome.
+The plan must distinguish:
+
+- observed symptom or requested change,
+- desired user experience or business outcome,
+- root-cause target when the request is a bug/regression,
+- accepted completion signal, including whether deployed or valid-path proof is
+  required.
+
+Questions are required when the same report could reasonably mean different
+goals, such as:
+
+- improving an error message versus preventing the error from happening,
+- keeping a user in their current state versus showing a retry screen,
+- removing the root cause versus adding diagnostics or logging,
+- local source-code repair versus deployed artifact or valid-session proof.
+
+Do not infer the goal from the easiest source change. Source evidence can
+support a no-question decision only when it also supports the desired outcome.
+If the requester has already stated the goal explicitly, record that wording in
+`Intent And Ambiguity Resolution`, `Goal`, and `No Questions Rationale`.
+
 ## Questioning Decision Gate
 
 Before writing or freezing the plan, explicitly decide whether user questions
@@ -94,6 +122,7 @@ source evidence, existing docs, or a direct user answer:
 
 - actor, role, store/tenant/customer scope, permission, or ownership,
 - current behavior versus desired behavior,
+- desired user experience, root-cause target, or accepted completion signal,
 - business outcome, success criteria, or completion signal,
 - data lifecycle, state transition, side effect, or external dependency,
 - visible step names, order, wording, placement, or user workflow,
@@ -110,6 +139,7 @@ If no questions are asked, add a `Questioning Decision` section or table with:
 | --- | --- |
 | Questions asked | No |
 | Requirement questions asked | No |
+| Goal Confirmation | {explicit user wording or source-backed reason the desired outcome is unambiguous} |
 | No Questions Rationale | {source-backed reason the plan can be frozen without user input} |
 | User answers | None required / {answers already provided by user} |
 | Unsafe assumptions? | None blocking / {explicit blocker} |
@@ -126,6 +156,8 @@ Questions are required when any of these are unclear:
 - target actor, role, permission, tenant, store, company, or customer scope,
 - desired business outcome, current behavior, desired behavior, or success
   criteria,
+- desired user experience, root-cause target, accepted completion signal, or
+  whether the request is about symptom presentation versus cause removal,
 - data ownership, lifecycle, status transition, deletion/retention, migration,
   backfill, or existing-data compatibility,
 - user-visible entrypoint, screen placement, wording, workflow order, or
@@ -139,6 +171,8 @@ Questions may be skipped only when all of these are true:
 
 - actor/scope, current behavior, desired behavior, and success criteria are
   directly supported by user wording or source evidence,
+- desired outcome/user experience and accepted completion signal are explicit
+  in user wording or unambiguously supported by source/runtime evidence,
 - affected screens, routes, APIs, jobs, mail/PDF/export paths, schema, shared
   services, and external dependencies have been inspected or ruled out,
 - permission/ownership, exception paths, boundary values, lifecycle rules, and
@@ -153,7 +187,7 @@ Questions may be skipped only when all of these are true:
 If questions are skipped, the plan must include a "No Questions Rationale" that
 cites the evidence used to avoid questions. Lack of obvious ambiguity is not
 enough; the rationale must explain why implementation would not require a
-business-rule guess.
+business-rule or requester-goal guess.
 
 ## Onboarding And UI Guidance Plans
 
@@ -293,6 +327,8 @@ Use this structure unless the target repo already has a stricter local template:
 ## 4. Readiness
 - [ ] Requirements map to tasks
 - [ ] User intent and current-state analysis is documented
+- [ ] Goal Confirmation is documented, including desired outcome and completion
+      signal
 - [ ] Questioning Decision is documented
 - [ ] No Questions Rationale is source-backed when no questions were asked
 - [ ] Business/product ambiguity has been resolved or explicitly blocked

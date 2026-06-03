@@ -16,6 +16,7 @@ User requirements from interactive questioning are combined with codebase analys
 - Include plan author metadata near the frozen marker: `<!-- plan_author: claude-code -->`.
 - The plan is updated incrementally across phases. Do NOT batch work across phases.
 - Before writing the implementation design, explicitly analyze the user's request intent against the current codebase state and ask requirement questions when intent, business behavior, actors, data ownership, entrypoints, or success criteria are unclear.
+- Before freezing, confirm the requester's desired user experience, business outcome, root-cause target, and accepted completion signal. If the same report could mean message improvement, state preservation, root-cause elimination, diagnostics, or deployed/valid-path proof, ask the user which goal is intended.
 - If requirement questions are needed, stop after presenting the questions. Do not draft or freeze a plan that carries unresolved business ambiguity.
 - Every plan MUST include a `Questioning Decision`. When no questions are
   asked, the plan MUST include a source-backed `No Questions Rationale`; a
@@ -86,6 +87,11 @@ Before asking or writing, create a concise internal analysis of the user's reque
 
 The analysis must answer:
 - What business outcome is the user likely asking for?
+- What desired user experience and accepted completion signal did the requester
+  actually ask for?
+- If this is a bug/regression, is the accepted goal symptom presentation, state
+  preservation, root-cause elimination, diagnostics, or deployed valid-path
+  proof?
 - Who are the actors and affected user roles?
 - What current behavior or missing capability exists in the codebase?
 - Which routes, screens, commands, jobs, APIs, schemas, shared services, mail/PDF/export paths, or external integrations could be affected?
@@ -244,6 +250,7 @@ blocked.
 
 Questions are required when any of these are unclear:
 - Target actor, role, permission, or tenant/store/company/customer scope
+- Desired user experience, root-cause target, or accepted completion signal
 - Desired business outcome or success criteria
 - Current behavior vs desired behavior
 - Data ownership, lifecycle, status transition, or deletion/retention rule
@@ -255,13 +262,15 @@ Questions are required when any of these are unclear:
 
 Questions may be skipped only when all of these are true:
 - Actor/scope, current behavior, desired behavior, and success criteria are directly supported by user wording or source evidence.
+- Desired outcome/user experience and accepted completion signal are explicit
+  in user wording or unambiguously supported by source/runtime evidence.
 - Affected screens, routes, APIs, jobs, mail/PDF/export paths, schema, shared services, and external dependencies have been inspected or ruled out.
 - Permission/ownership, exception paths, boundary values, lifecycle rules, and side effects can be described without guessing.
 - Migration, backfill, deploy/runtime enforcement, and existing-data compatibility are either not involved or source-backed.
 - Onboarding docs, existing plans, tests, and code do not conflict with the planned behavior.
 - Any remaining assumptions are source-backed, low-risk, explicitly out of scope, or recorded as concrete blockers/waivers.
 
-Do not treat "no obvious ambiguity" as enough. If questions are skipped, the No Questions Rationale must explain why implementation would not require a business-rule guess.
+Do not treat "no obvious ambiguity" as enough. If questions are skipped, the No Questions Rationale must explain why implementation would not require a business-rule or requester-goal guess.
 
 When questions are needed, present:
 - A short "Understanding so far" summary.
@@ -271,6 +280,8 @@ When questions are needed, present:
 
 When no questions are needed, do not proceed silently. Record:
 - Questioning decision: `No questions needed`
+- Goal confirmation: explicit user wording or source-backed reason the desired
+  outcome/completion signal is unambiguous
 - Evidence used: concrete files, routes, tests, schema, docs, or explicit user wording
 - No Questions Rationale: source-backed reason the plan can be frozen without user input
 - Safe assumptions: any assumptions that remain but are low-risk or out of scope, with reason

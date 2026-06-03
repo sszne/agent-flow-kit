@@ -17,6 +17,9 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
   Residual Risk Preflight when applicable.
 - Same questioning behavior: include `Questioning Decision` in every plan and
   require a source-backed `No Questions Rationale` when no questions are asked.
+- Same goal-confirmation behavior: confirm desired user experience, business
+  outcome, root-cause target, and accepted completion signal before freeze; ask
+  when the requester goal is ambiguous.
 - Same runtime behavior: include Runtime Causality Gate when production-only,
   deploy/runtime/provider, browser-network, auth/session, secret/binding,
   remote data, or external-runtime symptoms may be involved.
