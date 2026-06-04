@@ -275,4 +275,6 @@ Report:
 - The exact next step
 
 If the user wants implementation immediately, continue into `/team-implement` style execution with the manager retaining artifact ownership.
-Do not start coding until `flow-plan-review` approves the current frozen plan.
+Do not start coding until `flow-plan-review` approves the current frozen plan
+when review is required. If review is optional, record the optional-review
+reason before implementation.

@@ -25,8 +25,10 @@ DIRECT execution as specified, then run integration evidence and review gates.
 - Stop if no plan can be resolved, the plan is missing, or multiple latest plans
   are ambiguous.
 - Require a frozen marker such as `<!-- frozen: v... -->`.
-- Require `docs/flow/{feature_name}/plan-review.md` to approve the current
-  frozen marker before coding starts.
+- Require the plan to include `Plan Review Requirement: Required` or
+  `Optional` with a concrete reason. When review is required, require
+  `docs/flow/{feature_name}/plan-review.md` to approve the current frozen
+  marker before coding starts.
 - Do not start behavior-changing implementation unless the frozen plan contains
   Business Flow Matrix, Regression Surface Matrix, Test Design Matrix, and
   Integration Coverage Contract.
@@ -52,7 +54,8 @@ Phase 0: Resolve Plan
   latest docs/flow/*/plan.md when no argument is provided
     ->
 Phase 1: Gate Check
-  frozen marker + approved plan-review + required matrices + onboarding docs + waivers
+  frozen marker + plan-review decision + required review when applicable
+  + required matrices + onboarding docs + waivers
     ->
 Phase 2: Red
   failing Feature/API integration, Unit, or browser-scenario coverage

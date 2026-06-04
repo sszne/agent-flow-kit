@@ -4,7 +4,7 @@ description: |
   Parallel implementation using Agent Teams. Spawns teammates per module/layer,
   each owning separate files to avoid conflicts. Uses shared task list with
   dependencies for autonomous coordination. Run after /flow-start or /flow-plan
-  approval and flow-plan-review approval.
+  approval, plus flow-plan-review approval when review is required.
 metadata:
   short-description: Parallel implementation with Agent Teams
 ---
@@ -16,7 +16,8 @@ metadata:
 ## Prerequisites
 
 - `/flow-start` or `/flow-plan` is complete and the plan has been approved by the user
-- `/flow-plan-review` has approved the current frozen plan
+- The plan records whether `/flow-plan-review` is required or optional
+- `/flow-plan-review` has approved the current frozen plan when review is required
 - Architecture is documented in `.claude/docs/DESIGN.md`
 - Task list has been created
 

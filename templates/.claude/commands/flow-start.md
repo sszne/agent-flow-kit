@@ -97,7 +97,8 @@ Run the workflow from `.claude/skills/flow-start/SKILL.md`:
 7. Design the minimal fitting approach
 8. Write `docs/flow/{feature_name}/plan.md`
 9. Freeze the plan only when it is coherent
-10. Run `/flow-plan-review` before implementation starts
+10. Run `/flow-plan-review` before implementation starts when review is
+    required or requested
 
 ### Step 6: Present the handoff
 
@@ -106,7 +107,8 @@ Report the following to the user:
 - What will change
 - Which areas are affected
 - Main risks
-- The exact next step: `/flow-plan-review` before `/flow-impl` or `team-implement`
+- The exact next step: `/flow-plan-review` if required or requested, otherwise
+  `/flow-impl` or `team-implement`
 
 ---
 

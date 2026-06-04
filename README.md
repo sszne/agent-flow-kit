@@ -12,8 +12,8 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - CI matrix gate for required plan matrices
 - onboarding skills for new repositories
 - Playwright integration-test evidence gate
-- mandatory cross-agent `flow-plan-review` gate before behavior-changing
-  implementation
+- high-impact `flow-plan-review` gate before large-scale or high-risk
+  implementation, with optional review for smaller behavior changes
 - Goal Confirmation Gate that confirms the requester's desired user experience,
   business outcome, root-cause target, and accepted completion signal before a
   plan freezes when the goal is ambiguous
@@ -192,21 +192,37 @@ Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
 If discovery shows that an existing runtime path will change, switch to
 `/flow-plan` before freezing the plan or editing behavior-changing files.
 
+`/flow-plan` must record a `Plan Review Requirement` decision before freezing.
+Use `Requirement: Required` for large-scale or high-impact work, and
+`Requirement: Optional` for smaller localized behavior changes where the plan
+explains why cross-agent review is not mandatory.
+
 `/flow-plan-review` must run after `/flow-plan` and before `/flow-impl` or
-`team-implement`. It writes `docs/flow/{feature_name}/plan-review.md`; Codex
-plans should be reviewed by Claude Code, and Claude Code plans should be
-reviewed by Codex unless a concrete same-agent fallback reason is recorded.
+`team-implement` when the plan says review is required or when configured
+high-impact paths are changed. It writes
+`docs/flow/{feature_name}/plan-review.md`; Codex plans should be reviewed by
+Claude Code, and Claude Code plans should be reviewed by Codex unless a
+concrete same-agent fallback reason is recorded. It remains available and
+recommended whenever the user or agent wants another readiness pass.
 
-`/flow-plan-review` is not required for clearly non-behavioral work such as
-typo fixes, formatting-only edits, or docs-only changes that do not alter the
-workflow contract, runtime behavior, test expectations, install behavior, CI
-gates, or user-facing behavior. If a docs-only change updates Agent Flow rules,
-skill behavior, gates, review policy, risky-path config, or required evidence,
-treat it as behavior-changing workflow work and keep the plan-review gate.
+Treat these as high-impact review-required changes by default: multi-flow or
+cross-module changes; auth, permission, tenant, ownership, session, security, or
+privacy changes; schema, migration, data compatibility, backfill, rollback, or
+destructive data changes; deploy, CI, install, hooks, workflow gates, risky-path
+config, or Agent Flow contract changes; external providers, webhooks, mail/PDF,
+storage, search/cache, queues, jobs, schedules, or other side effects; public
+API contracts or shared runtime entrypoints; and any change the user or plan
+author marks as uncertain or high impact.
 
-`/flow-impl` can be run after `/flow-plan-review` without arguments. When no
-argument is provided, it resolves the most recently modified
-`docs/flow/*/plan.md` and uses that plan as the implementation target.
+`/flow-plan-review` is optional for clearly non-high-impact work, including
+small localized behavior changes and non-behavioral typo, formatting-only, or
+docs-only changes. A docs-only change that updates Agent Flow rules, skill
+behavior, gates, review policy, risky-path config, or required evidence is
+high-impact workflow work and still requires review.
+
+`/flow-impl` can be run after a frozen plan, and after `/flow-plan-review` when
+review is required. When no argument is provided, it resolves the most recently
+modified `docs/flow/*/plan.md` and uses that plan as the implementation target.
 
 ## Gate Order
 
@@ -216,7 +232,7 @@ Source document intake
   -> Business-flow discovery
   -> Integration-scenario design
   -> /flow-start or /flow-plan
-  -> /flow-plan-review
+  -> /flow-plan-review when required or requested
   -> /flow-impl or team-implement
   -> /flow-integration-test
   -> team-review
@@ -232,7 +248,7 @@ Codex users should prefer the `flow-plan` skill, not a separate lightweight
 prompt. If a legacy `~/.codex/prompts/flow-plan.md` or repo-local prompt exists,
 it should delegate to the skill and must preserve `Questioning Decision`,
 source-backed `No Questions Rationale`, Residual Risk Preflight, Flow Knowledge
-Update, the matrices, and the `flow-plan-review` handoff. Questions may be
+Update, the matrices, and the `Plan Review Requirement` decision. Questions may be
 skipped only when actor/scope, current behavior, desired behavior, success
 criteria, affected entrypoints, side effects, migration/data compatibility, and
 conflicts with existing docs/tests/code are all resolved by source evidence or

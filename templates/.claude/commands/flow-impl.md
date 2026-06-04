@@ -8,10 +8,11 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 - If `$ARGUMENTS` is provided, interpret it as either `{feature_name}` or a direct `docs/flow/{feature_name}/plan.md` path.
 - Always announce the resolved plan path before implementation starts. If no plan can be resolved, stop and ask the user which plan to implement.
 - The plan (`docs/flow/{feature_name}/plan.md`) MUST have a frozen tag (`<!-- frozen: v{N} ... -->`). If not frozen, abort and instruct the user to run `/flow-plan` first.
-- `docs/flow/{feature_name}/plan-review.md` MUST exist and approve the current
-  frozen plan. If missing, stale, `CHANGES_REQUIRED`, `BLOCKED`, or same-agent
-  without a concrete fallback reason, abort and instruct the user to run
-  `/flow-plan-review` first.
+- The plan MUST include `Plan Review Requirement: Required` or `Optional` with
+  a concrete reason. When review is required, `docs/flow/{feature_name}/plan-review.md`
+  MUST exist and approve the current frozen plan. If missing, stale,
+  `CHANGES_REQUIRED`, `BLOCKED`, or same-agent without a concrete fallback
+  reason, abort and instruct the user to run `/flow-plan-review` first.
 - Execute tasks one at a time in dependency order. NEVER batch multiple tasks together.
 - TDD tasks follow Red-Green-Refactor strictly.
 - DIRECT tasks follow Execute-Verify.
@@ -33,7 +34,8 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 ## Prerequisites
 
 - `/flow-plan` has been completed and plan.md is frozen.
-- `/flow-plan-review` has approved the current frozen plan.
+- `/flow-plan-review` has approved the current frozen plan when the plan marks
+  review required or configured high-impact paths are changed.
 - Either `$ARGUMENTS` identifies the plan, or at least one `docs/flow/*/plan.md` exists so the latest plan can be resolved.
 
 ## Directory Structure
@@ -74,7 +76,8 @@ Do not ask for `{feature_name}` merely because `$ARGUMENTS` is empty when a late
 
 Read `docs/flow/{feature_name}/plan.md`. Verify the `<!-- frozen: ... -->` tag exists. If missing, stop and inform the user.
 
-Read `docs/flow/{feature_name}/plan-review.md`. Verify:
+Read the plan's `Plan Review Requirement`. If it is `Required`, read
+`docs/flow/{feature_name}/plan-review.md` and verify:
 
 - it references the same `docs/flow/{feature_name}/plan.md`;
 - `Reviewed frozen marker` matches the current frozen marker from plan.md;
@@ -84,7 +87,9 @@ Read `docs/flow/{feature_name}/plan-review.md`. Verify:
 - reviewer and author are different unless `Same-agent fallback` contains a
   concrete reason or blocker.
 
-If any check fails, stop before coding and run `/flow-plan-review`.
+If review is required and any check fails, stop before coding and run
+`/flow-plan-review`. If review is optional, record that the plan gives a
+concrete optional-review reason and continue.
 
 Verify the plan includes the required quality gates:
 
@@ -92,7 +97,8 @@ Verify the plan includes the required quality gates:
 - Regression Surface Matrix for indirect effects
 - Test Design Matrix for TDD/risky tasks
 - Integration Coverage Contract for behavior-changing work
-- Approved, current `plan-review.md`
+- Plan Review Requirement decision
+- Approved, current `plan-review.md` when review is required
 - Agent-flow onboarding docs for behavior-changing work
 - Bug Feedback Review for bug/regression work
 - Migration/runtime enforcement notes when schema changes exist

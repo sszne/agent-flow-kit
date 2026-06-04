@@ -17,8 +17,8 @@ metadata:
 ## Overview
 
 This skill handles the planning phases (Phase 1-3). Plan review is done via
-`/flow-plan-review`. Implementation is done via `/team-implement`, and final
-review via `/team-review`.
+`/flow-plan-review` when required or requested. Implementation is done via
+`/team-implement`, and final review via `/team-review`.
 
 ```
 
@@ -36,8 +36,8 @@ review via `/team-review`.
 - If discovery shows the request is actually a modification of an existing runtime path, switch to the `/flow-plan` structure before freezing.
 /flow-start <feature>     ← This skill (planning)
     ↓ After approval
-/flow-plan-review           ← Cross-agent plan review
-    ↓ After approval
+/flow-plan-review           ← Cross-agent plan review when required/requested
+    ↓ After required approval
 /team-implement             ← Parallel implementation
     ↓ After completion
 /team-review                ← Parallel review
@@ -393,8 +393,8 @@ Present the plan to the user:
 
 ### Next Steps
 1. Shall we proceed with this plan?
-2. After approval, run `/flow-plan-review`
-3. After plan-review approval, start parallel implementation with `/team-implement`
+2. After approval, run `/flow-plan-review` if review is required or requested
+3. After required plan-review approval, start parallel implementation with `/team-implement`
 4. After implementation, run parallel review with `/team-review`
 
 ---
@@ -419,7 +419,7 @@ Shall we proceed with this plan?
 
 - **Phase 1**: Opus subagent (1M context) analyzes the codebase while Claude interacts with the user
 - **Phase 2**: Agent Teams bidirectional communication allows Researcher (Opus) and Architect (Codex) to influence each other
-- **Phase 3**: After plan approval, run `/flow-plan-review`, then proceed to
-  parallel implementation with `/team-implement`
+- **Phase 3**: After plan approval, run `/flow-plan-review` when required or
+  requested, then proceed to parallel implementation with `/team-implement`
 - **Ctrl+T**: Toggle task list display
 - **Shift+Up/Down**: Navigate between teammates (when using Agent Teams)

@@ -15,8 +15,8 @@ Use the repo-local `.claude/commands/flow-impl.md` command contract.
 - Same target resolution: if no argument is provided, use the most recently
   modified `docs/flow/*/plan.md`.
 - Same gates: require frozen plan, required matrices, concrete waivers,
-  approved current `plan-review.md`, onboarding docs, and Bug Feedback Review
-  for bug/regression work.
+  `Plan Review Requirement`, approved current `plan-review.md` when review is
+  required, onboarding docs, and Bug Feedback Review for bug/regression work.
 - Same execution: task-by-task, TDD Red before Green for TDD tasks, update plan
   and implementation report after each task.
 - Same evidence: run `/flow-integration-test` for visible or multi-step

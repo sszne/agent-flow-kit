@@ -17,7 +17,9 @@ Use this after a plan is frozen and approved. The main Codex agent remains the m
 
 - Activate `context-loader` first.
 - Require a frozen plan marker: `<!-- frozen: v... -->`.
-- Require an approved current `docs/flow/{feature_name}/plan-review.md`.
+- Require `Plan Review Requirement: Required` or `Optional` with a concrete
+  reason. When review is required, require an approved current
+  `docs/flow/{feature_name}/plan-review.md`.
 - Do not implement behavior-changing work unless the plan contains:
   - Business Flow Matrix
   - Regression Surface Matrix
@@ -67,8 +69,9 @@ Read:
 Stop before coding if:
 
 - the plan is not frozen,
-- `plan-review.md` is missing, stale, not approved, or same-agent without a
-  concrete fallback reason,
+- Plan Review Requirement is missing or lacks a concrete reason,
+- review is required and `plan-review.md` is missing, stale, not approved, or
+  same-agent without a concrete fallback reason,
 - behavior-changing work lacks Business Flow Matrix,
 - risky surfaces lack Test Design Matrix coverage,
 - affected flows lack Integration Coverage Contract coverage or explicit waivers,

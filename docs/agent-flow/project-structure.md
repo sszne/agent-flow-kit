@@ -39,8 +39,8 @@
 | Support skill | `manifest.json` `support_skills` | Must exist under both tool skill directories | Shared helper skill used by entry workflows |
 | Required onboarding document | `manifest.json` `required_onboarding_docs`; `agent-flow-matrix-gate.py` | Produced during `agent-flow-onboarding`; required before behavior-changing implementation | Durable project knowledge for future plans and tests |
 | Source document ledger | `docs/agent-flow/source-documents.md`; `flow-document` skill | Optional sidecar produced at onboarding start | Classifies requirement/source-document claims without making them source-of-truth |
-| Plan | `docs/flow/{feature}/plan.md`; `agent-flow-matrix-gate.py` markers | Must contain matrices and frozen marker before implementation | Traceable change design and coverage contract |
-| Plan review | `docs/flow/{feature}/plan-review.md`; `agent-flow-matrix-gate.py` markers | Required for behavior-changing implementation | Cross-agent missed-risk review |
+| Plan | `docs/flow/{feature}/plan.md`; `agent-flow-matrix-gate.py` markers | Must contain matrices, Plan Review Requirement, and frozen marker before implementation | Traceable change design and coverage contract |
+| Plan review | `docs/flow/{feature}/plan-review.md`; `agent-flow-matrix-gate.py` markers | Required for high-impact implementation; optional for smaller localized changes | Cross-agent missed-risk review |
 | Integration evidence | Skill docs and README evidence contract | Produced under `docs/flow/{feature}/integration-test/{run_id}/` | Auditable Playwright/business-flow verification |
 
 ## Use Cases
@@ -55,7 +55,7 @@
 | Review plan readiness | Opposite or fallback agent | `flow-plan-review` skill or command | Check missed risks, migration/auth/runtime/test coverage, decide readiness | `README.md`, `agent-flow-matrix-gate.py` |
 | Implement a frozen plan | Coding agent | `flow-impl` or `team-implement` | Apply plan tasks after gates are satisfied | README canonical flow |
 | Verify visible/multi-step workflows | Coding agent | `flow-integration-test` | Produce Playwright evidence and review artifacts | README and integration-test skill templates |
-| Enforce workflow in CI | GitHub Actions | `agent-flow-matrix-gate.py` | Check risky diffs for onboarding docs, frozen plan, plan review, matrices, and waiver quality | CI workflow and script |
+| Enforce workflow in CI | GitHub Actions | `agent-flow-matrix-gate.py` | Check risky diffs for onboarding docs, frozen plan, Plan Review Requirement, required plan review, matrices, and waiver quality | CI workflow and script |
 
 ## Runtime / Operations
 | Concern | Evidence | Risk |

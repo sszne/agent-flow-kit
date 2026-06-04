@@ -47,6 +47,7 @@ readiness gate. Do not implement during this skill.
   - Regression Surface Matrix
   - Test Design Matrix
   - Integration Coverage Contract
+  - Plan Review Requirement with `Required` or `Optional` and a concrete reason
   - Flow Knowledge Update
   - Residual Risk Preflight when applicable
   - Runtime Causality Gate when runtime, deploy, external provider, secret,
@@ -59,13 +60,21 @@ readiness gate. Do not implement during this skill.
 - Provider, auth, LIFF, LINE, Google, deploy, or smoke-test plans must separate
   local mock coverage, deployed-artifact checks, real provider/device happy
   paths, valid credential/session paths, and concrete blockers.
+- Mark `Plan Review Requirement: Required` for large-scale or high-impact
+  changes: multi-flow/cross-module work; auth, permission, tenant, session,
+  security, or privacy changes; schema/migration/data-compatibility changes;
+  deploy, CI, install, hook, workflow-gate, risky-path config, or Agent Flow
+  contract changes; external providers, webhooks, mail/PDF, storage,
+  search/cache, queues, jobs, schedules, side effects, public API contracts, or
+  shared runtime entrypoints. For smaller localized changes, mark
+  `Requirement: Optional` with the reason review is not mandatory.
 - Bug/regression plans must search `docs/agent-flow/bug-knowledge.md`, classify
   any matching prevention pattern, and add flow-improvement tasks before
   implementation tasks when the bug is preventable by better planning or tests.
 - Include plan author metadata near the frozen marker:
   `<!-- plan_author: codex -->`.
-- Tell the user that `flow-plan-review` must approve the frozen plan before
-  `flow-impl` or `team-implement` starts.
+- Tell the user whether `flow-plan-review` is required before `flow-impl` or
+  `team-implement`, or optional but available for an extra readiness pass.
 - Waivers must include a concrete reason or blocker. Reject vague entries such
   as `N/A`, `manual`, `low risk`, `TBD`, `later`, or blank cells.
 
@@ -322,9 +331,10 @@ Use this structure unless the target repo already has a stricter local template:
 ### 2.10 Regression Surface Matrix
 ### 2.11 Test Design Matrix
 ### 2.12 Integration Coverage Contract
-### 2.13 Playwright Integration Test Plan
-### 2.14 Migration / Runtime Enforcement
-### 2.15 Open Questions
+### 2.13 Plan Review Requirement
+### 2.14 Playwright Integration Test Plan
+### 2.15 Migration / Runtime Enforcement
+### 2.16 Open Questions
 
 ## 3. Tasks
 - [ ] TASK-001 ...
@@ -349,6 +359,7 @@ Use this structure unless the target repo already has a stricter local template:
       prevention patterns before task design
 - [ ] Business flows map to required tests or blockers
 - [ ] Integration Coverage Contract has concrete coverage or waivers
+- [ ] Plan Review Requirement is `Required` or `Optional` with a concrete reason
 - [ ] Validation commands are identified
 
 <!-- frozen: v1 YYYY-MM-DD -->

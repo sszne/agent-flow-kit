@@ -13,8 +13,8 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
 
 - Same artifact as Codex: `docs/flow/{feature_name}/plan.md`.
 - Same required gates: Business Flow Matrix, Regression Surface Matrix, Test
-  Design Matrix, Integration Coverage Contract, Flow Knowledge Update, and
-  Residual Risk Preflight when applicable.
+  Design Matrix, Integration Coverage Contract, Plan Review Requirement, Flow
+  Knowledge Update, and Residual Risk Preflight when applicable.
 - Same questioning behavior: include `Questioning Decision` in every plan and
   require a source-backed `No Questions Rationale` when no questions are asked.
 - Same goal-confirmation behavior: confirm desired user experience, business
@@ -42,8 +42,10 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
   multi-step workflows.
 - Same author metadata: Claude Code-authored plans include
   `<!-- plan_author: claude-code -->`.
-- Same next gate: the frozen plan must pass `/flow-plan-review` before
-  `/flow-impl` or `team-implement`.
+- Same plan-review decision: mark review `Required` for large-scale or
+  high-impact work and `Optional` for smaller localized changes with a concrete
+  reason. The frozen plan must pass `/flow-plan-review` before `/flow-impl` or
+  `team-implement` only when review is required.
 
 When this skill is invoked in Claude Code, execute `/flow-plan` semantics rather
 than inventing a separate planning flow.

@@ -385,6 +385,7 @@ Generate additional sections based on these conditions:
 | Regression Surface Matrix | Always for behavior-changing work |
 | Test Design Matrix | Always for TDD tasks and risky DIRECT tasks |
 | Integration Coverage Contract | Always for behavior-changing work |
+| Plan Review Requirement | Always for behavior-changing work; required only for large-scale or high-impact changes |
 | Flow Knowledge Update | Always for behavior-changing work; required when confirmed answers add reusable business-flow, exception, permission, side-effect, or integration-scenario knowledge |
 | Residual Risk Preflight | Always when any residual risk category applies |
 | Runtime Causality Gate | Production-only, deploy/runtime/provider, browser-network, auth/session, secret/binding, remote data, or external-runtime symptoms |
@@ -456,8 +457,9 @@ If blocking issues exist, present a maximum of 3 to the user for resolution. Aft
 - Add `<!-- frozen: v1 {YYYY-MM-DD} -->` tag to the top of plan.md
 - Add `<!-- plan_author: claude-code -->` next to the frozen tag
 - Write the READINESS section (section 4 of the plan template)
-- Present the complete plan to the user and instruct that `/flow-plan-review`
-  must approve it before `/flow-impl` or `team-implement`
+- Present the complete plan to the user and state whether `/flow-plan-review`
+  is required before `/flow-impl` or `team-implement`, or optional but
+  available for an extra readiness pass
 - If the user requests changes, remove the frozen tag, make changes, and restart from Step 15
 
 ---
@@ -880,14 +882,30 @@ Coverage rules:
 - Waivers must include a reason marker such as `because`, `reason`, `blocked by`, `out of scope`, `理由`, `根拠`, `ブロック`, or `対象外`.
 - `N/A`, `manual`, `low risk`, `TBD`, `later`, and blank waiver entries are invalid unless the row is fully covered and no waiver is being used.
 
-### 2.11 Migration / Runtime Enforcement
+### 2.11 Plan Review Requirement
+<!-- Required for behavior-changing work. -->
+
+- Requirement: Required / Optional
+- Reason: {Concrete reason. Required for large-scale or high-impact changes; optional for smaller localized changes.}
+- Triggered criteria: {multi-flow/cross-module, auth/permission/security, schema/migration/data, deploy/CI/install/hooks/workflow gates, external providers/side effects, public API/shared runtime, uncertain/high-impact, or none}
+
+High-impact review-required changes include multi-flow or cross-module changes;
+auth, permission, tenant, ownership, session, security, or privacy changes;
+schema, migration, data compatibility, backfill, rollback, or destructive data
+changes; deploy, CI, install, hooks, workflow gates, risky-path config, or Agent
+Flow contract changes; external providers, webhooks, mail/PDF, storage,
+search/cache, queues, jobs, schedules, or other side effects; public API
+contracts or shared runtime entrypoints; and any change the user or plan author
+marks as uncertain or high impact.
+
+### 2.12 Migration / Runtime Enforcement
 <!-- Required when schema or deploy/startup assumptions are involved. -->
 
 - Migration needed: Yes/No
 - Migration enforcement path: {entrypoint/deploy/startup path or N/A}
 - Runtime validation command: `{command or N/A}`
 
-### 2.12 Playwright Integration Test Plan
+### 2.13 Playwright Integration Test Plan
 <!-- Required for visible browser behavior or multi-step business workflows. -->
 
 | Scenario ID | Business flow | Entry point | Major steps requiring screenshots | Expected result | Risk covered |
@@ -944,7 +962,8 @@ Evidence output:
 - [ ] Onboarding/UI plans confirm step names, order, exclusions, action placement, resume/fallback path, and blocked evidence lanes
 - [ ] Provider/auth/deploy plans distinguish local mock, deployed-artifact, real provider/device, valid credential/session, and blocker evidence
 - [ ] Business ambiguity has been resolved through user answers or explicitly blocked
-- [ ] `/flow-plan-review` must be run after freeze and before implementation
+- [ ] Plan Review Requirement is documented as `Required` or `Optional` with a concrete reason
+- [ ] `/flow-plan-review` is complete when the plan marks review required or high-impact paths are changed
 - [ ] Design decisions are consistent with requirements
 - [ ] Design policy and library-selection decisions are documented, or explicitly unnecessary because existing patterns decide them
 - [ ] Task dependencies have no cycles

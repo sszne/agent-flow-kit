@@ -58,24 +58,35 @@ Do not start behavior-changing implementation unless the frozen plan contains:
 - Regression Surface Matrix
 - Test Design Matrix
 - Integration Coverage Contract
-- approved `docs/flow/{feature_name}/plan-review.md` for the current frozen plan
+- Plan Review Requirement decision with `Required` or `Optional` and a concrete reason
+- approved `docs/flow/{feature_name}/plan-review.md` for the current frozen
+  plan when review is required
 - concrete waivers or blockers for any uncovered required coverage
 
 For bug/regression work, also require a Bug Feedback Review that classifies the
 prior flow failure or records why the issue could not be prevented by flow
 changes.
 
-`flow-plan-review` is mandatory for behavior-changing work. Use cross-agent
-review by default: Codex-created plans are reviewed by Claude Code, and
-Claude-created plans are reviewed by Codex. A same-agent review is acceptable
-only when `plan-review.md` records a concrete fallback reason or blocker.
+`flow-plan-review` is mandatory only for large-scale or high-impact work. Use
+cross-agent review by default when review runs: Codex-created plans are
+reviewed by Claude Code, and Claude-created plans are reviewed by Codex. A
+same-agent review is acceptable only when `plan-review.md` records a concrete
+fallback reason or blocker.
 
-Do not require `flow-plan-review` for clearly non-behavioral work such as typo
-fixes, formatting-only edits, or docs-only changes that do not alter workflow
-contracts, runtime behavior, test expectations, install behavior, CI gates, or
-user-facing behavior. If a docs-only change updates Agent Flow rules, skill
+Treat these as review-required high-impact changes by default: multi-flow or
+cross-module changes; auth, permission, tenant, ownership, session, security, or
+privacy changes; schema, migration, data compatibility, backfill, rollback, or
+destructive data changes; deploy, CI, install, hooks, workflow gates,
+risky-path config, or Agent Flow contract changes; external providers,
+webhooks, mail/PDF, storage, search/cache, queues, jobs, schedules, or other
+side effects; public API contracts or shared runtime entrypoints; and any
+change the user or plan author marks as uncertain or high impact.
+
+`flow-plan-review` is optional for clearly non-high-impact work, including
+small localized behavior changes and non-behavioral typo, formatting-only, or
+docs-only changes. If a docs-only change updates Agent Flow rules, skill
 behavior, gates, review policy, risky-path config, or required evidence, treat
-it as behavior-changing workflow work and keep the review gate.
+it as high-impact workflow work and keep the review gate.
 
 ## Test Quality
 

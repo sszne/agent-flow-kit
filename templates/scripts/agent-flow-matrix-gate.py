@@ -170,6 +170,55 @@ DEFAULT_MIGRATION_FILES = {
     "drizzle.config.ts",
 }
 
+DEFAULT_PLAN_REVIEW_REQUIRED_PREFIXES = (
+    "api/",
+    "auth/",
+    "security/",
+    "server/",
+    "services/",
+    "packages/",
+    "apps/api/",
+    "apps/worker/",
+    "src/auth/",
+    "src/server/",
+    "src/services/",
+    "src/lib/auth/",
+    "src/lib/security/",
+    "prisma/",
+    "drizzle/",
+    "supabase/",
+    "db/",
+    "database/",
+    "migrations/",
+    "docker/",
+    "infra/",
+    ".github/workflows/",
+    ".claude/hooks/",
+    ".codex/hooks/",
+    "scripts/",
+)
+
+DEFAULT_PLAN_REVIEW_REQUIRED_FILES = {
+    "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "bun.lockb",
+    "next.config.js",
+    "next.config.mjs",
+    "next.config.ts",
+    "middleware.js",
+    "middleware.ts",
+    "tsconfig.json",
+    "jsconfig.json",
+    "prisma/schema.prisma",
+    "drizzle.config.js",
+    "drizzle.config.ts",
+    "vercel.json",
+    "docker-compose.yml",
+    "Dockerfile",
+}
+
 REQUIRED_CONTRACT_CASE_TYPES = {
     "happy": ("happy", "normal", "正常"),
     "validation": ("validation", "invalid", "バリデーション", "検証"),
@@ -563,12 +612,47 @@ def validate_questioning_decision(plan_text: str, errors: list[str]) -> None:
             errors.append("No Questions Rationale must include concrete source evidence, not a weak placeholder.")
 
 
+def validate_plan_review_requirement(plan_path: str, plan_text: str, errors: list[str]) -> str:
+    section = extract_section(plan_text, "Plan Review Requirement")
+    if not section.strip():
+        errors.append(
+            f"{plan_path} must include a Plan Review Requirement section with "
+            "Requirement: Required or Requirement: Optional."
+        )
+        return ""
+
+    if contains_placeholder(section):
+        errors.append(f"{plan_path} Plan Review Requirement still contains template placeholders.")
+
+    lower_section = section.lower()
+    match = re.search(
+        r"requirement\s*:\s*(required|mandatory|yes|optional|no)\b",
+        lower_section,
+    )
+    if not match:
+        errors.append(
+            f"{plan_path} Plan Review Requirement must state "
+            "Requirement: Required or Requirement: Optional."
+        )
+        return ""
+
+    reason_match = re.search(r"reason\s*:\s*(.+)", section, re.IGNORECASE)
+    reason = reason_match.group(1).strip() if reason_match else ""
+    if not reason or reason.lower() in WEAK_WAIVER_VALUES or len(reason) < 12:
+        errors.append(f"{plan_path} Plan Review Requirement must include a concrete reason.")
+
+    value = match.group(1)
+    if value in {"required", "mandatory", "yes"}:
+        return "required"
+    return "optional"
+
+
 def validate_plan_review(plan_path: str, plan_text: str, errors: list[str]) -> None:
     review_relative = plan_review_path(plan_path)
     review_file = REPO_ROOT / review_relative
     if not review_file.exists():
         errors.append(
-            f"Behavior-affecting changes require approved plan review: {review_relative}."
+            f"High-impact or plan-required changes require approved plan review: {review_relative}."
         )
         return
 
@@ -659,6 +743,12 @@ def main() -> int:
     browser_files = set(config.get("browser_affecting_files", sorted(DEFAULT_BROWSER_RISKY_FILES)))
     migration_prefixes = tuple(config.get("migration_affecting_prefixes", DEFAULT_MIGRATION_PREFIXES))
     migration_files = set(config.get("migration_affecting_files", sorted(DEFAULT_MIGRATION_FILES)))
+    review_required_prefixes = tuple(
+        config.get("plan_review_required_prefixes", DEFAULT_PLAN_REVIEW_REQUIRED_PREFIXES)
+    )
+    review_required_files = set(
+        config.get("plan_review_required_files", sorted(DEFAULT_PLAN_REVIEW_REQUIRED_FILES))
+    )
 
     obsolete_paths = [path for path in OBSOLETE_WORKFLOW_PATHS if (REPO_ROOT / path).exists()]
     if obsolete_paths:
@@ -719,11 +809,6 @@ def main() -> int:
         else:
             validate_table_section(plan_text, marker, errors)
 
-    for plan_path in plan_paths:
-        path = REPO_ROOT / plan_path
-        if path.exists():
-            validate_plan_review(plan_path, path.read_text(encoding="utf-8"), errors)
-
     if "Integration Coverage Contract" in plan_text:
         validate_integration_coverage_contract(plan_text, errors)
 
@@ -738,6 +823,37 @@ def main() -> int:
             if marker not in plan_text:
                 errors.append(f"Migration change requires plan marker: {marker}.")
 
+    review_required_paths = [
+        path for path in risky_paths if is_risky(path, review_required_prefixes, review_required_files)
+    ]
+    review_required = bool(review_required_paths)
+    plan_review_requirements: dict[str, str] = {}
+    for plan_path in plan_paths:
+        path = REPO_ROOT / plan_path
+        if not path.exists():
+            continue
+        single_plan_text = path.read_text(encoding="utf-8")
+        requirement = validate_plan_review_requirement(plan_path, single_plan_text, errors)
+        plan_review_requirements[plan_path] = requirement
+        if requirement == "required":
+            review_required = True
+
+    if review_required_paths:
+        optional_plans = [
+            path for path, requirement in plan_review_requirements.items() if requirement == "optional"
+        ]
+        if optional_plans:
+            errors.append(
+                "Plan review cannot be optional for configured high-impact paths: "
+                + ", ".join(review_required_paths)
+            )
+
+    if review_required:
+        for plan_path in plan_paths:
+            path = REPO_ROOT / plan_path
+            if path.exists():
+                validate_plan_review(plan_path, path.read_text(encoding="utf-8"), errors)
+
     has_browser_change = any(
         path in browser_files or any(path.startswith(prefix) for prefix in browser_prefixes)
         for path in risky_paths
@@ -750,7 +866,14 @@ def main() -> int:
     if errors:
         return fail(errors)
 
-    print("Agent flow matrix gate: required matrices and coverage contract found in frozen plan.")
+    if review_required:
+        print(
+            "Agent flow matrix gate: required matrices, coverage contract, and required plan review found."
+        )
+    else:
+        print(
+            "Agent flow matrix gate: required matrices and coverage contract found; plan review marked optional."
+        )
     print("Plan files: " + ", ".join(plan_paths))
     return 0
 
