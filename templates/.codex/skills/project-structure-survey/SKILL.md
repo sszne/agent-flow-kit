@@ -14,6 +14,13 @@ Create `docs/agent-flow/project-structure.md`.
 
 - Inspect the real repository before writing conclusions.
 - Prefer source files, routes, migrations/schema, tests, config, package files, and deployment files over old notes.
+- If `docs/agent-flow/source-documents.md` exists, read it as candidate
+  evidence only. Do not let converted requirement documents override source,
+  schema, routes, tests, package files, deploy config, current repo docs, or
+  explicit user confirmation.
+- When a source-document claim conflicts with repo evidence, label the conflict
+  and carry it as an open question instead of treating it as current
+  architecture or expected behavior.
 - Do not edit application code.
 - If a fact is inferred, label it as inferred.
 - Keep stale or missing areas explicit.
@@ -24,13 +31,15 @@ Create `docs/agent-flow/project-structure.md`.
 
 ## Workflow
 
-1. Identify the stack and runtime entrypoints.
-2. Map architecture boundaries: apps, modules, controllers, services/actions, views, jobs, APIs, build/deploy paths.
-3. Map domain models from schema/migrations/models/types.
-4. Map use cases from routes/controllers/screens/jobs/tests/docs.
-5. Map existing tests and verification commands.
-6. Map runtime-causality evidence sources and blockers.
-7. Write the document.
+1. Read `docs/agent-flow/source-documents.md` if it exists and note candidate
+   claims, conflicts, and open questions.
+2. Identify the stack and runtime entrypoints from real repo evidence.
+3. Map architecture boundaries: apps, modules, controllers, services/actions, views, jobs, APIs, build/deploy paths.
+4. Map domain models from schema/migrations/models/types.
+5. Map use cases from routes/controllers/screens/jobs/tests/docs.
+6. Map existing tests and verification commands.
+7. Map runtime-causality evidence sources and blockers.
+8. Write the document.
 
 ## Output Template
 
@@ -54,6 +63,13 @@ Create `docs/agent-flow/project-structure.md`.
 ## Use Cases
 | Use case | Actor | Entry point | Core flow | Evidence |
 | --- | --- | --- | --- | --- |
+
+## Source Document Intake
+| Claim status | How it affected this survey | Notes |
+| --- | --- | --- |
+| confirmed |  |  |
+| conflicts-with-repo |  |  |
+| aspirational / stale-or-unknown / needs-user-confirmation |  |  |
 
 ## Runtime / Operations
 | Concern | Evidence | Risk |

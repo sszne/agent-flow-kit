@@ -29,12 +29,33 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 
 ## Onboarding Sequence
 
-Run these before behavior-changing implementation starts in a new repository:
+Run `agent-flow-onboarding` before behavior-changing implementation starts in a
+new repository. During onboarding, run these steps in order:
 
-1. `agent-flow-onboarding`
+1. `flow-document`
 2. `project-structure-survey`
 3. `business-flow-discovery`
 4. `integration-scenario-design`
+
+`flow-document` is mandatory to run at the start of onboarding, but source
+documents are optional. If service requirement, proposal, design, or product
+materials exist, the step converts them with `markitdown` when it is already
+installed and writes a guarded claim ledger. If no documents exist, it records
+`no-documents-provided` and onboarding continues.
+
+Sidecar source-document ledger:
+
+```text
+docs/agent-flow/source-documents.md
+docs/agent-flow/source-documents/raw/
+docs/agent-flow/source-documents/converted/
+```
+
+The ledger is not a required implementation gate document. It exists to classify
+document claims as confirmed, conflicting, aspirational, stale/unknown, or
+needing user confirmation. Converted documents must not override repository
+source, schema, routes, tests, deploy config, current repo docs, or explicit user
+confirmation.
 
 Required Markdown outputs:
 
@@ -190,7 +211,8 @@ argument is provided, it resolves the most recently modified
 ## Gate Order
 
 ```text
-Project survey
+Source document intake
+  -> Project survey
   -> Business-flow discovery
   -> Integration-scenario design
   -> /flow-start or /flow-plan
@@ -235,6 +257,7 @@ records the concrete blocker.
 | Goal | Claude Code | Codex |
 | --- | --- | --- |
 | Load local context | `context-loader` skill | `context-loader` skill |
+| Source document intake | `/flow-document` | `flow-document` |
 | New-feature discovery | `/flow-start {feature}` | `flow-start {feature}` |
 | Existing behavior plan | `/flow-plan {request}` | `flow-plan {request}` |
 | Plan review gate | `/flow-plan-review {feature}` | `flow-plan-review {feature}` |

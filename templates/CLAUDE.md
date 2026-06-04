@@ -11,6 +11,7 @@ Before non-trivial repository work, read:
 - `AGENTS.md` when Codex or cross-agent behavior may matter
 - `.claude/rules/*.md`
 - `.claude/docs/DESIGN.md`
+- `docs/agent-flow/source-documents.md` when it exists
 - `docs/agent-flow/project-structure.md`
 - `docs/agent-flow/business-flows.md`
 - `docs/agent-flow/integration-scenarios.md`
@@ -18,6 +19,12 @@ Before non-trivial repository work, read:
 
 If behavior-changing work starts before the onboarding docs exist, run
 `agent-flow-onboarding` first or record the blocker.
+
+During onboarding, run `/flow-document` first. Source documents are optional,
+but the intake status should be recorded in
+`docs/agent-flow/source-documents.md`. Treat converted requirement documents as
+candidate evidence only; source, schema, routes, tests, deploy config, current
+repo docs, and explicit user confirmation take priority.
 
 Treat `.claude/` as shared Agent Flow documentation. Load only the rules and
 docs relevant to the current task, and avoid importing tool-delegation or
@@ -28,6 +35,10 @@ repository evidence, or direct user instruction.
 
 ```text
 agent-flow-onboarding
+  -> /flow-document
+  -> project-structure-survey
+  -> business-flow-discovery
+  -> integration-scenario-design
   -> /flow-start or /flow-plan
   -> /flow-plan-review
   -> /flow-impl or team-implement

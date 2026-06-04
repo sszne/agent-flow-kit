@@ -14,10 +14,19 @@ Create `docs/agent-flow/business-flows.md` and the companion draw.io diagram
 ## Prerequisites
 
 - `docs/agent-flow/project-structure.md` exists.
+- `docs/agent-flow/source-documents.md` may exist as optional sidecar evidence.
 
 ## Rules
 
 - Start from the project structure survey.
+- If `docs/agent-flow/source-documents.md` exists, read the claim ledger before
+  drafting flows.
+- Use only `confirmed` or explicitly user-confirmed source-document claims in
+  Business Flow Matrix expected behavior.
+- Do not treat `conflicts-with-repo`, `aspirational`, `stale-or-unknown`, or
+  `needs-user-confirmation` claims as current behavior or required future
+  behavior. Convert them into open questions, blockers, or stale/aspirational
+  notes.
 - Ask the user concise questions only where business behavior is ambiguous.
 - Prefer flow coverage over implementation detail.
 - Include normal, error, permission, boundary, status, mail/PDF/export, job, and integration paths where relevant.
@@ -36,13 +45,17 @@ Create `docs/agent-flow/business-flows.md` and the companion draw.io diagram
 ## Workflow
 
 1. Read `docs/agent-flow/project-structure.md`.
-2. Draft candidate business flows from use cases.
-3. Ask the user for missing business rules and priority/risk.
-4. Produce Business Flow Matrix.
-5. Produce Regression Surface Matrix.
-6. Create `docs/agent-flow/business-flows.drawio`.
-7. Validate the `.drawio` file as well-formed XML when practical.
-8. Record unresolved questions.
+2. Read `docs/agent-flow/source-documents.md` if it exists, then separate
+   confirmed claims from conflicts, aspirational notes, stale/unknown notes, and
+   claims that need user confirmation.
+3. Draft candidate business flows from use cases and confirmed claims only.
+4. Ask the user for missing business rules, priority/risk, and any
+   `needs-user-confirmation` claims that would affect matrices.
+5. Produce Business Flow Matrix.
+6. Produce Regression Surface Matrix.
+7. Create `docs/agent-flow/business-flows.drawio`.
+8. Validate the `.drawio` file as well-formed XML when practical.
+9. Record unresolved questions.
 
 ## Output Template
 
@@ -57,6 +70,13 @@ Create `docs/agent-flow/business-flows.md` and the companion draw.io diagram
 - Draw.io file: `docs/agent-flow/business-flows.drawio`
 - Diagram status: created / blocked because ...
 - Consistency check: Flow IDs in the diagram match the Flow Inventory.
+
+## Source Document Claim Handling
+| Claim status | Handling decision | Notes |
+| --- | --- | --- |
+| confirmed | May inform Flow Inventory / Business Flow Matrix |  |
+| conflicts-with-repo | Open question or conflict note only |  |
+| aspirational / stale-or-unknown / needs-user-confirmation | Open question, blocker, or future-scope note only |  |
 
 ## Business Flow Matrix
 | Flow ID | Actor / scope | Entry point | Existing behavior | Expected behavior | Normal path | Error/exception paths | Permission/ownership/boundary paths | Side effects | Regression risk | Required verification |

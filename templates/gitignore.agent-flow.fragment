@@ -4,6 +4,7 @@
 !.claude/commands/
 .claude/commands/*
 !.claude/commands/flow-start.md
+!.claude/commands/flow-document.md
 !.claude/commands/flow-plan.md
 !.claude/commands/flow-impl.md
 !.claude/commands/flow-integration-test.md
@@ -24,6 +25,8 @@
 !.claude/skills/integration-test/**
 !.claude/skills/agent-flow-onboarding/
 !.claude/skills/agent-flow-onboarding/**
+!.claude/skills/flow-document/
+!.claude/skills/flow-document/**
 !.claude/skills/project-structure-survey/
 !.claude/skills/project-structure-survey/**
 !.claude/skills/business-flow-discovery/
@@ -57,6 +60,8 @@
 !.codex/skills/integration-test/**
 !.codex/skills/agent-flow-onboarding/
 !.codex/skills/agent-flow-onboarding/**
+!.codex/skills/flow-document/
+!.codex/skills/flow-document/**
 !.codex/skills/project-structure-survey/
 !.codex/skills/project-structure-survey/**
 !.codex/skills/business-flow-discovery/

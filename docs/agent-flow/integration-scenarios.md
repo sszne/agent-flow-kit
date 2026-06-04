@@ -12,6 +12,7 @@
 | SCN-007 | Matrix gate smoke | AFK-005, AFK-006, AFK-009 | Happy, exception, regression | `agent-flow-matrix-gate.py` | Temporary git fixture when gate logic changes | Create risky diff with/without plan markers and plan review, plus display-only style/layout/text diffs | Gate rejects missing docs/review for behavior changes and accepts complete artifacts or classified display-only changes | Fixture output |
 | SCN-008 | Evidence artifact review | AFK-008 | Happy, side effect, regression | `docs/flow/{feature}/integration-test/{run_id}/` | Feature with visible workflow | Confirm index, screenshots, result, test review, and business-flow impact docs exist | Evidence is auditable | Artifact review |
 | SCN-009 | Planning precision review | AFK-005, AFK-006, AFK-009 | Happy, exception, permission, boundary, side effect, regression | `flow-plan` templates and generated `docs/flow/{feature}/plan.md` | Behavior-changing request with possible ambiguity or provider evidence risk | Confirm Goal Confirmation, `Questioning Decision`, `No Questions Rationale` when applicable, onboarding/UI precision, provider/auth/deploy evidence lanes, and prevention taxonomy classification | Plan freezes only after requester goal, ambiguity, valid-path evidence lanes, and reusable bug patterns are resolved or blocked | Plan review notes |
+| SCN-010 | Documentation review | AFK-002, AFK-003, AFK-004, AFK-010 | Happy, exception, boundary, side effect, regression | `flow-document` and onboarding skill docs | Current template docs | Confirm source documents create a claim ledger, not source-of-truth, and unconfirmed claims cannot enter matrices or required scenarios | Claim statuses, source priority, and downstream restrictions are explicit | Review notes |
 
 ## Playwright Scenarios
 | Scenario ID | Entry point | Major steps requiring screenshots | Assertions | Screenshot names |
@@ -42,6 +43,7 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 | AFK-007 | Feature-specific planned validation | Happy, exception, permission, boundary, side effect, regression | Defined in each feature plan | Feature-specific waiver required if omitted |
 | AFK-008 | Evidence artifact review when visible workflow exists | Happy, exception, permission, boundary, side effect, regression | SCN-008, PW-001 | Blocked only when no runnable browser/app exists; blocker must name surface |
 | AFK-009 | Gate smoke or fixture checks, including display-only bypass and behavior-change rejection | Happy, exception, boundary, regression | SCN-003, SCN-007, SRV-003, SRV-005 | None for gate logic changes |
+| AFK-010 | Source-document intake template review plus downstream guardrail review | Happy, exception, boundary, side effect, regression | SCN-010 | Automated semantic validation is out of scope because claim classification depends on repo evidence and user confirmation |
 
 ## Seed / Reset Strategy
 - Use temporary directories under `/tmp` for installer smoke checks.
@@ -86,6 +88,10 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
   reported risk.
 - Bug/regression plans must classify matching entries in
   `docs/agent-flow/bug-knowledge.md` by prevention pattern before task design.
+- Source-document claims from `docs/agent-flow/source-documents.md` may improve
+  business-flow discovery only after they are confirmed by repo evidence or the
+  user. Conflicting, aspirational, stale/unknown, and needs-confirmation claims
+  remain open questions, blockers, or future-scope notes.
 
 ## Coverage Gaps
 | Gap | Reason | Follow-up |

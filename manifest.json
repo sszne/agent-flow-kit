@@ -4,6 +4,7 @@
   "description": "Transferable Claude/Codex agent-flow workflow with onboarding skills, hooks, planning gates, review gates, and Playwright integration evidence gates.",
   "entry_skills": [
     "agent-flow-onboarding",
+    "flow-document",
     "project-structure-survey",
     "business-flow-discovery",
     "integration-scenario-design",
@@ -26,6 +27,10 @@
   ],
   "canonical_flow": [
     "agent-flow-onboarding",
+    "flow-document",
+    "project-structure-survey",
+    "business-flow-discovery",
+    "integration-scenario-design",
     "flow-start or flow-plan",
     "flow-plan-review",
     "flow-impl or team-implement",

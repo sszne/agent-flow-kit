@@ -14,10 +14,17 @@ Create `docs/agent-flow/integration-scenarios.md`.
 
 - `docs/agent-flow/project-structure.md` exists.
 - `docs/agent-flow/business-flows.md` exists.
+- `docs/agent-flow/source-documents.md` may exist as optional sidecar evidence.
 
 ## Rules
 
 - Start from business flows and regression surfaces, not from edited files.
+- Do not create required scenarios solely from source-document claims that are
+  `conflicts-with-repo`, `aspirational`, `stale-or-unknown`, or
+  `needs-user-confirmation`.
+- If source documents mention a high-risk future flow that is not confirmed in
+  `business-flows.md`, record it as a coverage gap or open question rather than
+  required coverage.
 - Prefer deterministic, seedable, repeatable scenarios.
 - Use Playwright for visible/multi-step browser behavior.
 - Use Feature/API tests for server behavior, validation, permission, mail/PDF/job, and persistence where browser adds little value.
@@ -31,12 +38,14 @@ Create `docs/agent-flow/integration-scenarios.md`.
 ## Workflow
 
 1. Read project structure and business-flow docs.
-2. Classify each flow and required case type by verification level: Unit, Feature/API, Playwright, migration/runtime, manual/blocker.
-3. Draft Playwright scenarios with major screenshot steps.
-4. Draft non-browser integration scenarios for server-side surfaces.
-5. Define seed data and reset strategy.
-6. Define runtime/provider smoke and causality checks.
-7. Define pass/fail evidence requirements.
+2. Read source-document intake if present, and identify any unconfirmed claims
+   that must remain coverage gaps or open questions.
+3. Classify each confirmed flow and required case type by verification level: Unit, Feature/API, Playwright, migration/runtime, manual/blocker.
+4. Draft Playwright scenarios with major screenshot steps.
+5. Draft non-browser integration scenarios for server-side surfaces.
+6. Define seed data and reset strategy.
+7. Define runtime/provider smoke and causality checks.
+8. Define pass/fail evidence requirements.
 
 ## Output Template
 
@@ -73,5 +82,9 @@ Create `docs/agent-flow/integration-scenarios.md`.
 
 ## Coverage Gaps
 | Gap | Reason | Follow-up |
+| --- | --- | --- |
+
+## Source Document Gaps
+| Claim ID | Reason not covered as required scenario | Follow-up |
 | --- | --- | --- |
 ```

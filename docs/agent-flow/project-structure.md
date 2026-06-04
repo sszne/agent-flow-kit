@@ -38,6 +38,7 @@
 | Entry skill | `manifest.json` `entry_skills` | Must exist under both `.claude/skills/` and `.codex/skills/` | User-facing workflow action such as onboarding, planning, implementation, or review |
 | Support skill | `manifest.json` `support_skills` | Must exist under both tool skill directories | Shared helper skill used by entry workflows |
 | Required onboarding document | `manifest.json` `required_onboarding_docs`; `agent-flow-matrix-gate.py` | Produced during `agent-flow-onboarding`; required before behavior-changing implementation | Durable project knowledge for future plans and tests |
+| Source document ledger | `docs/agent-flow/source-documents.md`; `flow-document` skill | Optional sidecar produced at onboarding start | Classifies requirement/source-document claims without making them source-of-truth |
 | Plan | `docs/flow/{feature}/plan.md`; `agent-flow-matrix-gate.py` markers | Must contain matrices and frozen marker before implementation | Traceable change design and coverage contract |
 | Plan review | `docs/flow/{feature}/plan-review.md`; `agent-flow-matrix-gate.py` markers | Required for behavior-changing implementation | Cross-agent missed-risk review |
 | Integration evidence | Skill docs and README evidence contract | Produced under `docs/flow/{feature}/integration-test/{run_id}/` | Auditable Playwright/business-flow verification |
@@ -48,6 +49,7 @@
 | Install Agent Flow Kit into a repository | Developer / coding agent | `python3 install.py --target ...` | Validate templates, copy or classify files, merge settings hooks, update `.gitignore` | `README.md`, `install.py` |
 | Preview safe kit updates | Developer / coding agent | `install.py --dry-run --apply-recommended-updates` | Classify existing file differences and show recommended overwrites | `README.md`, `install.py` |
 | Onboard a target repository | Coding agent | `agent-flow-onboarding` skill | Produce project structure, business-flow, and integration-scenario docs | `templates/.codex/skills/agent-flow-onboarding/SKILL.md` |
+| Intake source documents | Coding agent plus user | `flow-document` skill or `/flow-document` command | Convert optional service documents with markitdown when available and create a guarded claim ledger | `templates/.codex/skills/flow-document/SKILL.md` |
 | Discover business flows | Coding agent plus user | `business-flow-discovery` skill | Build flow inventory, business-flow matrix, regression surface matrix, and coverage contract | `templates/.codex/skills/business-flow-discovery/SKILL.md` |
 | Plan a behavior-changing change | Coding agent | `flow-plan` skill or `/flow-plan` command | Load context, inspect code/docs/tests, clarify ambiguity, write frozen plan | `README.md`, skill templates |
 | Review plan readiness | Opposite or fallback agent | `flow-plan-review` skill or command | Check missed risks, migration/auth/runtime/test coverage, decide readiness | `README.md`, `agent-flow-matrix-gate.py` |

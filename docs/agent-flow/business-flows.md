@@ -12,6 +12,7 @@
 | AFK-007 | Implement a frozen plan | Coding agent | `flow-impl`, `team-implement` | High | Implementation before gates can bypass business-flow coverage |
 | AFK-008 | Collect integration evidence | Coding agent | `flow-integration-test` | Medium | Browser evidence can be incomplete or unauditable |
 | AFK-009 | Enforce plan quality in CI | CI / reviewer | `agent-flow-matrix-gate.py` | High | Gate gaps can allow vague waivers, missing docs, or missing plan review |
+| AFK-010 | Intake source documents during onboarding | Coding agent plus user | `flow-document` | Medium | Stale or aspirational requirement documents can pollute repo-derived business-flow matrices |
 
 ## Business Flow Matrix
 | Flow ID | Actor / scope | Entry point | Existing behavior | Expected behavior | Normal path | Error/exception paths | Permission/ownership/boundary paths | Side effects | Regression risk | Required verification |
@@ -25,6 +26,7 @@
 | AFK-007 | Coding agent implementing | `flow-impl`, `team-implement` | Implementation should follow frozen reviewed plan | Edits are limited to plan tasks and verified by planned commands | Resolve plan, apply tasks, run focused then broader checks, report deviations | Plan absent/stale; user changes files; tests unavailable | Must not revert unrelated user changes; must respect local docs | Writes source/docs/tests and implementation report where applicable | Scope creep; unverified side effects; missing docs updates | Planned unit/integration/browser/migration checks |
 | AFK-008 | Coding agent verifying visible flows | `flow-integration-test` | Produces evidence for browser workflows | Evidence includes screenshots, index, test review, and business-flow impact review | Run app, execute Playwright scenarios, collect artifacts, review results | Local server unavailable; browser dependency blocked; flaky selector | Blockers must name affected surface and missing evidence | Writes `docs/flow/{feature}/integration-test/{run_id}/` | False confidence from informal browser checks | Artifact presence and review content |
 | AFK-009 | CI / reviewer | GitHub Actions matrix gate | Checks risky diffs for required plan docs and markers | Rejects risky changes with missing onboarding docs, frozen plan, plan review, matrices, migration/runtime section, or weak waivers; passes classified display-only style, layout, and visible text changes without a plan | Compute changed files, classify risk, allow presentation-only diffs, locate plans/reviews, validate markers | No git base; config invalid; non-standard repo path; ambiguous component diff cannot be proven display-only | Config can tune risky paths and presentation-only paths for target repo | CI pass/fail | Gate false positives or false negatives | Gate fixture tests and dry-run review |
+| AFK-010 | Coding agent plus user | `flow-document` skill or `/flow-document` command | Onboarding has no dedicated requirement/source-document intake | Onboarding runs document intake first, converts files with `markitdown` when available, and writes a guarded claim ledger without making documents authoritative | Ask for source docs, convert when possible, extract claims, classify status, write `docs/agent-flow/source-documents.md` | No documents provided; `markitdown` missing; conversion failure; document claim conflicts with repo evidence | Source/schema/routes/tests/deploy config and current repo docs outrank converted requirements; only confirmed/user-confirmed claims can affect matrices | Writes sidecar source-document ledger and optional raw/converted folders | Business-flow matrices inherit stale sales/proposal/future-scope assumptions | Template review, installer dry-run, targeted grep for claim statuses and source priority |
 
 ## Regression Surface Matrix
 | Surface | Affected flows | Evidence | Required verification |
@@ -36,7 +38,8 @@
 | Required onboarding docs | AFK-002, AFK-003, AFK-004, AFK-005, AFK-009 | `manifest.json`, matrix gate constants, skill templates | Matrix-gate checks; documentation review |
 | Planning precision rules | AFK-005, AFK-006, AFK-009 | `flow-plan` templates, `agent-flow-matrix-gate.py`, bug-knowledge template, testing rules | Targeted checks for Goal Confirmation, `Questioning Decision`, onboarding/UI precision, provider/auth/deploy lanes, and prevention taxonomy |
 | Diagram artifacts | AFK-003 | Planned draw.io onboarding enhancement | XML well-formedness check; cross-reference with flow inventory |
-| README / user guidance | AFK-001 through AFK-009 | `README.md` | Documentation review and install command smoke |
+| Source-document intake | AFK-002, AFK-003, AFK-004, AFK-010 | `flow-document`, onboarding, survey, business-flow, and scenario-design templates | Static review for claim statuses, source priority, and downstream use restrictions |
+| README / user guidance | AFK-001 through AFK-010 | `README.md` | Documentation review and install command smoke |
 | External integrations | AFK-008, AFK-009 | Playwright, GitHub Actions, target repo hooks | Blocker/waiver when local environment cannot run |
 
 ## Integration Coverage Contract
@@ -52,6 +55,7 @@
 | AFK-007 | Planned implementation validation commands for the target change | Happy, exception, permission, boundary, side effect, regression | Waiver must be feature-specific in the implementation plan |
 | AFK-008 | Playwright evidence artifact check when visible workflows are affected | Happy, exception, permission, boundary, side effect, regression | Blocked only when no runnable browser/app environment exists; blocker must name affected surface |
 | AFK-009 | Matrix-gate fixture/smoke checks when gate logic changes, including display-only bypass and behavior-change rejection | Happy, exception, boundary, regression | Fixture tests may be deferred only with reason when change is documentation-only |
+| AFK-010 | Template review for document intake and downstream source-priority guardrails | Happy, exception, boundary, side effect, regression | Automated semantic claim validation is out of scope because requirement-document interpretation needs repo evidence and user confirmation |
 
 Waiver rules:
 - Valid: includes a concrete `because`, `reason`, `blocked by`, `out of scope`, `理由`, `根拠`, `ブロック`, or `対象外`.
@@ -59,8 +63,13 @@ Waiver rules:
 
 ## User-confirmed Decisions
 - The business-flow discovery step should produce a draw.io diagram so humans can understand and audit onboarding flow inventory more easily.
+- Onboarding should run `flow-document` first when source documents may exist.
+  The resulting `docs/agent-flow/source-documents.md` is a sidecar claim ledger,
+  not a required gate document or source of truth.
 
 ## Open Questions
 - Should diagram creation be mandatory for every onboarding run, or only mandatory when more than one business flow is discovered?
 - Should the diagram be one `docs/agent-flow/business-flows.drawio` file, or a directory of per-flow `.drawio` files?
 - Should the kit include a helper script for deterministic draw.io XML generation, or should the skill instruct the agent to author the XML directly?
+- Should a future helper automate file inventory and markitdown conversion after
+  the manual `flow-document` workflow has been validated in multiple repos?

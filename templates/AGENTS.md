@@ -11,6 +11,7 @@ At the start of every non-trivial repository task, load the local context:
 - `CLAUDE.md` only when it exists and the task is workflow-sensitive
 - `.claude/rules/*.md`
 - `.claude/docs/DESIGN.md`
+- `docs/agent-flow/source-documents.md` when it exists
 - `docs/agent-flow/project-structure.md`
 - `docs/agent-flow/business-flows.md`
 - `docs/agent-flow/integration-scenarios.md`
@@ -19,6 +20,12 @@ At the start of every non-trivial repository task, load the local context:
 
 If these files are missing and the work changes behavior, run or request
 `agent-flow-onboarding` before implementation.
+
+During onboarding, run `flow-document` first. Source documents are optional, but
+the intake status should be recorded in `docs/agent-flow/source-documents.md`.
+Treat converted requirement documents as candidate evidence only; source,
+schema, routes, tests, deploy config, current repo docs, and explicit user
+confirmation take priority.
 
 Treat `.claude/` as shared Agent Flow documentation, not as Claude-only
 instructions. When a shared rule conflicts with Codex behavior, direct user
