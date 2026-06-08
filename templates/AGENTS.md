@@ -11,6 +11,9 @@ At the start of every non-trivial repository task, load the local context:
 - `CLAUDE.md` only when it exists and the task is workflow-sensitive
 - `.claude/rules/*.md`
 - `.claude/docs/DESIGN.md`
+- `docs/agent-flow/design-system.md` and `docs/agent-flow/design-system/`
+  when frontend design, screens, components, styles, brand, tokens, or
+  component rules are in scope
 - `docs/agent-flow/source-documents.md` when it exists
 - `docs/agent-flow/project-structure.md`
 - `docs/agent-flow/business-flows.md`
@@ -49,6 +52,11 @@ repo evidence.
 In Codex, `/flow-plan`, `/flow-plan-review`, `/flow-impl`, and
 `/flow-integration-test` map to the same-named skills: `flow-plan`,
 `flow-plan-review`, `flow-impl`, and `flow-integration-test`.
+
+For frontend behavior-changing plans, `flow-plan` uses `flow-design` as a
+support skill when design-system guidance may apply. If local design-system
+components or tokens match the planned UI, the plan should apply them or record
+a concrete waiver.
 
 ## Implementation Gate
 
@@ -101,6 +109,11 @@ Visible or multi-step business workflows require Playwright integration evidence
 with screenshots, `index.html`, test review, and business-flow impact review.
 If this is blocked, report `BLOCKED` with the concrete reason and affected
 surface.
+
+Frontend plans that affect screens, components, client UI, styles, or public
+frontend assets should include design-system applicability evidence when a
+design system is present. If no design system is found, record the searched
+paths and fallback source/component patterns.
 
 ## Working Style
 

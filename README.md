@@ -26,6 +26,9 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
 - provider/auth/deploy evidence lanes that separate local mocks from deployed
   artifacts, real provider/device happy paths, valid credential/session paths,
   and concrete blockers
+- design-system-aware frontend planning through the `flow-design` support skill,
+  so frontend plans prefer repo-local tokens, components, patterns, and voice
+  rules when they exist
 
 ## Onboarding Sequence
 
@@ -141,6 +144,8 @@ After install, review:
 - `.codex/skills/*/SKILL.md`
 - `.codex/hooks/*.py`
 - `.claude/docs/DESIGN.md`
+- `docs/agent-flow/design-system.md`
+- `docs/agent-flow/design-system/`
 
 The default `.agent-flow/config.json` is tuned for common Next.js repositories.
 Adjust the path lists when installing into another stack.
@@ -187,6 +192,19 @@ tests, install behavior, CI gates, or Agent Flow contracts still requires
 `/flow-plan`. The hook and matrix gate can classify style files directly and
 allow simple UI markup edits such as `className`/`style`/visible text changes;
 ambiguous component edits stay blocked until a plan exists.
+
+For frontend behavior-changing work that does require `/flow-plan`, the plan
+must also run the Frontend Design System Gate. `flow-plan` uses `flow-design` as
+a support skill to search configured design-system paths, local
+`docs/agent-flow/design-system.md`, `docs/agent-flow/design-system/`,
+`.claude/docs/DESIGN.md`, and relevant source components/styles. If matching
+tokens, components, patterns, or voice rules exist, the plan should apply them
+or record a concrete waiver. If no design system exists, the plan records the
+searched paths and fallback source/component patterns.
+
+This keeps Payn-like design-system imports generic: the kit can preserve and
+apply a target repo's design-system rules, but it does not ship any brand's
+tokens or components as defaults.
 
 Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
 If discovery shows that an existing runtime path will change, switch to
@@ -248,11 +266,12 @@ Codex users should prefer the `flow-plan` skill, not a separate lightweight
 prompt. If a legacy `~/.codex/prompts/flow-plan.md` or repo-local prompt exists,
 it should delegate to the skill and must preserve `Questioning Decision`,
 source-backed `No Questions Rationale`, Residual Risk Preflight, Flow Knowledge
-Update, the matrices, and the `Plan Review Requirement` decision. Questions may be
-skipped only when actor/scope, current behavior, desired behavior, success
-criteria, affected entrypoints, side effects, migration/data compatibility, and
-conflicts with existing docs/tests/code are all resolved by source evidence or
-explicit scope control.
+Update, Frontend Design System Gate when triggered, the matrices, and the
+`Plan Review Requirement` decision. Questions may be skipped only when
+actor/scope, current behavior, desired behavior, success criteria, affected
+entrypoints, side effects, migration/data compatibility, design-system
+applicability for frontend plans, and conflicts with existing docs/tests/code
+are all resolved by source evidence or explicit scope control.
 
 `flow-plan` must also confirm the requester's goal before freezing. When a bug
 or change request could mean several different outcomes, such as improving an

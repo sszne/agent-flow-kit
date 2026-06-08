@@ -21,6 +21,8 @@ Use at the start of every non-trivial repository task, especially:
 - test design or integration-test evidence work,
 - any task touching auth, schema, routes, screens, jobs, mail/PDF/export,
   search/cache, external integrations, or shared business logic.
+- frontend planning or review that may depend on repo-local design-system
+  rules, tokens, components, patterns, or brand guidance.
 
 For tiny self-contained questions, load only the directly relevant files.
 
@@ -46,9 +48,18 @@ For tiny self-contained questions, load only the directly relevant files.
    integration evidence.
 6. If bug knowledge exists, read `docs/agent-flow/bug-knowledge.md` for similar
    regressions.
-7. If a task involves a specific library and `.claude/docs/libraries/` contains
+7. If frontend design, screens, components, client UI, styles, public frontend
+   assets, brand, tokens, or component rules are in scope, read design-system
+   context when it exists:
+   - `.agent-flow/config.json` `design_system_paths`
+   - `docs/agent-flow/design-system.md`
+   - `docs/agent-flow/design-system/`
+   - `.claude/docs/DESIGN.md`
+   - existing source component/style/theme files directly relevant to the
+     planned surface
+8. If a task involves a specific library and `.claude/docs/libraries/` contains
    relevant notes, read only the matching library files.
-8. Continue with the requested task using the loaded constraints.
+9. Continue with the requested task using the loaded constraints.
 
 ## Operating Notes
 

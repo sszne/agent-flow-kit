@@ -13,6 +13,7 @@
 | SCN-008 | Evidence artifact review | AFK-008 | Happy, side effect, regression | `docs/flow/{feature}/integration-test/{run_id}/` | Feature with visible workflow | Confirm index, screenshots, result, test review, and business-flow impact docs exist | Evidence is auditable | Artifact review |
 | SCN-009 | Planning precision review | AFK-005, AFK-006, AFK-009 | Happy, exception, permission, boundary, side effect, regression | `flow-plan` templates and generated `docs/flow/{feature}/plan.md` | Behavior-changing request with possible ambiguity or provider evidence risk | Confirm Goal Confirmation, `Questioning Decision`, `No Questions Rationale` when applicable, onboarding/UI precision, provider/auth/deploy evidence lanes, and prevention taxonomy classification | Plan freezes only after requester goal, ambiguity, valid-path evidence lanes, and reusable bug patterns are resolved or blocked | Plan review notes |
 | SCN-010 | Documentation review | AFK-002, AFK-003, AFK-004, AFK-010 | Happy, exception, boundary, side effect, regression | `flow-document` and onboarding skill docs | Current template docs | Confirm source documents create a claim ledger, not source-of-truth, and unconfirmed claims cannot enter matrices or required scenarios | Claim statuses, source priority, and downstream restrictions are explicit | Review notes |
+| SCN-011 | Matrix gate fixture | AFK-005, AFK-009 | Happy, exception, boundary, regression | `agent-flow-matrix-gate.py` | Temporary git repo with browser-affecting behavior change and frozen plans with/without design-system applicability | Run gate against missing-section and complete-section variants | Missing `Design System Applicability` fails; complete section with searched paths and fallback/design evidence passes | Fixture output |
 
 ## Playwright Scenarios
 | Scenario ID | Entry point | Major steps requiring screenshots | Assertions | Screenshot names |
@@ -29,6 +30,7 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 | SRV-003 | Static syntax | Regression | Python files | Current checkout | `py_compile` succeeds | AFK-001, AFK-009 |
 | SRV-004 | Static XML parse | Exception, boundary | Generated `.drawio` file | Generated diagram artifact | XML parser accepts the file and root is draw.io-compatible | AFK-003 |
 | SRV-005 | Git fixture | Happy, exception, regression | `agent-flow-matrix-gate.py` | Temporary git repo with risky diffs | Optional-review plan passes for smaller behavior changes; high-impact paths require approved review; missing markers fail; display-only style/layout/text diffs pass without a plan | AFK-005, AFK-006, AFK-009 |
+| SRV-006 | Git fixture | Happy, exception, boundary, regression | `agent-flow-matrix-gate.py` | Temporary git repo with browser-affecting diff | Frontend behavior plan without `Design System Applicability` fails; equivalent plan with searched-path evidence passes | AFK-005, AFK-009 |
 
 ## Integration Coverage Contract
 | Flow ID | Required coverage | Required case types | Scenario IDs | Waiver / blocker |
@@ -39,6 +41,7 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 | AFK-004 | Documentation review against business-flow docs | Happy, exception, permission, boundary, regression | Covered by future feature-specific plan checks | Automated scenario execution is out of scope because this flow writes planning docs |
 | AFK-005 | Matrix-gate validation and plan-review requirement decision | Happy, exception, permission, boundary, side effect, regression | SCN-007, SRV-005 | None for gate logic changes |
 | AFK-005 planning precision | Template and plan-review validation of Goal Confirmation, `Questioning Decision`, `No Questions Rationale`, Plan Review Requirement, onboarding/UI precision, provider/auth/deploy evidence lanes, and bug prevention taxonomy | Happy, exception, permission, boundary, side effect, regression | SCN-009 | Automated semantic proof is out of scope because plans are natural-language artifacts; matrix gate and required reviews remain the enforcement layer. |
+| AFK-005 frontend design-system planning | Template, plan-review, and matrix-gate validation of `Design System Applicability`, component matching, searched paths, and concrete design waivers | Happy, exception, boundary, regression | SCN-011, SRV-006 | Automated visual/design semantic proof is out of scope because design-system matching is a natural-language workflow; the plan section, component matrix, and review gate remain the enforcement layer. |
 | AFK-006 | Plan-review marker validation when review is required | Happy, exception, regression | SCN-007, SRV-005 | Cross-agent execution may be blocked by unavailable opposite agent; same-agent fallback must record the blocker. Smaller localized behavior changes, typo fixes, formatting-only edits, and docs-only edits may mark review optional when they do not alter high-impact surfaces. |
 | AFK-007 | Feature-specific planned validation | Happy, exception, permission, boundary, side effect, regression | Defined in each feature plan | Feature-specific waiver required if omitted |
 | AFK-008 | Evidence artifact review when visible workflow exists | Happy, exception, permission, boundary, side effect, regression | SCN-008, PW-001 | Blocked only when no runnable browser/app exists; blocker must name surface |
@@ -70,6 +73,12 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 - Every behavior-changing plan must record a `Questioning Decision`. If no
   questions are asked, the `No Questions Rationale` must cite concrete user
   wording, source files, docs, tests, schema, routes, or explicit scope control.
+- Frontend behavior-changing plans must run the Frontend Design System Gate when
+  screens, components, frontend routes, client UI, styles, public frontend
+  assets, brand, tokens, component rules, or design-system attachments are in
+  scope. The plan must include `Design System Applicability`; if no design
+  system is found, it must record searched paths and fallback source/component
+  evidence.
 - Every behavior-changing plan must confirm the requester's desired outcome and
   accepted completion signal before freezing. If a bug report could mean
   symptom display, state preservation, root-cause elimination, diagnostics, or

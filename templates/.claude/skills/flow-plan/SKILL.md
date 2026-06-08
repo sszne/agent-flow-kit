@@ -30,6 +30,10 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
 - Same onboarding/UI behavior: confirm step names, order, exclusions, action
   placement, resume/fallback path, and blocked evidence lanes before
   implementation.
+- Same frontend design-system behavior: run the Frontend Design System Gate for
+  screens, components, frontend routes, client UI, styles, public frontend
+  assets, brand, tokens, or component rules; apply matching design-system rules
+  or record concrete waivers.
 - Same provider/auth/deploy behavior: distinguish local mock coverage,
   deployed-artifact checks, real provider/device happy paths, valid
   credential/session paths, and concrete blockers.

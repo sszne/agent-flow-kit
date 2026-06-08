@@ -57,6 +57,11 @@ readiness gate. Do not implement during this skill.
 - Onboarding, setup, wizard, modal, or user-guidance UI plans must confirm step
   names, step order, excluded elements, action placement, resume/fallback path,
   and blocked evidence lanes before rich UI implementation.
+- Frontend plans that affect screens, components, frontend routes, client UI,
+  styles, public frontend assets, brand, tokens, or component rules must run
+  the Frontend Design System Gate. When a repo-local or user-provided design
+  system contains matching components, tokens, patterns, or voice rules, plan
+  against those rules or record concrete waivers.
 - Provider, auth, LIFF, LINE, Google, deploy, or smoke-test plans must separate
   local mock coverage, deployed-artifact checks, real provider/device happy
   paths, valid credential/session paths, and concrete blockers.
@@ -88,6 +93,7 @@ Phase 1: Scope
   -> bug feedback review when applicable
   -> residual risk preflight
   -> runtime causality gate when applicable
+  -> frontend design system gate when applicable
   -> flow knowledge update check
   -> ask user only required questions
     ->
@@ -240,6 +246,55 @@ Do not mark a provider/auth/deploy issue complete using only preflight, invalid
 input, unauthenticated `401`, or health checks if the valid path or side effect
 is the failure being planned.
 
+## Frontend Design System Gate
+
+Run this gate before implementation design is frozen when the request affects:
+
+- screens, pages, frontend routes, components, client UI, UI state, forms,
+  navigation, tables, cards, modals, layout, styles, public frontend assets, or
+  browser-visible behavior;
+- brand, typography, color, spacing, radius, shadow, icons, tokens, design
+  systems, component libraries, style guides, or copy/voice;
+- an attached or repo-local design-system artifact.
+
+When triggered, call the `flow-design` support skill or perform the equivalent
+design-system analysis using repo evidence. Search:
+
+- `.agent-flow/config.json` `design_system_paths`,
+- `docs/agent-flow/design-system.md`,
+- `docs/agent-flow/design-system/`,
+- `.claude/docs/DESIGN.md`,
+- existing source components, CSS variables, theme files, Tailwind config,
+  Storybook or component-library docs relevant to the planned surface.
+
+If a matching design-system component, token, pattern, or voice rule exists,
+the plan must apply it or record a concrete waiver. If no design system is
+found, the plan must record the searched paths and fallback source/component
+patterns.
+
+Add these sections to the plan when the gate is triggered:
+
+```markdown
+### Design System Applicability
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Design system searched | Yes | {paths inspected} |
+| Design system found | Yes/No/Partial | {source paths or reason none found} |
+| Applies to this plan | Yes/No/Partial | {screens/components/tokens matched} |
+| Required waivers | Yes/No | {summary of concrete waivers or "None"} |
+
+### Component Match Matrix
+
+| Planned UI | Design System Match | Rule To Apply | Source | Exception / Waiver |
+| --- | --- | --- | --- | --- |
+| {UI item} | {exact-match / partial-match / no-match / conflict} | {token/component/pattern rule or fallback source pattern} | {file/path/section} | {None or concrete reason} |
+```
+
+`Component Match Matrix` may be omitted only when the applicability section
+shows the plan has no frontend UI item that can map to a component/pattern, or
+no design system exists after searched-path review.
+
 ## Bug Knowledge Pattern Reuse
 
 For bug/regression work, search `docs/agent-flow/bug-knowledge.md` before task
@@ -322,19 +377,21 @@ Use this structure unless the target repo already has a stricter local template:
 ### 2.1 Affected Files And Modules
 ### 2.2 Implementation Approach
 ### 2.3 Design Policy And Library Selection
-### 2.4 Risks And Mitigations
-### 2.5 Residual Risk Preflight
-### 2.6 Runtime Causality Gate
-### 2.7 Bug Feedback Review
-### 2.8 Flow Knowledge Update
-### 2.9 Business Flow Matrix
-### 2.10 Regression Surface Matrix
-### 2.11 Test Design Matrix
-### 2.12 Integration Coverage Contract
-### 2.13 Plan Review Requirement
-### 2.14 Playwright Integration Test Plan
-### 2.15 Migration / Runtime Enforcement
-### 2.16 Open Questions
+### 2.4 Design System Applicability
+### 2.5 Component Match Matrix
+### 2.6 Risks And Mitigations
+### 2.7 Residual Risk Preflight
+### 2.8 Runtime Causality Gate
+### 2.9 Bug Feedback Review
+### 2.10 Flow Knowledge Update
+### 2.11 Business Flow Matrix
+### 2.12 Regression Surface Matrix
+### 2.13 Test Design Matrix
+### 2.14 Integration Coverage Contract
+### 2.15 Plan Review Requirement
+### 2.16 Playwright Integration Test Plan
+### 2.17 Migration / Runtime Enforcement
+### 2.18 Open Questions
 
 ## 3. Tasks
 - [ ] TASK-001 ...
@@ -351,6 +408,9 @@ Use this structure unless the target repo already has a stricter local template:
 - [ ] Flow Knowledge Update target is explicit
 - [ ] Residual Risk Preflight warnings have countermeasures, setup tasks, or blockers
 - [ ] Runtime Causality Gate is complete or explicitly not triggered
+- [ ] Frontend Design System Gate is complete or explicitly not triggered
+- [ ] Frontend plans include Design System Applicability and matching component
+      rules or concrete waivers when a design system applies
 - [ ] Onboarding/UI plans confirm step names, order, exclusions, action
       placement, resume/fallback path, and blocked evidence lanes
 - [ ] Provider/auth/deploy plans separate mock, deployed-artifact, real

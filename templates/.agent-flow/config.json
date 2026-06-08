@@ -68,6 +68,17 @@
     "postcss.config.js",
     "postcss.config.mjs"
   ],
+  "design_system_paths": [
+    "docs/agent-flow/design-system.md",
+    "docs/agent-flow/design-system/",
+    ".claude/docs/DESIGN.md",
+    "styleguide.md",
+    "styleguide/",
+    "design-system.md",
+    "design-system/",
+    "storybook/",
+    ".storybook/"
+  ],
   "presentation_only_prefixes": [
     "styles/",
     "src/styles/",

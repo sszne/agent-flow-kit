@@ -18,7 +18,8 @@
     "integration-test"
   ],
   "support_skills": [
-    "context-loader"
+    "context-loader",
+    "flow-design"
   ],
   "required_onboarding_docs": [
     "docs/agent-flow/project-structure.md",

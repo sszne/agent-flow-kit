@@ -32,6 +32,12 @@ User requirements from interactive questioning are combined with codebase analys
   elements, action placement, resume/fallback path, safe
   recipient/provider boundaries, and blocked evidence lanes before
   implementation.
+- For frontend plans that affect screens, components, frontend routes, client
+  UI, styles, public frontend assets, brand, tokens, or component rules, run the
+  Frontend Design System Gate. Use `flow-design` as a support skill when
+  available. If a local or user-provided design system has matching components,
+  tokens, patterns, or voice rules, plan against those rules or record concrete
+  waivers.
 - For provider/auth/deploy/smoke work, distinguish local mock coverage,
   deployed-artifact checks, real provider/device happy paths, valid
   credential/session paths, and concrete blockers. Do not use shallow checks
@@ -315,6 +321,31 @@ Do not mark a provider/auth/deploy issue complete using only preflight, invalid
 input, unauthenticated `401`, or health checks when the valid path or side
 effect is the reported risk.
 
+### Step 8.2: Frontend Design System Gate
+
+Run this gate before implementation design is frozen when the request affects:
+
+- screens, pages, frontend routes, components, client UI, UI state, forms,
+  navigation, tables, cards, modals, layout, styles, public frontend assets, or
+  browser-visible behavior;
+- brand, typography, color, spacing, radius, shadow, icons, tokens, design
+  systems, component libraries, style guides, or copy/voice;
+- an attached or repo-local design-system artifact.
+
+Use `flow-design` as a support skill when available. Search:
+
+- `.agent-flow/config.json` `design_system_paths`,
+- `docs/agent-flow/design-system.md`,
+- `docs/agent-flow/design-system/`,
+- `.claude/docs/DESIGN.md`,
+- existing source components, CSS variables, theme files, Tailwind config,
+  Storybook or component-library docs relevant to the planned surface.
+
+If a matching design-system component, token, pattern, or voice rule exists,
+the plan must apply it or record a concrete waiver. If no design system is
+found, the plan must record searched paths and fallback source/component
+patterns.
+
 ### Step 9: Iterate
 
 If ambiguity remains after user answers, return to Step 3. Repeat until all requirements are clear. Re-run the Flow Knowledge Update Check whenever answers add or change business-flow, exception, permission, side-effect, or integration-scenario knowledge.
@@ -389,6 +420,8 @@ Generate additional sections based on these conditions:
 | Flow Knowledge Update | Always for behavior-changing work; required when confirmed answers add reusable business-flow, exception, permission, side-effect, or integration-scenario knowledge |
 | Residual Risk Preflight | Always when any residual risk category applies |
 | Runtime Causality Gate | Production-only, deploy/runtime/provider, browser-network, auth/session, secret/binding, remote data, or external-runtime symptoms |
+| Design System Applicability | Frontend design, screens, components, routes, client UI, styles, public frontend assets, brand, tokens, component rules, or design-system attachments |
+| Component Match Matrix | Frontend Design System Gate finds matching components, tokens, patterns, voice rules, partial matches, or conflicts |
 | Playwright Integration Test Plan | Visible browser behavior OR multi-step business workflow |
 
 ### Step 13: Task decomposition
@@ -431,6 +464,8 @@ Verify traceability:
 - Every requirement traces back to user intent, codebase evidence, or an explicit user answer
 - Every assumption is either resolved, marked out of scope, or listed as a blocker
 - Every triggered residual-risk warning has a resolved countermeasure, setup task, or concrete blocker
+- Frontend design-system applicability is documented when frontend planning is
+  triggered, including searched paths, component matches, and concrete waivers
 - Design decisions are consistent with requirements
 - Task dependencies form a valid DAG (no cycles)
 - Every affected business flow maps to at least one test or documented low-risk/blocker reason
@@ -681,6 +716,7 @@ include the results in plan.md only where useful.
 | Flow knowledge update | Did questioning confirm reusable business-flow, exception, permission, side-effect, or integration-scenario knowledge missing from onboarding docs? | `docs/agent-flow/business-flows.md`, `docs/agent-flow/integration-scenarios.md`, user answers |
 | Questioning decision | Are questions required, and if not, what source evidence makes no questions safe? | `Questioning Decision`, `No Questions Rationale`, user answers, source/docs evidence |
 | Onboarding/UI precision | Do step names, order, excluded elements, action placement, resume path, and evidence lane need confirmation? | Existing UI/components, user request, screenshots/manuals, integration scenarios |
+| Design-system applicability | Does a repo-local or user-provided design system define matching tokens, components, patterns, or copy/voice rules? | `docs/agent-flow/design-system.md`, `docs/agent-flow/design-system/`, `.agent-flow/config.json`, `.claude/docs/DESIGN.md`, source components/styles |
 | Provider/deploy evidence lane | Does the risk require local mock, deployed artifact, real provider/device, valid session, or blocker evidence? | Runtime Causality Gate, provider docs/config, smoke scripts, integration scenarios |
 | Regression surfaces | What adjacent shared flows can break even if not directly edited? | Shared partials/scripts/services/actions/schema/tests |
 | Minimal scope | What is the smallest codebase-conforming change that satisfies the intent? | Existing patterns and alternatives considered |
@@ -830,14 +866,31 @@ dedicated design section.
 | --- | --- | --- | --- | --- | --- |
 | {Architecture/library/tooling area} | {Selected approach} | {Rationale} | {Alternatives} | Yes/No | {Risk and mitigation} |
 
-### 2.7 Business Flow Matrix
+### 2.7 Design System Applicability
+<!-- Required when frontend design, screens, components, routes, client UI, styles, public frontend assets, brand, tokens, component rules, or design-system attachments are in scope. If not triggered, write "Not triggered: {source-backed reason}." -->
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Design system searched | Yes/No | {paths inspected, configured paths, or reason not triggered} |
+| Design system found | Yes/No/Partial | {source paths or reason none found} |
+| Applies to this plan | Yes/No/Partial | {screens/components/tokens matched or reason not applicable} |
+| Required waivers | Yes/No | {summary of concrete waivers or "None"} |
+
+### 2.8 Component Match Matrix
+<!-- Include when planned UI maps to design-system components, tokens, patterns, voice rules, partial matches, or conflicts. May be omitted only when Design System Applicability records no matching UI or no design system found after searched-path review. -->
+
+| Planned UI | Design System Match | Rule To Apply | Source | Exception / Waiver |
+| --- | --- | --- | --- | --- |
+| {UI item} | {exact-match / partial-match / no-match / conflict} | {token/component/pattern rule or fallback source pattern} | {file/path/section} | {None or concrete reason} |
+
+### 2.9 Business Flow Matrix
 <!-- Required for behavior-changing work. This turns domain knowledge into implementation and test obligations. -->
 
 | Flow | Actor / scope | Entry point | Existing behavior | New behavior | Normal path | Error / exception paths | Permission / ownership / boundary paths | Side effects | Regression risk | Required test coverage |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | {Order/dealer/company/mail/PDF/job/search/status flow} | {role/tenant/company/customer scope} | {route/screen/API/job/mail/PDF} | {current behavior} | {expected behavior} | {happy workflow} | {validation, missing relation, external failure, rollback, not found} | {forbidden, cross-tenant, min/max/null/empty edge cases} | {mail/PDF/export/job/audit/cache/search/index changes} | {what could regress} | {Feature/API integration, Unit, Browser, Migration, Manual with reason} |
 
-### 2.8 Regression Surface Matrix
+### 2.10 Regression Surface Matrix
 <!-- Inspect indirect effects, not only directly edited files. -->
 
 | Surface | Affected? | Covered flows | Evidence | Required verification |
@@ -851,7 +904,7 @@ dedicated design section.
 | Auth/permissions/tenant scope | Yes/No | {flow IDs} | {middleware/policies/session inspected} | {permission integration/browser check/N/A} |
 | External APIs/storage/cache/search | Yes/No | {flow IDs} | {clients/adapters/config inspected} | {mocked-boundary integration test/N/A} |
 
-### 2.9 Test Design Matrix
+### 2.11 Test Design Matrix
 <!-- Red tests must be listed before implementation starts. -->
 
 | Test ID | Level | Case type | Target | Data setup / preconditions | Scenario | Assertions | Covers flow/risk | Evidence |
@@ -861,7 +914,7 @@ dedicated design section.
 | TEST-003 | Unit | Pure logic | {test file} | {input object/value} | {isolated rule} | {return/error value} | {flow/risk} | {command/report path} |
 | TEST-004 | Browser / Playwright | Browser evidence | {screen/spec} | {seeded user and route state} | {visible multi-step workflow} | {visible result and screenshots} | {flow/risk} | {index.html/screenshots} |
 
-### 2.10 Integration Coverage Contract
+### 2.12 Integration Coverage Contract
 <!-- Required for behavior-changing work. Every affected flow needs coverage or a named waiver before implementation starts. -->
 
 | Flow | Required coverage | Required case types | Waiver / blocker if not covered |
@@ -882,7 +935,7 @@ Coverage rules:
 - Waivers must include a reason marker such as `because`, `reason`, `blocked by`, `out of scope`, `理由`, `根拠`, `ブロック`, or `対象外`.
 - `N/A`, `manual`, `low risk`, `TBD`, `later`, and blank waiver entries are invalid unless the row is fully covered and no waiver is being used.
 
-### 2.11 Plan Review Requirement
+### 2.13 Plan Review Requirement
 <!-- Required for behavior-changing work. -->
 
 - Requirement: Required / Optional
@@ -898,14 +951,14 @@ search/cache, queues, jobs, schedules, or other side effects; public API
 contracts or shared runtime entrypoints; and any change the user or plan author
 marks as uncertain or high impact.
 
-### 2.12 Migration / Runtime Enforcement
+### 2.14 Migration / Runtime Enforcement
 <!-- Required when schema or deploy/startup assumptions are involved. -->
 
 - Migration needed: Yes/No
 - Migration enforcement path: {entrypoint/deploy/startup path or N/A}
 - Runtime validation command: `{command or N/A}`
 
-### 2.13 Playwright Integration Test Plan
+### 2.15 Playwright Integration Test Plan
 <!-- Required for visible browser behavior or multi-step business workflows. -->
 
 | Scenario ID | Business flow | Entry point | Major steps requiring screenshots | Expected result | Risk covered |
@@ -954,6 +1007,8 @@ Evidence output:
 - [ ] Triggered residual-risk warnings have countermeasures, setup tasks, or concrete blockers
 - [ ] Runtime Causality Gate is documented, or explicitly not triggered with source-backed reason
 - [ ] Triggered runtime-causality checks classify code/environment/data/deploy/provider/inconclusive before behavior-changing implementation tasks
+- [ ] Frontend Design System Gate is documented, or explicitly not triggered with source-backed reason
+- [ ] Frontend plans include Design System Applicability, searched paths, component matches, and concrete waivers when a design system applies
 - [ ] Bug Feedback Review is documented for bug/regression work, or explicitly unnecessary because this is not a bug/regression request
 - [ ] Flow Knowledge Update is documented for behavior-changing work, including target docs or a concrete feature-local reason
 - [ ] Required `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md` update tasks are included before implementation when reusable flow knowledge is found

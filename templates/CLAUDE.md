@@ -11,6 +11,9 @@ Before non-trivial repository work, read:
 - `AGENTS.md` when Codex or cross-agent behavior may matter
 - `.claude/rules/*.md`
 - `.claude/docs/DESIGN.md`
+- `docs/agent-flow/design-system.md` and `docs/agent-flow/design-system/`
+  when frontend design, screens, components, styles, brand, tokens, or
+  component rules are in scope
 - `docs/agent-flow/source-documents.md` when it exists
 - `docs/agent-flow/project-structure.md`
 - `docs/agent-flow/business-flows.md`
@@ -63,6 +66,11 @@ Codex uses the same workflow names as skills: `flow-plan`, `flow-plan-review`,
 `flow-impl`, and `flow-integration-test`. Both tools write the same artifacts under
 `docs/flow/{feature_name}/`.
 
+For frontend behavior-changing plans, `flow-plan` uses `flow-design` as a
+support skill when design-system guidance may apply. If local design-system
+components or tokens match the planned UI, the plan should apply them or record
+a concrete waiver.
+
 ## Quality Gates
 
 Behavior-changing plans need:
@@ -103,6 +111,11 @@ it as high-impact workflow work and keep the review gate.
 
 Visible or multi-step business workflows require Playwright integration evidence
 with screenshots, `index.html`, test review, and business-flow impact review.
+
+Frontend plans that affect screens, components, client UI, styles, or public
+frontend assets should include design-system applicability evidence when a
+design system is present. If no design system is found, record the searched
+paths and fallback source/component patterns.
 
 ## Documentation
 

@@ -9,6 +9,7 @@
   - `templates/.codex/skills/*/SKILL.md`: Codex skill templates.
   - `templates/.claude/hooks/*.py` and `templates/.codex/hooks/*.py`: workflow gates and quality hooks.
   - `templates/scripts/agent-flow-matrix-gate.py`: CI plan-quality gate.
+  - `templates/docs/agent-flow/design-system.md`: optional target-repo design-system documentation template used by frontend planning.
 - Local run commands:
   - `python3 install.py --target /path/to/repo --dry-run`
   - `python3 install.py --target /path/to/repo --dry-run --apply-recommended-updates`
@@ -39,6 +40,7 @@
 | Support skill | `manifest.json` `support_skills` | Must exist under both tool skill directories | Shared helper skill used by entry workflows |
 | Required onboarding document | `manifest.json` `required_onboarding_docs`; `agent-flow-matrix-gate.py` | Produced during `agent-flow-onboarding`; required before behavior-changing implementation | Durable project knowledge for future plans and tests |
 | Source document ledger | `docs/agent-flow/source-documents.md`; `flow-document` skill | Optional sidecar produced at onboarding start | Classifies requirement/source-document claims without making them source-of-truth |
+| Design-system document | `docs/agent-flow/design-system.md`, `docs/agent-flow/design-system/`; `flow-design` skill | Optional frontend planning context | Records repo-local tokens, components, patterns, voice rules, source priority, and waiver rules |
 | Plan | `docs/flow/{feature}/plan.md`; `agent-flow-matrix-gate.py` markers | Must contain matrices, Plan Review Requirement, and frozen marker before implementation | Traceable change design and coverage contract |
 | Plan review | `docs/flow/{feature}/plan-review.md`; `agent-flow-matrix-gate.py` markers | Required for high-impact implementation; optional for smaller localized changes | Cross-agent missed-risk review |
 | Integration evidence | Skill docs and README evidence contract | Produced under `docs/flow/{feature}/integration-test/{run_id}/` | Auditable Playwright/business-flow verification |
@@ -52,6 +54,7 @@
 | Intake source documents | Coding agent plus user | `flow-document` skill or `/flow-document` command | Convert optional service documents with markitdown when available and create a guarded claim ledger | `templates/.codex/skills/flow-document/SKILL.md` |
 | Discover business flows | Coding agent plus user | `business-flow-discovery` skill | Build flow inventory, business-flow matrix, regression surface matrix, and coverage contract | `templates/.codex/skills/business-flow-discovery/SKILL.md` |
 | Plan a behavior-changing change | Coding agent | `flow-plan` skill or `/flow-plan` command | Load context, inspect code/docs/tests, clarify ambiguity, write frozen plan | `README.md`, skill templates |
+| Analyze frontend design-system fit | Coding agent | `flow-design` support skill called by `flow-plan` | Search configured design-system paths, compare planned UI with tokens/components/patterns, return applicability and component-match matrices | `templates/.codex/skills/flow-design/SKILL.md`, `templates/.claude/skills/flow-design/SKILL.md` |
 | Review plan readiness | Opposite or fallback agent | `flow-plan-review` skill or command | Check missed risks, migration/auth/runtime/test coverage, decide readiness | `README.md`, `agent-flow-matrix-gate.py` |
 | Implement a frozen plan | Coding agent | `flow-impl` or `team-implement` | Apply plan tasks after gates are satisfied | README canonical flow |
 | Verify visible/multi-step workflows | Coding agent | `flow-integration-test` | Produce Playwright evidence and review artifacts | README and integration-test skill templates |
@@ -65,6 +68,7 @@
 | Safe updates | `SAFE_UPDATE_PREFIXES` and `SAFE_UPDATE_FILES` in `install.py` | Portable workflow assets should be updateable without touching local docs |
 | Hook merge idempotency | `HOOK_SCRIPT_PATTERN` and settings merge logic in `install.py` | Repeated installs must not register duplicate hooks |
 | Workflow gate strictness | `agent-flow-matrix-gate.py` required markers and waiver checks | Overly broad defaults can block non-Next.js repos until config is tuned |
+| Frontend design-system planning | `flow-design`, `flow-plan`, `design_system_paths`, matrix gate | Plans can become boilerplate unless applicability includes searched paths, component matches, and concrete waivers |
 | Documentation-first behavior | README canonical flow and skill templates | Missing onboarding docs should block behavior-changing implementation |
 
 ## Existing Test Surface

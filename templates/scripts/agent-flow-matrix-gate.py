@@ -74,6 +74,8 @@ REQUIRED_PLAN_MARKERS = (
     "Integration Coverage Contract",
 )
 
+DESIGN_SYSTEM_APPLICABILITY_MARKER = "Design System Applicability"
+
 REQUIRED_PLAN_REVIEW_MARKERS = (
     "Missed Risk Review",
     "DB / Schema / Migration Review",
@@ -574,6 +576,54 @@ def validate_integration_coverage_contract(plan_text: str, errors: list[str]) ->
             )
 
 
+def validate_design_system_applicability(plan_text: str, errors: list[str]) -> None:
+    section = extract_section(plan_text, DESIGN_SYSTEM_APPLICABILITY_MARKER)
+    if not section.strip():
+        errors.append(
+            "Frontend/browser-affecting plans require a Design System Applicability section."
+        )
+        return
+
+    if contains_placeholder(section):
+        errors.append("Design System Applicability still contains template placeholders.")
+
+    rows = data_rows(section)
+    if not rows:
+        errors.append("Design System Applicability requires at least one concrete table row.")
+        return
+
+    lower_section = section.lower()
+    required_phrases = (
+        "design system searched",
+        "design system found",
+        "applies to this plan",
+        "required waivers",
+    )
+    for phrase in required_phrases:
+        if phrase not in lower_section:
+            errors.append(f"Design System Applicability is missing required check: {phrase}.")
+
+    no_design_system = (
+        "design system found" in lower_section
+        and re.search(r"design system found\s*\|\s*(no|none|not found|なし)", lower_section)
+    )
+    if no_design_system and not any(
+        marker in lower_section
+        for marker in (
+            "searched",
+            "paths inspected",
+            "fallback",
+            "existing source",
+            "existing component",
+            "source pattern",
+        )
+    ):
+        errors.append(
+            "Design System Applicability may record no design system found only "
+            "when searched paths and fallback source/component evidence are documented."
+        )
+
+
 def validate_questioning_decision(plan_text: str, errors: list[str]) -> None:
     section = extract_section(plan_text, "Questioning Decision")
     if not section.strip():
@@ -858,6 +908,9 @@ def main() -> int:
         path in browser_files or any(path.startswith(prefix) for prefix in browser_prefixes)
         for path in risky_paths
     )
+    if has_browser_change:
+        validate_design_system_applicability(plan_text, errors)
+
     if has_browser_change and "Playwright Integration Test Plan" not in plan_text:
         errors.append(
             "Visible browser changes require a Playwright Integration Test Plan in the frozen plan."
