@@ -15,6 +15,8 @@ Before non-trivial repository work, read:
   when frontend design, screens, components, styles, brand, tokens, or
   component rules are in scope
 - `docs/agent-flow/source-documents.md` when it exists
+- `docs/agent-flow/business-flow-integration-tests.md` when business-flow
+  baseline operation tests are in scope
 - `docs/agent-flow/project-structure.md`
 - `docs/agent-flow/business-flows.md`
 - `docs/agent-flow/integration-scenarios.md`
@@ -42,6 +44,7 @@ agent-flow-onboarding
   -> project-structure-survey
   -> business-flow-discovery
   -> integration-scenario-design
+  -> /business-flow-integration-test when requested
   -> /flow-start or /flow-plan
   -> /flow-plan-review when required or requested
   -> /flow-impl or team-implement
@@ -61,6 +64,11 @@ Agent Flow contracts, keep `/flow-plan` required.
 
 Use `/flow-start` only for new-feature discovery or greenfield scope shaping.
 If discovery touches an existing runtime path, switch to `/flow-plan`.
+
+Use `/business-flow-integration-test` after onboarding when the repository needs
+a callable regression suite for major confirmed business-flow operations. This
+suite is created through user-confirmed scenarios and is not automatically run
+from `/flow-impl`.
 
 Codex uses the same workflow names as skills: `flow-plan`, `flow-plan-review`,
 `flow-impl`, and `flow-integration-test`. Both tools write the same artifacts under
@@ -111,6 +119,25 @@ it as high-impact workflow work and keep the review gate.
 
 Visible or multi-step business workflows require Playwright integration evidence
 with screenshots, `index.html`, test review, and business-flow impact review.
+
+`/flow-integration-test` should use a conditional evidence lane:
+
+- Full Gate Required: visible UI, multi-step workflows,
+  auth/session/permission/tenant, provider/device/deploy, external side
+  effects, or high-impact release confidence.
+- Lightweight Evidence Allowed: API-only, internal logic, docs/skill-only,
+  static/build-only, or otherwise non-visible low-risk changes, with a
+  concrete reason, substitute checks, and covered regression surface.
+- Blocked Early: if a required full gate cannot run, report `BLOCKED` with the
+  blocker category, exact unverified surface, and minimum unblock action.
+
+Every lane should record effectiveness metrics: issues found, whether a fix
+resulted, fix reference, whether another test would have caught it, elapsed
+time when available, token/work overhead when available, and blocker category.
+
+The onboarding-derived `/business-flow-integration-test` suite is the
+project-wide baseline for major continuous operations. `/flow-integration-test`
+remains the feature-specific evidence gate after implementation.
 
 Frontend plans that affect screens, components, client UI, styles, or public
 frontend assets should include design-system applicability evidence when a

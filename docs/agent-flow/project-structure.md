@@ -10,6 +10,7 @@
   - `templates/.claude/hooks/*.py` and `templates/.codex/hooks/*.py`: workflow gates and quality hooks.
   - `templates/scripts/agent-flow-matrix-gate.py`: CI plan-quality gate.
   - `templates/docs/agent-flow/design-system.md`: optional target-repo design-system documentation template used by frontend planning.
+  - `business-flow-integration-test`: onboarding follow-up entrypoint that creates, updates, and runs a callable regression suite for major confirmed business-flow operation tests.
 - Local run commands:
   - `python3 install.py --target /path/to/repo --dry-run`
   - `python3 install.py --target /path/to/repo --dry-run --apply-recommended-updates`
@@ -43,7 +44,8 @@
 | Design-system document | `docs/agent-flow/design-system.md`, `docs/agent-flow/design-system/`; `flow-design` skill | Optional frontend planning context | Records repo-local tokens, components, patterns, voice rules, source priority, and waiver rules |
 | Plan | `docs/flow/{feature}/plan.md`; `agent-flow-matrix-gate.py` markers | Must contain matrices, Plan Review Requirement, and frozen marker before implementation | Traceable change design and coverage contract |
 | Plan review | `docs/flow/{feature}/plan-review.md`; `agent-flow-matrix-gate.py` markers | Required for high-impact implementation; optional for smaller localized changes | Cross-agent missed-risk review |
-| Integration evidence | Skill docs and README evidence contract | Produced under `docs/flow/{feature}/integration-test/{run_id}/` | Auditable Playwright/business-flow verification |
+| Integration evidence | Skill docs and README evidence contract | Produced under `docs/flow/{feature}/integration-test/{run_id}/` for full evidence; recorded in reports for lightweight or blocked lanes | Conditional feature-specific verification with lane decision, Playwright/business-flow artifacts when required, and effectiveness metrics |
+| Business-flow integration suite | `business-flow-integration-test` skill; `docs/agent-flow/business-flow-integration-tests.md` | Created after onboarding from confirmed business flows and user-approved scenario inventory | Re-runnable project-wide regression baseline for major continuous operations |
 
 ## Use Cases
 | Use case | Actor | Entry point | Core flow | Evidence |
@@ -53,11 +55,12 @@
 | Onboard a target repository | Coding agent | `agent-flow-onboarding` skill | Produce project structure, business-flow, and integration-scenario docs | `templates/.codex/skills/agent-flow-onboarding/SKILL.md` |
 | Intake source documents | Coding agent plus user | `flow-document` skill or `/flow-document` command | Convert optional service documents with markitdown when available and create a guarded claim ledger | `templates/.codex/skills/flow-document/SKILL.md` |
 | Discover business flows | Coding agent plus user | `business-flow-discovery` skill | Build flow inventory, business-flow matrix, regression surface matrix, and coverage contract | `templates/.codex/skills/business-flow-discovery/SKILL.md` |
+| Create or run business-flow regression suite | Coding agent plus user | `business-flow-integration-test` skill or `/business-flow-integration-test` command | Infer major operation tests from onboarding docs, ask about unclear operations, confirm final list, create executable tests, register all-suite runner, and run on demand | `templates/.codex/skills/business-flow-integration-test/SKILL.md` |
 | Plan a behavior-changing change | Coding agent | `flow-plan` skill or `/flow-plan` command | Load context, inspect code/docs/tests, clarify ambiguity, write frozen plan | `README.md`, skill templates |
 | Analyze frontend design-system fit | Coding agent | `flow-design` support skill called by `flow-plan` | Search configured design-system paths, compare planned UI with tokens/components/patterns, return applicability and component-match matrices | `templates/.codex/skills/flow-design/SKILL.md`, `templates/.claude/skills/flow-design/SKILL.md` |
 | Review plan readiness | Opposite or fallback agent | `flow-plan-review` skill or command | Check missed risks, migration/auth/runtime/test coverage, decide readiness | `README.md`, `agent-flow-matrix-gate.py` |
 | Implement a frozen plan | Coding agent | `flow-impl` or `team-implement` | Apply plan tasks after gates are satisfied | README canonical flow |
-| Verify visible/multi-step workflows | Coding agent | `flow-integration-test` | Produce Playwright evidence and review artifacts | README and integration-test skill templates |
+| Verify feature-specific implementation evidence | Coding agent | `flow-integration-test` | Choose full, lightweight, or blocked evidence lane; produce Playwright artifacts when required; record substitute evidence or blockers and effectiveness metrics | README and integration-test skill templates |
 | Enforce workflow in CI | GitHub Actions | `agent-flow-matrix-gate.py` | Check risky diffs for onboarding docs, frozen plan, Plan Review Requirement, required plan review, matrices, and waiver quality | CI workflow and script |
 
 ## Runtime / Operations
@@ -69,6 +72,7 @@
 | Hook merge idempotency | `HOOK_SCRIPT_PATTERN` and settings merge logic in `install.py` | Repeated installs must not register duplicate hooks |
 | Workflow gate strictness | `agent-flow-matrix-gate.py` required markers and waiver checks | Overly broad defaults can block non-Next.js repos until config is tuned |
 | Frontend design-system planning | `flow-design`, `flow-plan`, `design_system_paths`, matrix gate | Plans can become boilerplate unless applicability includes searched paths, component matches, and concrete waivers |
+| Integration evidence lane selection | `flow-integration-test`, `integration-test`, testing rules | Overuse of full Playwright evidence wastes token/work budget; overuse of lightweight evidence can miss visible or provider/deploy regressions |
 | Documentation-first behavior | README canonical flow and skill templates | Missing onboarding docs should block behavior-changing implementation |
 
 ## Existing Test Surface
@@ -77,7 +81,7 @@
 | Syntax | `python3 -m py_compile install.py templates/.claude/hooks/*.py templates/.codex/hooks/*.py templates/scripts/*.py` | Validates Python files parse |
 | Installer smoke | `python3 install.py --target /tmp/agent-flow-kit-smoke --dry-run` | Validates manifest skill presence and dry-run file classification |
 | Matrix gate smoke | `python3 templates/scripts/agent-flow-matrix-gate.py --help` | Validates CLI argument parsing; stronger checks need a temporary git fixture |
-| Manual documentation review | `templates/.claude/skills/*`, `templates/.codex/skills/*`, README | Needed for template wording and cross-tool consistency |
+| Manual documentation review | `templates/.claude/skills/*`, `templates/.codex/skills/*`, README | Needed for template wording, cross-tool consistency, evidence-lane guardrails, and effectiveness metrics |
 
 ## Open Questions
 - Should this kit add automated tests around installer update classification and matrix-gate failure cases?

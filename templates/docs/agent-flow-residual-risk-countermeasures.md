@@ -357,14 +357,23 @@ Before behavior-changing implementation:
 - [ ] No vague waivers remain.
 - [ ] Project-specific test commands are documented.
 - [ ] Local/staging services needed for integration tests are available.
-- [ ] Playwright can capture screenshots and produce `index.html` evidence for visible workflows.
+- [ ] `flow-integration-test` evidence lane is selected. Full lane can capture
+      screenshots and produce `index.html` for visible, multi-step,
+      auth/session/permission/tenant, provider/device/deploy,
+      external-side-effect, or high-impact workflows; lightweight/blocker lane
+      has concrete substitute evidence or unblock action.
 
 Before release or merge:
 
 - [ ] Unit tests pass.
 - [ ] Feature/API integration tests pass.
 - [ ] Migration/runtime enforcement is verified when schema changes exist.
-- [ ] Browser evidence exists for visible or multi-step workflows.
+- [ ] Full browser evidence exists for visible, multi-step,
+      auth/session/permission/tenant, provider/device/deploy,
+      external-side-effect, or high-impact workflows, or `BLOCKED` names the
+      exact unverified surface and minimum unblock action.
+- [ ] Lightweight evidence, when used, records the low-risk reason, substitute
+      checks, covered regression surface, and effectiveness metrics.
 - [ ] `test-review.md` and `business-flow-impact.md` are complete.
 - [ ] `team-review` has checked security, quality, tests, matrix coverage, and waiver quality.
 

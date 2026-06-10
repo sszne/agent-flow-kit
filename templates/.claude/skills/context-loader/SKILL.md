@@ -43,6 +43,8 @@ For tiny self-contained questions, load only the directly relevant files.
    - `docs/agent-flow/project-structure.md`
    - `docs/agent-flow/business-flows.md`
    - `docs/agent-flow/integration-scenarios.md`
+   - `docs/agent-flow/business-flow-integration-tests.md` when the task
+     touches baseline business-flow operation tests or suite evidence.
 5. If the task references an existing plan or implementation, read the relevant
    `docs/flow/{feature_name}/plan.md`, `implementation_report.md`, and
    integration evidence.
@@ -81,6 +83,9 @@ For tiny self-contained questions, load only the directly relevant files.
   Regression Surface Matrix, Test Design Matrix, Integration Coverage Contract,
   a Plan Review Requirement decision, and an approved current `plan-review.md`
   when review is required.
-- Visible or multi-step business workflows need Playwright integration evidence
-  or a concrete blocker.
+- Visible, multi-step, auth/session/permission/tenant, provider/device/deploy,
+  external-side-effect, or high-impact workflows need full
+  `flow-integration-test` evidence or a concrete `BLOCKED` result. Low-risk
+  non-visible changes may use lightweight evidence only with a concrete reason,
+  substitute checks, and covered regression surface.
 - Waivers must include a concrete reason or blocker.

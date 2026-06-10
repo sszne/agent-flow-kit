@@ -11,7 +11,10 @@ Transferable Claude/Codex workflow package for medium-sized repositories.
   instructions
 - CI matrix gate for required plan matrices
 - onboarding skills for new repositories
-- Playwright integration-test evidence gate
+- onboarding-derived business-flow integration regression suites that infer,
+  confirm, create, register, and run major operation tests on demand
+- conditional Playwright integration-test evidence gate with lightweight and
+  blocked lanes for low-risk or unavailable cases
 - high-impact `flow-plan-review` gate before large-scale or high-risk
   implementation, with optional review for smaller behavior changes
 - Goal Confirmation Gate that confirms the requester's desired user experience,
@@ -39,6 +42,14 @@ new repository. During onboarding, run these steps in order:
 2. `project-structure-survey`
 3. `business-flow-discovery`
 4. `integration-scenario-design`
+
+After onboarding, run `business-flow-integration-test` when the repository
+should have a callable regression suite for major business-flow operations. The
+skill explains the purpose, infers tests from the confirmed business flows,
+asks about unclear operations, accepts missing operations from the user, gets
+approval of the final list, creates executable tests, and registers an
+all-suite runner. This follow-up is deliberately separate from `flow-impl` so
+long baseline suites run only when invoked.
 
 `flow-document` is mandatory to run at the start of onboarding, but source
 documents are optional. If service requirement, proposal, design, or product
@@ -73,6 +84,58 @@ Companion business-flow diagram:
 ```text
 docs/agent-flow/business-flows.drawio
 ```
+
+Optional business-flow integration suite spec after the follow-up:
+
+```text
+docs/agent-flow/business-flow-integration-tests.md
+docs/agent-flow/business-flow-integration-test-runs/{run_id}/
+```
+
+### When Business-Flow Integration Tests Help
+
+This follow-up is useful when the risk is not an isolated function but whether
+the real business operation can still complete end to end.
+
+Use it especially:
+
+- right after onboarding, while the primary business-flow knowledge is fresh,
+  to turn "what must not break" into executable baseline tests;
+- before releases, to confirm auth, registration, delivery, reservation,
+  order, payment, search, or other multi-step flows still work;
+- after changing shared foundations such as auth middleware, permissions, API
+  clients, schema, date/time logic, mail, delivery, jobs, or provider wiring;
+- after larger refactors, to prove user-visible business outcomes survived the
+  internal restructuring;
+- after a repeated or costly regression, to make that full operation part of
+  the standard regression route;
+- when onboarding new engineers or agents, because
+  `docs/agent-flow/business-flow-integration-tests.md` becomes a living
+  specification of the main operations and how to run them.
+
+Do not use this for small copy/style changes or isolated unit-level behavior.
+Those should stay covered by focused unit, API, or feature tests. The split is:
+`flow-integration-test` proves the current implementation plan, while
+`business-flow-integration-test` proves the product's main business operations
+still work as a baseline suite.
+
+`flow-integration-test` itself is conditional:
+
+- **Full Gate Required**: visible UI, multi-step workflows,
+  auth/session/permission/tenant, provider/device/deploy, external side
+  effects, and high-impact release confidence require full Playwright evidence
+  or an explicit `BLOCKED` result.
+- **Lightweight Evidence Allowed**: API-only, internal logic, docs/skill-only,
+  static/build-only, or otherwise non-visible low-risk changes can use focused
+  substitute evidence when the concrete reason, substitute commands/reviews,
+  and covered regression surface are recorded.
+- **Blocked Early**: if a required full gate cannot run, stop with `BLOCKED`
+  and record blocker category, exact unverified surface, and minimum unblock
+  action.
+
+Every lane records effectiveness metrics such as issues found, whether a fix
+resulted, fix reference, whether another test would have caught it, elapsed
+time when available, token/work overhead when available, and blocker category.
 
 Behavior-changing work is blocked until the three Markdown onboarding documents
 exist. The `.drawio` file is a companion diagram for human review of the
@@ -249,6 +312,7 @@ Source document intake
   -> Project survey
   -> Business-flow discovery
   -> Integration-scenario design
+  -> Business-flow integration-test suite when requested
   -> /flow-start or /flow-plan
   -> /flow-plan-review when required or requested
   -> /flow-impl or team-implement
@@ -293,6 +357,7 @@ records the concrete blocker.
 | --- | --- | --- |
 | Load local context | `context-loader` skill | `context-loader` skill |
 | Source document intake | `/flow-document` | `flow-document` |
+| Business-flow regression suite | `/business-flow-integration-test` | `business-flow-integration-test` |
 | New-feature discovery | `/flow-start {feature}` | `flow-start {feature}` |
 | Existing behavior plan | `/flow-plan {request}` | `flow-plan {request}` |
 | Plan review gate | `/flow-plan-review {feature}` | `flow-plan-review {feature}` |

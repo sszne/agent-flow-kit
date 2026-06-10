@@ -2,7 +2,21 @@
 
 ## Purpose
 
-This document defines the integration-test gate for behavior-changing work. The goal is to make browser evidence, test review, and business-flow impact review explicit before a feature is allowed to pass.
+This document defines the integration-test gate for behavior-changing work. The goal is to make the required evidence lane, browser evidence when needed, test review, business-flow impact review, blockers, and usefulness metrics explicit before a feature is allowed to pass.
+
+## Evidence Lane Decision
+
+Choose one lane before spending browser-test budget:
+
+| Lane | Use when | Required evidence |
+| --- | --- | --- |
+| Full Gate Required | Visible UI, multi-step workflow, auth/session/permission/tenant, provider/device/deploy, external side effect, or high-impact release confidence is in scope | Playwright Test result, major-step screenshots, `index.html`, `result.md`, `test-review.md`, `business-flow-impact.md`, coverage mapping |
+| Lightweight Evidence Allowed | API-only, internal logic, docs/skill-only, static/build-only, or otherwise non-visible low-risk change | Concrete low-risk reason, substitute commands/reviews, covered regression surface, Integration Coverage Contract coverage or waiver |
+| Blocked Early | Full gate is required but runner, base URL, auth session, provider credential, device tunnel, safe test data, or equivalent dependency is unavailable | `BLOCKED` result, blocker category, exact unverified surface, minimum unblock action |
+
+Lightweight evidence must not bypass visible, multi-step,
+auth/session/permission/tenant, provider/device/deploy, external-side-effect, or
+high-impact evidence requirements.
 
 ## Runner Decision
 
@@ -30,6 +44,8 @@ Investigation
 
 ## Required Artifacts
 
+Full lane:
+
 ```text
 docs/flow/{feature_name}/integration-test/{run_id}/
   index.html
@@ -38,6 +54,13 @@ docs/flow/{feature_name}/integration-test/{run_id}/
   business-flow-impact.md
   screenshots/
 ```
+
+Lightweight lane: record the substitute evidence, covered regression surface,
+and metrics in `result.md`, the implementation report, or an equivalent
+feature evidence report.
+
+Blocked lane: record `BLOCKED`, blocker category, exact unverified surface, and
+minimum unblock action in `result.md` or the implementation report.
 
 ## Scenario Design
 
@@ -62,6 +85,12 @@ Each scenario must identify:
 
 Before browser-only verification, each Integration Coverage Contract row must have Feature/API integration, Unit, Browser, Migration, or explicit waiver evidence for required happy, exception, permission, boundary, side-effect, and regression cases.
 
+For lightweight lanes, replace the Playwright scenario table with substitute
+evidence that names the low-risk reason, commands/reviews, and covered
+regression surface. If any visible, multi-step, auth/session/permission/tenant,
+provider/device/deploy, external-side-effect, or high-impact surface remains,
+switch back to the full lane or record `BLOCKED`.
+
 For long or fragile flows, first draft the scenario in Webwright-style:
 
 1. Create a small exploratory Playwright script.
@@ -85,6 +114,7 @@ screenshots/03-PW-001-confirm-updated-status.png
 `index.html` is the canonical human-readable evidence summary. It must include:
 
 - feature name, plan version, timestamp, base URL, branch/commit
+- evidence lane and effectiveness metrics
 - commands executed and exit status
 - scenario result table
 - business-flow coverage table
@@ -93,6 +123,19 @@ screenshots/03-PW-001-confirm-updated-status.png
 - console/network errors or "None observed"
 - Playwright report/trace/video links when available
 - final gate status: `PASS`, `FAIL`, or `BLOCKED`
+
+Effectiveness metrics:
+
+```text
+evidence_lane: full | lightweight | blocked
+issues_found: count + severity list
+fix_resulted: yes | no
+fix_reference: commit / file / task / none
+would_other_tests_have_caught: yes | no | unknown
+elapsed_time_minutes: number | unknown
+token_or_work_overhead: estimate | unknown
+blocker_category: runner | base_url | auth_session | provider_credentials | device_tunnel | safe_test_data | none
+```
 
 ## Test Review
 
@@ -124,12 +167,15 @@ Review:
 
 The integration-test gate passes only when:
 
-- all required Playwright scenarios pass,
-- major-step screenshots exist,
-- `index.html` exists and reports `PASS`,
-- `test-review.md` exists,
-- `business-flow-impact.md` exists,
+- evidence lane is recorded,
+- full lane: all required Playwright scenarios pass,
+- full lane: major-step screenshots exist,
+- full lane: `index.html` exists and reports `PASS`,
+- full lane: `test-review.md` exists,
+- full lane: `business-flow-impact.md` exists,
+- lightweight lane: substitute evidence, covered regression surface, and low-risk reason are recorded, and no high-risk full-gate surface is skipped,
 - no unhandled Critical or High findings remain,
 - Medium findings are fixed, explicitly waived, or converted to follow-up tasks.
 
-Blocked browser execution is not a pass. It must be reported as `BLOCKED` with the unverified surfaces named.
+Blocked browser execution is not a pass. It must be reported as `BLOCKED` with
+blocker category, exact unverified surface, and minimum unblock action.

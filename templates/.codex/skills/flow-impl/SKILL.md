@@ -44,8 +44,10 @@ DIRECT execution as specified, then run integration evidence and review gates.
   an unplanned behavior or design choice.
 - Update both `plan.md` and `implementation_report.md` after each completed
   task.
-- For visible or multi-step workflows, run `flow-integration-test` before final
-  review.
+- Before final review, choose the `flow-integration-test` evidence lane.
+  Visible, multi-step, auth/session/permission/tenant, provider/device/deploy,
+  external-side-effect, or high-impact workflows require full evidence or
+  `BLOCKED`; low-risk non-visible changes may record lightweight evidence.
 
 ## Workflow
 
@@ -67,7 +69,7 @@ Phase 4: Refactor / Verify
   focused tests + lint/build + broader integration coverage
     ->
 Phase 5: Integration Evidence
-  flow-integration-test for visible or multi-step workflows
+  flow-integration-test lane decision: full / lightweight / blocked
     ->
 Phase 6: Report
   implementation_report.md + final summary with covered regression surfaces
@@ -92,6 +94,7 @@ Report:
 
 - what was implemented,
 - validation commands and results,
-- integration-test evidence path or concrete `BLOCKED`/`N/A` reason,
+- integration-test evidence lane, path if full, or concrete lightweight /
+  `BLOCKED` / `N/A` reason,
 - regression surfaces covered,
 - remaining risks.

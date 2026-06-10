@@ -32,7 +32,10 @@ Use this after a plan is frozen and approved. The main Codex agent remains the m
 - For TDD tasks, write Red tests before production code.
 - Keep implementation inside the approved scope. Ask the user if a new behavior or design choice is needed.
 - Update both `plan.md` and `implementation_report.md` as tasks complete.
-- For visible browser behavior or multi-step business workflows, run the `integration-test` skill after implementation and before final review.
+- Before final review, choose the `integration-test` evidence lane. Visible,
+  multi-step, auth/session/permission/tenant, provider/device/deploy,
+  external-side-effect, or high-impact workflows require full evidence or
+  `BLOCKED`; low-risk non-visible changes may record lightweight evidence.
 
 ## Workflow
 
@@ -128,9 +131,9 @@ pnpm exec playwright test
 npm run build
 ```
 
-For Laravel/PHP projects, use the equivalent PHPUnit/Pint/migration commands documented in the target repository. For visible behavior or multi-step business workflows, run Playwright integration evidence against the configured local base URL.
+For Laravel/PHP projects, use the equivalent PHPUnit/Pint/migration commands documented in the target repository. For visible, multi-step, auth/session/permission/tenant, provider/device/deploy, external-side-effect, or high-impact workflows, run full Playwright integration evidence against the configured local base URL or record `BLOCKED`. For low-risk non-visible changes, record lightweight substitute evidence and the covered regression surface.
 
-Required evidence:
+Full-lane required evidence:
 
 - `docs/flow/{feature_name}/integration-test/{run_id}/index.html`
 - major-step screenshots
@@ -147,7 +150,7 @@ Update `docs/flow/{feature_name}/implementation_report.md` with:
 - files changed,
 - tests and commands run,
 - browser/migration verification,
-- integration-test evidence index path,
+- integration-test evidence lane and index path when full,
 - Integration Coverage Contract rows satisfied or waived,
 - regression surfaces covered,
 - remaining blockers or judgment items.
@@ -162,7 +165,7 @@ Final response should include:
 
 ### Validation
 - PASS: {command}
-- PASS/BLOCKED/N/A: {integration-test evidence path or reason}
+- PASS/BLOCKED/N/A: {integration-test evidence lane, path if full, or lightweight/blocker reason}
 - BLOCKED/N/A: {reason}
 
 ### Remaining Risks

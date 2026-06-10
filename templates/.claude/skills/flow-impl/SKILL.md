@@ -19,8 +19,11 @@ Use the repo-local `.claude/commands/flow-impl.md` command contract.
   required, onboarding docs, and Bug Feedback Review for bug/regression work.
 - Same execution: task-by-task, TDD Red before Green for TDD tasks, update plan
   and implementation report after each task.
-- Same evidence: run `/flow-integration-test` for visible or multi-step
-  workflows before final review.
+- Same evidence: choose the `/flow-integration-test` evidence lane before final
+  review. Visible, multi-step, auth/session/permission/tenant,
+  provider/device/deploy, external-side-effect, or high-impact workflows
+  require full evidence or `BLOCKED`; low-risk non-visible changes may record
+  lightweight evidence.
 
 When this skill is invoked in Claude Code, execute `/flow-impl` semantics rather
 than inventing a separate implementation flow.

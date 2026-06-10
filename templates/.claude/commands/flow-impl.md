@@ -23,7 +23,10 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 - Update task checkboxes in plan.md as each task completes.
 - Update the implementation report after each task -- do NOT defer to the end.
 - All tests must pass before reporting completion.
-- For visible browser behavior or multi-step business workflows, `/flow-integration-test` must pass before final review.
+- Before final review, choose the `/flow-integration-test` evidence lane.
+  Visible, multi-step, auth/session/permission/tenant, provider/device/deploy,
+  external-side-effect, or high-impact workflows require full evidence or
+  `BLOCKED`; low-risk non-visible changes may record lightweight evidence.
 - Do not start production implementation unless the frozen plan contains Business Flow Matrix, Regression Surface Matrix, and Test Design Matrix for behavior-changing work.
 - Do not start production implementation unless the frozen plan contains an Integration Coverage Contract for behavior-changing work.
 - Do not start behavior-changing implementation unless `docs/agent-flow/project-structure.md`, `docs/agent-flow/business-flows.md`, and `docs/agent-flow/integration-scenarios.md` exist.
@@ -102,7 +105,10 @@ Verify the plan includes the required quality gates:
 - Agent-flow onboarding docs for behavior-changing work
 - Bug Feedback Review for bug/regression work
 - Migration/runtime enforcement notes when schema changes exist
-- Playwright Integration Test Plan when visible browser behavior or multi-step business workflows exist
+- Evidence lane decision for `flow-integration-test`; full Playwright
+  Integration Test Plan when visible, multi-step,
+  auth/session/permission/tenant, provider/device/deploy, external-side-effect,
+  or high-impact workflows exist
 
 If any required section is missing, stop and update the plan before coding.
 
@@ -163,9 +169,9 @@ For each task in the plan (respecting dependency order):
 
 ### Step 5: Run integration evidence gates
 
-Run the server-side Feature/API integration tests required by the Integration Coverage Contract. Then, for visible behavior, forms, modals, tables, filters, auth redirects, displayed values, or multi-step business workflows, run `/flow-integration-test`.
+Run the server-side Feature/API integration tests required by the Integration Coverage Contract. Then choose the `/flow-integration-test` evidence lane. For visible behavior, forms, modals, tables, filters, auth redirects, displayed values, multi-step business workflows, auth/session/permission/tenant, provider/device/deploy, external-side-effect, or high-impact workflows, run the full lane or record `BLOCKED`. For low-risk non-visible changes, record lightweight substitute evidence and the covered regression surface.
 
-Required evidence:
+Full-lane required evidence:
 
 - Feature/API integration command output
 - `docs/flow/{feature_name}/integration-test/{run_id}/index.html`
@@ -175,7 +181,7 @@ Required evidence:
 
 Do not continue to final review if the integration-test gate is `FAIL` or `BLOCKED`.
 
-If there is no visible or multi-step browser workflow, document the concrete low-risk reason in `implementation_report.md`.
+If lightweight evidence is used, document the concrete low-risk reason, substitute commands/reviews, covered regression surface, and effectiveness metrics in `implementation_report.md`.
 
 ## Phase 6: REVIEW
 
@@ -211,7 +217,7 @@ pnpm exec playwright test
 npm run build
 ```
 
-For Laravel/PHP projects, use the equivalent focused and broad commands such as `./vendor/bin/phpunit`, `./vendor/bin/pint --dirty`, and migration validation. For visible changes or multi-step business workflows, run `/flow-integration-test` against the configured local base URL. If blocked, record the blocker and the unverified surface; do not report browser verification as passed.
+For Laravel/PHP projects, use the equivalent focused and broad commands such as `./vendor/bin/phpunit`, `./vendor/bin/pint --dirty`, and migration validation. For visible, multi-step, auth/session/permission/tenant, provider/device/deploy, external-side-effect, or high-impact workflows, run the full `/flow-integration-test` lane against the configured local base URL. If blocked, record the blocker category, exact unverified surface, and minimum unblock action; do not report browser verification as passed. For low-risk non-visible changes, record lightweight substitute evidence and the covered regression surface.
 
 ### Step 10: Readiness checklist verification
 
@@ -222,7 +228,7 @@ Re-verify all items in plan.md section "4. READINESS" checklist are satisfied.
 Complete the implementation report with:
 - All task details
 - Quality check results
-- Playwright integration evidence path and gate status
+- Integration-test evidence lane, path when full, gate status, and metrics
 - Remaining tasks (if any)
 - Observations and next actions
 
@@ -302,8 +308,9 @@ Present the completed implementation report to the user with:
 - [ ] Business Flow Matrix coverage is satisfied
 - [ ] Regression Surface Matrix coverage is satisfied
 - [ ] Integration Coverage Contract is satisfied, or uncovered rows have explicit waivers/blockers
-- [ ] Playwright integration-test evidence completed or blocker documented
-- [ ] Integration-test `index.html`, screenshots, test review, and business-flow impact review are linked when applicable
+- [ ] Integration-test evidence lane completed or blocker documented
+- [ ] Full lane: `index.html`, screenshots, test review, and business-flow impact review are linked when applicable
+- [ ] Lightweight lane: substitute evidence, low-risk reason, covered regression surface, and metrics are recorded when applicable
 - [ ] Migration/runtime enforcement verified when applicable
 
 ## Remaining Tasks

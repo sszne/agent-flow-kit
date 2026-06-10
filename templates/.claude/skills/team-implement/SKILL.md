@@ -192,7 +192,10 @@ Spawn teammates:
    - Cover affected routes/API handlers/shared behavior with Feature/API integration tests
    - Cover validation, permission/ownership, missing relation, boundary, side-effect, and regression cases required by the Integration Coverage Contract
    - Identify unit-only cases separately
-   - Identify browser verification steps for visible or multi-step behavior
+   - Identify the integration-test evidence lane: full for visible,
+     multi-step, auth/session/permission/tenant, provider/device/deploy,
+     external-side-effect, or high-impact behavior; lightweight only for
+     low-risk non-visible work; blocked when a required full lane cannot run
    - Run targeted project-specific test commands after each test file
    - Report failing tests to the relevant implementer
 
@@ -257,7 +260,7 @@ Wait for all teammates to complete their tasks.
 - Integration Coverage Contract coverage
 - Focused tests
 - Migration enforcement check when schema changes
-- Browser verification requirements for visible behavior
+- Integration-test evidence lane requirements: full / lightweight / blocked
 - Formatting/linting before completion
 
 ---
@@ -295,7 +298,7 @@ For Laravel/PHP projects, use the equivalent PHPUnit/Pint/migration commands doc
 - Integration Coverage Contract: PASS / FAIL
 - Focused tests: PASS / FAIL
 - Lint/format: PASS / FAIL
-- Browser verification: PASS / BLOCKED / N/A
+- Integration-test evidence lane: full / lightweight / blocked / N/A
 - Migration enforcement: PASS / BLOCKED / N/A
 
 ### Next Steps

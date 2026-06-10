@@ -17,7 +17,7 @@ Investigation
   -> Green implementation
   -> Refactor
   -> Unit/Feature/browser/migration verification
-  -> Playwright integration evidence
+  -> Integration evidence lane: full Playwright / lightweight / blocked
   -> Test review and business-flow impact review
   -> Bug feedback loop for regressions
   -> Review
@@ -33,7 +33,10 @@ Behavior-changing work must not proceed to implementation until the plan include
 - Integration Coverage Contract
 - Migration/runtime enforcement notes when schema changes exist
 - Browser verification plan when visible behavior changes
-- Playwright Integration Test Plan when visible behavior or multi-step business workflows change
+- Evidence lane decision for `flow-integration-test`; full Playwright
+  Integration Test Plan when visible behavior, multi-step business workflows,
+  auth/session/permission/tenant behavior, provider/device/deploy behavior,
+  external side effects, or high-impact release confidence are in scope
 
 ## Business Flow Matrix
 
@@ -69,6 +72,13 @@ Behavior-changing work must not proceed to implementation until the plan include
 
 ## Playwright Integration Test Plan
 
+Use full Playwright evidence for visible UI, multi-step workflow,
+auth/session/permission/tenant, provider/device/deploy, external side effect,
+or high-impact release confidence. Use lightweight evidence only for API-only,
+internal logic, docs/skill-only, static/build-only, or other non-visible
+low-risk changes. If a required full gate cannot run, record `BLOCKED` with
+blocker category, exact unverified surface, and minimum unblock action.
+
 | Scenario ID | Business flow | Entry point | Major steps requiring screenshots | Expected result | Risk covered |
 | --- | --- | --- | --- | --- | --- |
 | PW-001 | {flow} | {URL/modal/state} | {step names} | {expected browser-visible state} | {risk} |
@@ -101,7 +111,11 @@ docs/flow/{feature_name}/integration-test/{run_id}/
 - `team-review` is now the required review gate for behavior-changing work; `/review` is supplemental for small low-risk checks.
 - CI includes `agent-flow-matrix.yml`, which blocks behavior-affecting PRs unless a frozen `docs/flow/{feature}/plan.md` contains the required matrices and Integration Coverage Contract. Browser-visible file changes also require a Playwright Integration Test Plan.
 - Legacy project-local `kairo-*` commands and `sdd-*` skills have been removed. References now point to `/flow-plan` and `/flow-impl`, and the CI gate fails if those files are reintroduced.
-- `/flow-integration-test` defines the Playwright evidence gate: major-step screenshots, `index.html`, test review, and business-flow impact review must pass before final review.
+- `/flow-integration-test` defines conditional evidence lanes: full Playwright
+  evidence with major-step screenshots, `index.html`, test review, and
+  business-flow impact review for high-value workflows; lightweight substitute
+  evidence for low-risk non-visible work; and early `BLOCKED` for unavailable
+  required lanes.
 - `/flow-plan` includes a Bug Feedback Review for bug reports and regressions. When a previous plan exists, the agent classifies the failed flow step and updates project-specific flow docs when possible. Non-preventable bugs are appended to `docs/agent-flow/bug-knowledge.md`.
 - Webwright was evaluated as a replacement candidate. The workflow keeps Playwright Test as the deterministic gate and adopts Webwright-style code-as-action only for crafting long browser scenarios before converting them into Playwright specs.
 
@@ -137,7 +151,10 @@ environment, test, and review controls should be prepared.
 - Resolved: `team-review` is mandatory for behavior-changing work; `/review` is supplemental.
 - Resolved: CI enforces required plan matrices for behavior-affecting PRs.
 - Resolved: project-local `kairo-*` commands and `sdd-*` skills are abolished; canonical replacements are `/flow-plan` and `/flow-impl`.
-- Resolved: visible/multi-step workflows require `/flow-integration-test` evidence before final review.
+- Resolved: visible, multi-step, auth/session/permission/tenant,
+  provider/device/deploy, external-side-effect, and high-impact workflows
+  require full `/flow-integration-test` evidence or explicit `BLOCKED`;
+  low-risk non-visible changes may use documented lightweight evidence.
 - Resolved: Webwright is not a full Playwright Test replacement for this gate; use it as a scenario-crafting pattern when it reduces agent/browser turns.
 - Decide whether `.docs/` should be archived after still-current content is moved to `docs/`.
 - Decide whether model names should be hardcoded (`gpt-5.5-codex`) or configured through a local alias such as `CODEX_DEEP_MODEL`.

@@ -34,6 +34,10 @@ Create `docs/agent-flow/integration-scenarios.md`.
   callbacks, remote data, env/secrets/bindings, auth/session cookies, or
   production-only behavior, include runtime-causality scenarios that distinguish
   shallow checks from the valid happy path and side-effect path.
+- Identify candidate major operation tests that can later be confirmed and
+  made executable by `business-flow-integration-test`. Do not treat those
+  candidates as approved executable tests until that follow-up skill gets user
+  confirmation.
 
 ## Workflow
 
@@ -46,6 +50,8 @@ Create `docs/agent-flow/integration-scenarios.md`.
 6. Define seed data and reset strategy.
 7. Define runtime/provider smoke and causality checks.
 8. Define pass/fail evidence requirements.
+9. Record business-flow integration-test candidates and open questions for the
+   post-onboarding `business-flow-integration-test` follow-up.
 
 ## Output Template
 
@@ -68,6 +74,10 @@ Create `docs/agent-flow/integration-scenarios.md`.
 | Scenario ID | Runtime surface | Trigger / risk | Evidence command or source | Representative paths | Expected classification |
 | --- | --- | --- | --- | --- | --- |
 | RUNTIME-001 | {deploy/provider/runtime} | {production-only, browser-network, auth/session, binding, remote data, provider callback} | {smoke command, provider log, deploy version check, read-only diagnostic} | {preflight/invalid/valid/side-effect path} | code / environment-ops / data / deploy artifact / provider-runtime / inconclusive |
+
+## Business Flow Integration Test Candidates
+| Candidate ID | Business flow | Continuous operation | Suggested level | Data / environment needs | Questions before executable test |
+| --- | --- | --- | --- | --- | --- |
 
 ## Integration Coverage Contract
 | Flow ID | Required coverage | Required case types | Scenario IDs | Waiver / blocker |

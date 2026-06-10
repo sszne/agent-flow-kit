@@ -10,10 +10,11 @@
 | SCN-005 | Documentation review | AFK-003 | Happy, boundary, regression, side effect | `business-flow-discovery` skill docs | Current template docs | Confirm matrix output and draw.io artifact expectations match | Business-flow docs remain canonical and diagram is cross-linked | Review notes |
 | SCN-006 | XML validation | AFK-003 | Exception, boundary, regression | `docs/agent-flow/business-flows.drawio` in a target onboarding run | Generated draw.io file | Parse diagram as XML and check `<mxfile>` root | Diagram is structurally valid draw.io XML | Command output |
 | SCN-007 | Matrix gate smoke | AFK-005, AFK-006, AFK-009 | Happy, exception, regression | `agent-flow-matrix-gate.py` | Temporary git fixture when gate logic changes | Create risky diff with optional review, high-impact diff without review, high-impact diff with approved review, and display-only style/layout/text diffs | Gate accepts optional-review smaller changes, rejects missing review for high-impact changes, accepts complete required-review artifacts, and accepts classified display-only changes | Fixture output |
-| SCN-008 | Evidence artifact review | AFK-008 | Happy, side effect, regression | `docs/flow/{feature}/integration-test/{run_id}/` | Feature with visible workflow | Confirm index, screenshots, result, test review, and business-flow impact docs exist | Evidence is auditable | Artifact review |
+| SCN-008 | Evidence artifact review | AFK-008 | Happy, side effect, regression | `docs/flow/{feature}/integration-test/{run_id}/` and implementation report | Feature with visible/high-risk workflow or low-risk non-visible change | Confirm evidence lane is recorded; full lane has index, screenshots, result, test review, and business-flow impact docs; lightweight lane has substitute evidence and covered regression surface; blocked lane names blocker and unverified surface | Evidence is auditable and lane-appropriate | Artifact/review notes |
 | SCN-009 | Planning precision review | AFK-005, AFK-006, AFK-009 | Happy, exception, permission, boundary, side effect, regression | `flow-plan` templates and generated `docs/flow/{feature}/plan.md` | Behavior-changing request with possible ambiguity or provider evidence risk | Confirm Goal Confirmation, `Questioning Decision`, `No Questions Rationale` when applicable, onboarding/UI precision, provider/auth/deploy evidence lanes, and prevention taxonomy classification | Plan freezes only after requester goal, ambiguity, valid-path evidence lanes, and reusable bug patterns are resolved or blocked | Plan review notes |
 | SCN-010 | Documentation review | AFK-002, AFK-003, AFK-004, AFK-010 | Happy, exception, boundary, side effect, regression | `flow-document` and onboarding skill docs | Current template docs | Confirm source documents create a claim ledger, not source-of-truth, and unconfirmed claims cannot enter matrices or required scenarios | Claim statuses, source priority, and downstream restrictions are explicit | Review notes |
 | SCN-011 | Matrix gate fixture | AFK-005, AFK-009 | Happy, exception, boundary, regression | `agent-flow-matrix-gate.py` | Temporary git repo with browser-affecting behavior change and frozen plans with/without design-system applicability | Run gate against missing-section and complete-section variants | Missing `Design System Applicability` fails; complete section with searched paths and fallback/design evidence passes | Fixture output |
+| SCN-012 | Documentation / manifest review | AFK-002, AFK-004, AFK-008, AFK-011 | Happy, exception, permission, boundary, side effect, regression | `business-flow-integration-test` skill docs and generated suite spec contract | Current template docs | Confirm onboarding hands off to a user-confirmed business-flow operation suite, executable tests are not created before approval, one all-suite runner is registered, and feature-specific `flow-integration-test` remains separate | Entry skill exists for Claude/Codex, command exists for Claude, and suite evidence contract is explicit | Review notes and installer dry-run |
 
 ## Playwright Scenarios
 | Scenario ID | Entry point | Major steps requiring screenshots | Assertions | Screenshot names |
@@ -31,6 +32,12 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 | SRV-004 | Static XML parse | Exception, boundary | Generated `.drawio` file | Generated diagram artifact | XML parser accepts the file and root is draw.io-compatible | AFK-003 |
 | SRV-005 | Git fixture | Happy, exception, regression | `agent-flow-matrix-gate.py` | Temporary git repo with risky diffs | Optional-review plan passes for smaller behavior changes; high-impact paths require approved review; missing markers fail; display-only style/layout/text diffs pass without a plan | AFK-005, AFK-006, AFK-009 |
 | SRV-006 | Git fixture | Happy, exception, boundary, regression | `agent-flow-matrix-gate.py` | Temporary git repo with browser-affecting diff | Frontend behavior plan without `Design System Applicability` fails; equivalent plan with searched-path evidence passes | AFK-005, AFK-009 |
+| SRV-007 | Installer smoke | Happy, exception, regression | `install.py --dry-run` | Temporary target directory | Manifest validation finds `business-flow-integration-test` for both Claude and Codex | AFK-001, AFK-011 |
+
+## Business Flow Integration Test Candidates
+| Candidate ID | Business flow | Continuous operation | Suggested level | Data / environment needs | Questions before executable test |
+| --- | --- | --- | --- | --- | --- |
+| BFIT-CANDIDATE-001 | Target repo primary confirmed flow | Major operation sequence inferred from onboarding docs | Playwright or Feature/API | Target-specific seed/reset, auth, time, provider, or deployed-domain requirements | Confirmed by the user during `business-flow-integration-test` before executable tests are created |
 
 ## Integration Coverage Contract
 | Flow ID | Required coverage | Required case types | Scenario IDs | Waiver / blocker |
@@ -44,9 +51,10 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
 | AFK-005 frontend design-system planning | Template, plan-review, and matrix-gate validation of `Design System Applicability`, component matching, searched paths, and concrete design waivers | Happy, exception, boundary, regression | SCN-011, SRV-006 | Automated visual/design semantic proof is out of scope because design-system matching is a natural-language workflow; the plan section, component matrix, and review gate remain the enforcement layer. |
 | AFK-006 | Plan-review marker validation when review is required | Happy, exception, regression | SCN-007, SRV-005 | Cross-agent execution may be blocked by unavailable opposite agent; same-agent fallback must record the blocker. Smaller localized behavior changes, typo fixes, formatting-only edits, and docs-only edits may mark review optional when they do not alter high-impact surfaces. |
 | AFK-007 | Feature-specific planned validation | Happy, exception, permission, boundary, side effect, regression | Defined in each feature plan | Feature-specific waiver required if omitted |
-| AFK-008 | Evidence artifact review when visible workflow exists | Happy, exception, permission, boundary, side effect, regression | SCN-008, PW-001 | Blocked only when no runnable browser/app exists; blocker must name surface |
+| AFK-008 | Conditional evidence-lane review; full Playwright artifact check when visible/high-risk workflow exists | Happy, exception, permission, boundary, side effect, regression | SCN-008, PW-001 | Lightweight evidence is allowed only for non-visible low-risk changes with substitute checks and covered regression surface; required full evidence can be blocked only with blocker category, exact unverified surface, and minimum unblock action |
 | AFK-009 | Gate smoke or fixture checks, including display-only bypass and behavior-change rejection | Happy, exception, boundary, regression | SCN-003, SCN-007, SRV-003, SRV-005 | None for gate logic changes |
 | AFK-010 | Source-document intake template review plus downstream guardrail review | Happy, exception, boundary, side effect, regression | SCN-010 | Automated semantic validation is out of scope because claim classification depends on repo evidence and user confirmation |
+| AFK-011 | Business-flow integration suite template, command, manifest, and installer review; generated target-repo suite execution when created | Happy, exception, permission, boundary, side effect, regression | SCN-012, SRV-007 | Kit-level browser execution is out of scope because this repository has no application under test; target repos must run the registered suite and record PASS/FAIL/BLOCKED evidence. |
 
 ## Seed / Reset Strategy
 - Use temporary directories under `/tmp` for installer smoke checks.
@@ -67,6 +75,38 @@ No Playwright scenario is required for the current Agent Flow Kit repository unl
   review.
 - Browser evidence root when applicable: `docs/flow/{feature}/integration-test/{run_id}/`.
 - Required browser files when applicable: `index.html`, `result.md`, `test-review.md`, `business-flow-impact.md`, `screenshots/`.
+- Business-flow baseline suite spec:
+  `docs/agent-flow/business-flow-integration-tests.md`.
+- Business-flow baseline suite evidence when run:
+  `docs/agent-flow/business-flow-integration-test-runs/{run_id}/`.
+
+### Integration-Test Evidence Lanes
+
+| Lane | Use when | Required evidence |
+| --- | --- | --- |
+| Full Gate Required | Visible UI, multi-step workflow, auth/session/permission/tenant, provider/device/deploy, external side effect, or high-impact release confidence is in scope | Playwright Test result, major-step screenshots, `index.html`, `result.md`, `test-review.md`, `business-flow-impact.md`, coverage mapping |
+| Lightweight Evidence Allowed | API-only, internal logic, docs/skill-only, static/build-only, or otherwise non-visible low-risk change | Concrete low-risk reason, substitute commands/reviews, covered regression surface, Integration Coverage Contract coverage or waiver |
+| Blocked Early | Full gate is required but runner, base URL, auth session, provider credential, device tunnel, safe test data, or equivalent dependency is unavailable | `BLOCKED` result, blocker category, exact unverified surface, minimum unblock action |
+
+Lightweight evidence must not bypass visible, multi-step,
+auth/session/permission/tenant, provider/device/deploy, external-side-effect, or
+high-impact evidence requirements.
+
+### Effectiveness Metrics
+
+Record these keys for every full, lightweight, or blocked lane so operations
+can evaluate whether the gate finds defects worth its overhead:
+
+```text
+evidence_lane: full | lightweight | blocked
+issues_found: count + severity list
+fix_resulted: yes | no
+fix_reference: commit / file / task / none
+would_other_tests_have_caught: yes | no | unknown
+elapsed_time_minutes: number | unknown
+token_or_work_overhead: estimate | unknown
+blocker_category: runner | base_url | auth_session | provider_credentials | device_tunnel | safe_test_data | none
+```
 
 ## Planning Evidence Rules
 

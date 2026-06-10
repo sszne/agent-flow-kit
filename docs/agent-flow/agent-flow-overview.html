@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Flow 全体像</title>
+  <link rel="icon" href="data:image/gif;base64,R0lGODlhAQABAAAAACw=">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6f8fb;
+      --surface: #ffffff;
+      --surface-strong: #eef5f1;
+      --ink: #17211b;
+      --muted: #5a665f;
+      --line: #ccd7d1;
+      --green: #0d725a;
+      --green-soft: #d9efe8;
+      --blue: #315caa;
+      --blue-soft: #dce7ff;
+      --amber: #a76500;
+      --amber-soft: #fff0cc;
+      --red: #ad3d32;
+      --red-soft: #ffe4df;
+      --violet: #6551a8;
+      --violet-soft: #e9e4ff;
+      --shadow: 0 18px 40px rgba(25, 42, 34, 0.10);
+      --mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+      --body: "Avenir Next", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      --serif: "Hiragino Mincho ProN", "Yu Mincho", "Georgia", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(90deg, rgba(23, 33, 27, 0.035) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(23, 33, 27, 0.035) 1px, transparent 1px),
+        var(--paper);
+      background-size: 28px 28px;
+      color: var(--ink);
+      font-family: var(--body);
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.18em;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 10px 0 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 4px 4px 0 var(--green);
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .quick-nav a {
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      text-decoration: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 28px;
+      border-bottom: 3px solid var(--ink);
+      padding-bottom: 28px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 880px;
+      font-family: var(--serif);
+      font-size: clamp(38px, 6vw, 82px);
+      font-weight: 800;
+    }
+
+    .lead {
+      max-width: 780px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .keep {
+      white-space: nowrap;
+    }
+
+    .hero-note {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-left: 6px solid var(--green);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .hero-note p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section {
+      margin-top: 42px;
+    }
+
+    .section-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-family: var(--serif);
+      font-size: clamp(26px, 3vw, 42px);
+    }
+
+    .section-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .flow-map {
+      position: relative;
+      overflow-x: auto;
+      padding: 8px 2px 18px;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      min-width: 980px;
+      align-items: start;
+    }
+
+    .lane {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .lane-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 2px 8px;
+      border-bottom: 2px solid var(--ink);
+      font-weight: 800;
+    }
+
+    .lane-title span {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .node {
+      position: relative;
+      min-height: 116px;
+      padding: 15px 15px 14px;
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--green);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 10px 22px rgba(25, 42, 34, 0.08);
+    }
+
+    .node::after {
+      content: "";
+      position: absolute;
+      left: 30px;
+      bottom: -13px;
+      width: 2px;
+      height: 12px;
+      background: var(--line);
+    }
+
+    .node:last-child::after,
+    .node.no-tail::after {
+      display: none;
+    }
+
+    .node h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .node p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .node .id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .node.blue {
+      border-top-color: var(--blue);
+    }
+
+    .node.amber {
+      border-top-color: var(--amber);
+    }
+
+    .node.red {
+      border-top-color: var(--red);
+    }
+
+    .node.violet {
+      border-top-color: var(--violet);
+    }
+
+    .joiner {
+      display: grid;
+      place-items: center;
+      min-height: 58px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.52);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .decision {
+      border-color: rgba(167, 101, 0, 0.45);
+      border-top-color: var(--amber);
+      background:
+        linear-gradient(135deg, var(--amber-soft), rgba(255, 255, 255, 0.96) 42%),
+        var(--surface);
+    }
+
+    .gate {
+      border-color: rgba(173, 61, 50, 0.38);
+      border-top-color: var(--red);
+      background:
+        linear-gradient(135deg, var(--red-soft), rgba(255, 255, 255, 0.96) 44%),
+        var(--surface);
+    }
+
+    .artifact {
+      border-color: rgba(13, 114, 90, 0.34);
+      border-top-color: var(--green);
+      background:
+        linear-gradient(135deg, var(--green-soft), rgba(255, 255, 255, 0.96) 45%),
+        var(--surface);
+    }
+
+    .side-rail {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .rail-item {
+      min-height: 108px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-strong);
+    }
+
+    .rail-item strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .rail-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .swatch {
+      width: 13px;
+      height: 13px;
+      border-radius: 3px;
+      background: var(--green);
+    }
+
+    .swatch.blue {
+      background: var(--blue);
+    }
+
+    .swatch.amber {
+      background: var(--amber);
+    }
+
+    .swatch.red {
+      background: var(--red);
+    }
+
+    .swatch.violet {
+      background: var(--violet);
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .problem {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 8px 18px rgba(25, 42, 34, 0.06);
+    }
+
+    .problem .num {
+      display: inline-grid;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 12px;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--ink);
+      color: white;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .problem h3 {
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    .problem p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .human-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .human-table th,
+    .human-table td {
+      padding: 15px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .human-table th {
+      background: var(--ink);
+      color: white;
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+
+    .human-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .human-table td:first-child {
+      width: 22%;
+      font-weight: 800;
+    }
+
+    .human-table td {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .human-table code,
+    .node code,
+    .problem code,
+    .artifact-list code {
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+      background: #edf1f4;
+      color: #22332b;
+      font-family: var(--mono);
+      font-size: 0.9em;
+    }
+
+    .artifact-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .artifact-list article {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .artifact-list h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .artifact-list ul {
+      margin: 0;
+      padding-left: 19px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .callout {
+      display: grid;
+      grid-template-columns: 90px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+      margin-top: 24px;
+      padding: 18px;
+      border: 1px solid rgba(49, 92, 170, 0.32);
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--blue-soft), var(--surface) 52%);
+    }
+
+    .callout strong {
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .section-header {
+        grid-template-columns: 1fr;
+      }
+
+      .problem-grid,
+      .artifact-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .side-rail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .shell {
+        width: min(100% - 22px, 1180px);
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .quick-nav {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        gap: 20px;
+        padding-bottom: 22px;
+      }
+
+      .lead {
+        font-size: 16px;
+      }
+
+      .problem-grid,
+      .artifact-list,
+      .side-rail {
+        grid-template-columns: 1fr;
+      }
+
+      .human-table,
+      .human-table thead,
+      .human-table tbody,
+      .human-table tr,
+      .human-table th,
+      .human-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .human-table thead {
+        display: none;
+      }
+
+      .human-table tr {
+        padding: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .human-table tr:last-child {
+        border-bottom: 0;
+      }
+
+      .human-table td {
+        min-width: 0;
+        padding: 7px 0;
+        border-bottom: 0;
+      }
+
+      .human-table td:first-child {
+        width: auto;
+        padding-top: 0;
+        color: var(--ink);
+        font-size: 16px;
+      }
+
+      .human-table td:nth-child(2)::before,
+      .human-table td:nth-child(3)::before {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .human-table td:nth-child(2)::before {
+        content: "AI が準備できること";
+      }
+
+      .human-table td:nth-child(3)::before {
+        content: "人が判断・指示すること";
+      }
+
+      .callout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .node,
+      .problem,
+      .rail-item,
+      .artifact-list article {
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .node:hover,
+      .problem:hover,
+      .rail-item:hover,
+      .artifact-list article:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(25, 42, 34, 0.12);
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .shell {
+        width: 100%;
+        padding: 0;
+      }
+
+      .quick-nav {
+        display: none;
+      }
+
+      .flow-map {
+        overflow: visible;
+      }
+
+      .flow-grid {
+        min-width: 0;
+      }
+
+      .node,
+      .problem,
+      .rail-item,
+      .artifact-list article,
+      .hero-note,
+      .human-table {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar" aria-label="Page navigation">
+      <div class="brand">
+        <span class="mark">AF</span>
+        <span>Agent Flow Kit overview</span>
+      </div>
+      <nav class="quick-nav" aria-label="Sections">
+        <a href="#map">全体図</a>
+        <a href="#problems">解決できる課題</a>
+        <a href="#human">人が判断する箇所</a>
+        <a href="#artifacts">成果物</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Plan first, evidence last</p>
+        <h1>Agent Flow は、<span class="keep">判断・実装・検証</span>を同じ証拠でつなぐ作業導線です。</h1>
+        <p class="lead">
+          コードを書く前に業務フロー、回帰面、検証契約を固定し、実装後は証拠とレビューで閉じます。
+          AI に任せる範囲を広げつつ、人が決めるべき意思決定を見失わないためのキットです。
+        </p>
+      </div>
+      <aside class="hero-note">
+        <strong>この HTML の見方</strong>
+        <p>
+          上段は導入からレビューまでの流れです。赤いノードはゲート、黄色いノードは分岐判断、
+          緑のノードは後続作業の根拠になる成果物を表します。
+        </p>
+      </aside>
+    </section>
+
+    <section class="section" id="map">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Overall map</p>
+          <h2>全体フロー図</h2>
+        </div>
+        <p>
+          Agent Flow は、初回オンボーディングでプロジェクト知識を作り、以後の変更では
+          `flow-plan` を中心に計画、実装、統合証拠、レビューを接続します。
+        </p>
+      </div>
+
+      <div class="flow-map" aria-label="Agent Flow overview diagram">
+        <div class="flow-grid">
+          <div class="lane">
+            <div class="lane-title">1. Knowledge base <span>導入・棚卸し</span></div>
+            <article class="node blue">
+              <h3><span class="id">AFK-010</span> flow-document</h3>
+              <p>要件資料や提案資料を候補証拠として取り込み、確認済み・矛盾・未来範囲・要確認に分類します。</p>
+            </article>
+            <article class="node">
+              <h3><span class="id">AFK-002</span> project-structure-survey</h3>
+              <p>実ソース、ルート、スキーマ、テスト、デプロイ情報から構造・入口・運用リスクを記録します。</p>
+            </article>
+            <article class="node">
+              <h3><span class="id">AFK-003</span> business-flow-discovery</h3>
+              <p>業務フロー、通常系、例外、権限、境界、side effect、回帰面を行列化します。</p>
+            </article>
+            <article class="node artifact">
+              <h3><span class="id">AFK-004</span> integration-scenario-design</h3>
+              <p>各フローを Unit、Feature/API、Playwright、runtime/provider、manual blocker に割り当てます。</p>
+            </article>
+          </div>
+
+          <div class="lane">
+            <div class="lane-title">2. Planning gates <span>判断・計画</span></div>
+            <article class="node decision">
+              <h3><span class="id">START</span> flow-start or flow-plan</h3>
+              <p><code>flow-start</code> は新規発見、<code>flow-plan</code> は既存挙動変更・バグ・回帰・業務フロー変更で使います。</p>
+            </article>
+            <article class="node gate">
+              <h3><span class="id">GATE</span> Goal and questioning</h3>
+              <p>目的、成功条件、根本原因対象、質問の要否を明示し、推測だけで計画を凍結しないようにします。</p>
+            </article>
+            <article class="node gate">
+              <h3><span class="id">GATE</span> Risk-specific checks</h3>
+              <p>runtime causality、bug feedback、frontend design-system、provider/auth/deploy 証拠レーンを必要時に走らせます。</p>
+            </article>
+            <article class="node artifact">
+              <h3><span class="id">PLAN</span> Frozen plan</h3>
+              <p>Business Flow Matrix、Regression Surface Matrix、Test Design Matrix、Integration Coverage Contract を含む計画を保存します。</p>
+            </article>
+            <article class="node decision no-tail">
+              <h3><span class="id">REVIEW?</span> Plan Review Requirement</h3>
+              <p>大規模・高影響なら <code>flow-plan-review</code> 必須。小さな局所変更なら理由付きで任意にできます。</p>
+            </article>
+          </div>
+
+          <div class="lane">
+            <div class="lane-title">3. Execution loop <span>実装・証拠・レビュー</span></div>
+            <article class="node red">
+              <h3><span class="id">AFK-006</span> flow-plan-review</h3>
+              <p>高影響計画を実装前に別視点で確認し、見落とした DB、権限、外部依存、テストリスクを検出します。</p>
+            </article>
+            <article class="node violet">
+              <h3><span class="id">AFK-007</span> flow-impl / team-implement</h3>
+              <p>凍結計画のタスク順に実装し、必要なら TDD の Red から始め、実装レポートを更新します。</p>
+            </article>
+            <article class="node gate">
+              <h3><span class="id">AFK-008</span> flow-integration-test</h3>
+              <p>画面や複数ステップの業務フローは Playwright 証拠、スクリーンショット、影響レビューで検証します。</p>
+            </article>
+            <article class="node no-tail">
+              <h3><span class="id">REVIEW</span> team-review</h3>
+              <p>実差分をもとに security、quality、test coverage を確認し、残リスクと未検証面を明確にします。</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="side-rail" aria-label="Automation guard layer">
+          <article class="rail-item">
+            <strong>agent-router</strong>
+            <p>危険そうな依頼を `/flow-plan` へ誘導し、既存挙動変更の直実装を抑えます。</p>
+          </article>
+          <article class="rail-item">
+            <strong>flow-plan-required-gate</strong>
+            <p>挙動影響パスの編集に凍結計画を要求します。表示のみの軽微変更は狭く通します。</p>
+          </article>
+          <article class="rail-item">
+            <strong>matrix gate / CI</strong>
+            <p>必須行列、レビュー要否、曖昧な waiver、オンボーディング文書の欠落を検出します。</p>
+          </article>
+          <article class="rail-item">
+            <strong>installer dry-run</strong>
+            <p>portable assets と target-local guidance を分類し、ローカル判断の上書きを避けます。</p>
+          </article>
+        </div>
+
+        <div class="legend" aria-label="Legend">
+          <span><i class="swatch blue"></i>資料・入口</span>
+          <span><i class="swatch"></i>基礎知識・成果物</span>
+          <span><i class="swatch amber"></i>人の判断を含む分岐</span>
+          <span><i class="swatch red"></i>ゲート・レビュー</span>
+          <span><i class="swatch violet"></i>実装</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="problems">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Solved problems</p>
+          <h2>具体的に解決できる課題</h2>
+        </div>
+        <p>
+          Agent Flow は「AI に実装させる」だけの仕組みではなく、計画不足・検証不足・証拠不足を
+          実装前後のゲートで減らすための仕組みです。
+        </p>
+      </div>
+
+      <div class="problem-grid">
+        <article class="problem">
+          <span class="num">01</span>
+          <h3>隣接業務フローの見落とし</h3>
+          <p>Business Flow Matrix と Regression Surface Matrix により、編集ファイルではなく影響する業務フローからテストを設計できます。</p>
+        </article>
+        <article class="problem">
+          <span class="num">02</span>
+          <h3>曖昧な依頼のまま実装開始</h3>
+          <p>Goal Confirmation と Questioning Decision により、目的・成功条件・質問スキップ理由を計画に残します。</p>
+        </article>
+        <article class="problem">
+          <span class="num">03</span>
+          <h3>古い資料の真実化</h3>
+          <p><code>flow-document</code> が資料を sidecar 証拠として扱い、未確認・矛盾・未来範囲の主張が実装要件へ混入するのを防ぎます。</p>
+        </article>
+        <article class="problem">
+          <span class="num">04</span>
+          <h3>本番・外部要因の誤診断</h3>
+          <p>Runtime Causality Gate がデプロイ、provider、secret、binding、remote data、auth/session をコード変更前に分類します。</p>
+        </article>
+        <article class="problem">
+          <span class="num">05</span>
+          <h3>テストが関数単位だけに閉じる</h3>
+          <p>Integration Coverage Contract が happy、exception、permission、boundary、side-effect、regression を明示的に要求します。</p>
+        </article>
+        <article class="problem">
+          <span class="num">06</span>
+          <h3>レビュー過多またはレビュー不足</h3>
+          <p>Plan Review Requirement により、高影響変更はレビュー必須、小さな局所変更は理由付き任意にできます。</p>
+        </article>
+        <article class="problem">
+          <span class="num">07</span>
+          <h3>画面検証の証拠不足</h3>
+          <p>表示・複数ステップの業務フローは Playwright 証拠、<code>index.html</code>、test review、business-flow impact に集約します。</p>
+        </article>
+        <article class="problem">
+          <span class="num">08</span>
+          <h3>キット更新時のローカル知識破壊</h3>
+          <p>installer dry-run が safe update と preserve local を分類し、対象リポジトリ固有のルールや設定を手動マージ対象にします。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="human">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Human decision points</p>
+          <h2>人力による判断・指示が必要な箇所</h2>
+        </div>
+        <p>
+          Agent Flow は AI が調査、整理、提案、実装、検証証拠の作成を担えるようにします。
+          ただし、責任ある判断や外部権限が必要な部分は人が明示する必要があります。
+        </p>
+      </div>
+
+      <table class="human-table">
+        <thead>
+          <tr>
+            <th>箇所</th>
+            <th>AI が準備できること</th>
+            <th>人が判断・指示すること</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>資料インテーク</td>
+            <td>資料を読み、主張を分類し、リポジトリ証拠と矛盾する点を抽出します。</td>
+            <td>どの資料を使うか、未確認 claim を採用するか、古い資料を無視するかを決めます。</td>
+          </tr>
+          <tr>
+            <td>目的と成功条件</td>
+            <td>現象、原因候補、実装候補、検証候補を整理して質問します。</td>
+            <td>症状表示で十分か、根本原因除去が必要か、完了とみなす証拠を指定します。</td>
+          </tr>
+          <tr>
+            <td>業務ルール</td>
+            <td>既存コード、DB、テスト、画面から actor、権限、状態遷移、side effect を推定します。</td>
+            <td>actor、scope、権限、データ所有、例外時の業務判断など、コードだけでは決められないルールを確定します。</td>
+          </tr>
+          <tr>
+            <td>設計・依存関係</td>
+            <td>既存パターン、最小実装、代替案、リスク、テスト容易性を比較します。</td>
+            <td>新規ライブラリ、外部サービス、運用コスト、セキュリティ許容度などの選択を承認します。</td>
+          </tr>
+          <tr>
+            <td>レビュー要否</td>
+            <td>高影響条件に照らして <code>Required</code> / <code>Optional</code> の候補理由を書きます。</td>
+            <td>不確実性が高い変更、公開 API、認証、schema、外部連携などを高影響扱いにするか最終判断します。</td>
+          </tr>
+          <tr>
+            <td>外部・本番証拠</td>
+            <td>local mock、deployed artifact、provider/device、valid session の証拠レーンを分けて計画します。</td>
+            <td>認証情報、production/sandbox 操作、実端末確認、外部 provider 操作の実行または許可を行います。</td>
+          </tr>
+          <tr>
+            <td>waiver / blocker</td>
+            <td>未検証面と理由を具体化し、残リスクとして報告します。</td>
+            <td>ブロックを許容して進めるか、追加検証を要求するか、リリースを止めるかを判断します。</td>
+          </tr>
+          <tr>
+            <td>最終受け入れ</td>
+            <td>実装内容、検証結果、証拠パス、残リスクをまとめます。</td>
+            <td>業務上の受け入れ、デプロイ、公開、運用告知、フォローアップの優先度を決めます。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section" id="artifacts">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Artifacts</p>
+          <h2>主な成果物と置き場所</h2>
+        </div>
+        <p>
+          同じ情報を会話だけに残さず、次回の計画・実装・レビューで再利用できる形にします。
+        </p>
+      </div>
+
+      <div class="artifact-list">
+        <article>
+          <h3>オンボーディング文書</h3>
+          <ul>
+            <li><code>docs/agent-flow/source-documents.md</code></li>
+            <li><code>docs/agent-flow/project-structure.md</code></li>
+            <li><code>docs/agent-flow/business-flows.md</code></li>
+            <li><code>docs/agent-flow/integration-scenarios.md</code></li>
+          </ul>
+        </article>
+        <article>
+          <h3>変更ごとの計画・レビュー</h3>
+          <ul>
+            <li><code>docs/flow/{feature}/plan.md</code></li>
+            <li><code>docs/flow/{feature}/plan-review.md</code></li>
+            <li><code>docs/flow/{feature}/implementation_report.md</code></li>
+          </ul>
+        </article>
+        <article>
+          <h3>統合テスト証拠</h3>
+          <ul>
+            <li><code>docs/flow/{feature}/integration-test/{run_id}/index.html</code></li>
+            <li><code>result.md</code></li>
+            <li><code>test-review.md</code></li>
+            <li><code>business-flow-impact.md</code></li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Important</strong>
+        <p>
+          Agent Flow は「人の判断を不要にする」仕組みではありません。AI が証拠を集め、判断材料を構造化し、
+          実装・検証を進めます。人は目的、業務判断、外部権限、許容リスクを明示することで、AI の作業を安全に速くできます。
+        </p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      根拠: README、manifest、templates/.codex skills、docs/agent-flow の現行ドキュメントをもとに作成。
+      このページは静的 HTML なので、ブラウザで直接開けます。
+    </footer>
+  </main>
+</body>
+</html>

@@ -19,6 +19,11 @@ Run the onboarding sequence for a repo that will adopt agent-flow.
 - `docs/agent-flow/business-flows.drawio` (companion diagram for human review)
 - `docs/agent-flow/integration-scenarios.md`
 
+Optional follow-up output after onboarding:
+
+- `docs/agent-flow/business-flow-integration-tests.md` (confirmed executable
+  operation-test suite spec, created by `business-flow-integration-test`)
+
 ## Sequence
 
 1. Run `flow-document`.
@@ -39,6 +44,14 @@ Run the onboarding sequence for a repo that will adopt agent-flow.
      checks, runtime logs, smoke commands, bindings/secrets, remote data
      diagnostics, provider sandboxes, or concrete blockers,
    - open questions/blockers named.
+6. Explain the recommended follow-up:
+   - Agent Flow can use the confirmed business-flow docs to propose major
+     operation tests as a regression-prevention route.
+   - Tell the user to invoke `business-flow-integration-test` to infer the
+     test list, ask about unclear operations, accept missing operations, get
+     approval, create executable tests, and register an all-suite runner.
+   - Do not create those executable operation tests inside onboarding unless
+     the user explicitly asks to continue into the follow-up skill.
 
 ## Required Gate
 
