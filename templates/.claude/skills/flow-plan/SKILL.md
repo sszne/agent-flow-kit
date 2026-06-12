@@ -34,6 +34,14 @@ Use the repo-local `.claude/commands/flow-plan.md` command contract.
   screens, components, frontend routes, client UI, styles, public frontend
   assets, brand, tokens, or component rules; apply matching design-system rules
   or record concrete waivers.
+- Same design-principles behavior: run the Design Principles Gate for
+  behavior-changing work affecting modules, services/actions, domain logic,
+  shared logic, data ownership, or new classes/modules/dependencies; read
+  repo-local `docs/agent-flow/design-principles.md` and configured
+  `design_principles_paths` before external architecture references; include a
+  `Design Principles Compliance` section applying matching rules (including the
+  vague-responsibility, Service Introduction Rule, and aggregate-encapsulation
+  anti-pattern checks) or record concrete waivers.
 - Same provider/auth/deploy behavior: distinguish local mock coverage,
   deployed-artifact checks, real provider/device happy paths, valid
   credential/session paths, and concrete blockers.

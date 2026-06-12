@@ -17,7 +17,7 @@ Execute the frozen implementation plan task by task, following TDD or DIRECT met
 - TDD tasks follow Red-Green-Refactor strictly.
 - DIRECT tasks follow Execute-Verify.
 - Do NOT make technical choices not covered in the plan without user confirmation.
-- Architecture reference: fetch from (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/architecture.md). If unavailable, skip and note.
+- Architecture reference: read repo-local `docs/agent-flow/design-principles.md` and configured `design_principles_paths` first. Fetch (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/architecture.md) only as a fallback reference when no repo-local design-principles document exists. On conflict, the repo-local document wins; record the conflict. If neither is available, skip and note.
 - Code style reference: fetch from (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/code-style-review.md). If unavailable, skip and note.
 - Save implementation report to `docs/flow/{feature_name}/implementation_report.md`.
 - Update task checkboxes in plan.md as each task completes.
@@ -112,9 +112,13 @@ Verify the plan includes the required quality gates:
 
 If any required section is missing, stop and update the plan before coding.
 
-### Step 2: Load external documents
+### Step 2: Load architecture and code style documents
 
-Fetch architecture and code style documents from the URLs above. If fetch fails, note the failure and continue with local conventions.
+Read the repo-local design-principles document first
+(`docs/agent-flow/design-principles.md` and configured
+`design_principles_paths`). Fetch the external architecture and code style
+documents from the URLs above only as fallback. If nothing is available, note
+the gap and continue with local conventions.
 
 ### Step 3: Initialize implementation report
 
@@ -154,7 +158,11 @@ For each task in the plan (respecting dependency order):
 #### 4c. After each task (both TDD and DIRECT):
 
 1. **Code style check**: Verify implementation follows the code style document
-2. **Architecture check**: Verify implementation follows the architecture document
+2. **Architecture check**: Verify implementation follows the design-principles
+   document (or fallback architecture document), including the anti-pattern
+   rules: no vague-responsibility splits, no new Service/Manager class without
+   the plan's Service Introduction Rule evidence, and no aggregate-internal
+   constraint implemented outside the aggregate
 3. **Update plan.md**: Change `- [ ] **Completed**` to `- [x] **Completed**` for the task
 4. **Update implementation report**: Add task completion details
 5. **Regression surface check**: Confirm the related Business Flow Matrix, Test Design Matrix, and Integration Coverage Contract rows are covered
@@ -195,7 +203,13 @@ Re-read the code style document. Verify all implemented code complies. Fix any v
 
 ### Step 8: Architecture review
 
-Re-read the architecture document. Verify all implemented code complies. Fix any violations.
+Re-read the repo-local design-principles document (or the fallback
+architecture document). Verify all implemented code complies, including the
+anti-pattern rules: design splits must name owned data and invariants; new
+Service/Manager/coordinator classes must match the plan's Service Introduction
+Rule evidence; constraints protecting an aggregate's invariant must live
+inside the aggregate. Fix any violations, or ask the user when a fix would
+leave the frozen plan.
 
 ### Step 9: Run all tests
 
@@ -299,7 +313,10 @@ Present the completed implementation report to the user with:
 - [ ] All implementations follow code style document
 
 ### Architecture
-- [ ] All implementations follow architecture document
+- [ ] All implementations follow the design-principles document (or fallback architecture document)
+- [ ] No design split is justified only by vague "responsibility" wording without named data/invariant ownership
+- [ ] No new Service/Manager/coordinator class holds logic its data owner could hold, unless the plan records Service Introduction Rule evidence
+- [ ] Constraints protecting an aggregate's invariant are enforced inside the aggregate
 
 ### Tests
 - [ ] All unit tests pass

@@ -10,6 +10,7 @@
   - `templates/.claude/hooks/*.py` and `templates/.codex/hooks/*.py`: workflow gates and quality hooks.
   - `templates/scripts/agent-flow-matrix-gate.py`: CI plan-quality gate.
   - `templates/docs/agent-flow/design-system.md`: optional target-repo design-system documentation template used by frontend planning.
+  - `templates/docs/agent-flow/design-principles.md`: target-repo design-principles documentation template used by module/service/domain planning and implementation review.
   - `business-flow-integration-test`: onboarding follow-up entrypoint that creates, updates, and runs a callable regression suite for major confirmed business-flow operation tests.
 - Local run commands:
   - `python3 install.py --target /path/to/repo --dry-run`
@@ -42,6 +43,7 @@
 | Required onboarding document | `manifest.json` `required_onboarding_docs`; `agent-flow-matrix-gate.py` | Produced during `agent-flow-onboarding`; required before behavior-changing implementation | Durable project knowledge for future plans and tests |
 | Source document ledger | `docs/agent-flow/source-documents.md`; `flow-document` skill | Optional sidecar produced at onboarding start | Classifies requirement/source-document claims without making them source-of-truth |
 | Design-system document | `docs/agent-flow/design-system.md`, `docs/agent-flow/design-system/`; `flow-design` skill | Optional frontend planning context | Records repo-local tokens, components, patterns, voice rules, source priority, and waiver rules |
+| Design-principles document | `docs/agent-flow/design-principles.md`, `docs/agent-flow/design-principles/` | Module/service/domain planning and implementation-review context | Records core principles, anti-patterns (vague responsibility, Service-pattern abuse, out-of-aggregate constraints), Service Introduction Rule, source priority, and waiver rules |
 | Plan | `docs/flow/{feature}/plan.md`; `agent-flow-matrix-gate.py` markers | Must contain matrices, Plan Review Requirement, and frozen marker before implementation | Traceable change design and coverage contract |
 | Plan review | `docs/flow/{feature}/plan-review.md`; `agent-flow-matrix-gate.py` markers | Required for high-impact implementation; optional for smaller localized changes | Cross-agent missed-risk review |
 | Integration evidence | Skill docs and README evidence contract | Produced under `docs/flow/{feature}/integration-test/{run_id}/` for full evidence; recorded in reports for lightweight or blocked lanes | Conditional feature-specific verification with lane decision, Playwright/business-flow artifacts when required, and effectiveness metrics |
@@ -58,6 +60,7 @@
 | Create or run business-flow regression suite | Coding agent plus user | `business-flow-integration-test` skill or `/business-flow-integration-test` command | Infer major operation tests from onboarding docs, ask about unclear operations, confirm final list, create executable tests, register all-suite runner, and run on demand | `templates/.codex/skills/business-flow-integration-test/SKILL.md` |
 | Plan a behavior-changing change | Coding agent | `flow-plan` skill or `/flow-plan` command | Load context, inspect code/docs/tests, clarify ambiguity, write frozen plan | `README.md`, skill templates |
 | Analyze frontend design-system fit | Coding agent | `flow-design` support skill called by `flow-plan` | Search configured design-system paths, compare planned UI with tokens/components/patterns, return applicability and component-match matrices | `templates/.codex/skills/flow-design/SKILL.md`, `templates/.claude/skills/flow-design/SKILL.md` |
+| Check design-principles compliance | Coding agent | Design Principles Gate inside `flow-plan`; re-check inside `flow-impl` | Search configured design-principles paths, map affected modules/services/aggregates to principles and anti-pattern rules, record `Design Principles Compliance` with concrete waivers | `templates/.codex/skills/flow-plan/SKILL.md`, `templates/.claude/commands/flow-plan.md`, `templates/docs/agent-flow/design-principles.md` |
 | Review plan readiness | Opposite or fallback agent | `flow-plan-review` skill or command | Check missed risks, migration/auth/runtime/test coverage, decide readiness | `README.md`, `agent-flow-matrix-gate.py` |
 | Implement a frozen plan | Coding agent | `flow-impl` or `team-implement` | Apply plan tasks after gates are satisfied | README canonical flow |
 | Verify feature-specific implementation evidence | Coding agent | `flow-integration-test` | Choose full, lightweight, or blocked evidence lane; produce Playwright artifacts when required; record substitute evidence or blockers and effectiveness metrics | README and integration-test skill templates |
@@ -72,6 +75,7 @@
 | Hook merge idempotency | `HOOK_SCRIPT_PATTERN` and settings merge logic in `install.py` | Repeated installs must not register duplicate hooks |
 | Workflow gate strictness | `agent-flow-matrix-gate.py` required markers and waiver checks | Overly broad defaults can block non-Next.js repos until config is tuned |
 | Frontend design-system planning | `flow-design`, `flow-plan`, `design_system_paths`, matrix gate | Plans can become boilerplate unless applicability includes searched paths, component matches, and concrete waivers |
+| Design-principles planning | Design Principles Gate, `design_principles_paths`, `design_principles_affecting_prefixes`, excluded segments/extensions, matrix gate | Triggers too broadly without the negative filter; compliance can become boilerplate unless per-rule application rows and concrete waivers are enforced |
 | Integration evidence lane selection | `flow-integration-test`, `integration-test`, testing rules | Overuse of full Playwright evidence wastes token/work budget; overuse of lightweight evidence can miss visible or provider/deploy regressions |
 | Documentation-first behavior | README canonical flow and skill templates | Missing onboarding docs should block behavior-changing implementation |
 

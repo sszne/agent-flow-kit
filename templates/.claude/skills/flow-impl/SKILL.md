@@ -19,6 +19,12 @@ Use the repo-local `.claude/commands/flow-impl.md` command contract.
   required, onboarding docs, and Bug Feedback Review for bug/regression work.
 - Same execution: task-by-task, TDD Red before Green for TDD tasks, update plan
   and implementation report after each task.
+- Same design-principles behavior: read repo-local
+  `docs/agent-flow/design-principles.md` (and configured
+  `design_principles_paths`) before external architecture references, and
+  re-check the anti-pattern rules (vague-responsibility splits, Service
+  Introduction Rule, aggregate-internal constraints) during architecture
+  review before completion.
 - Same evidence: choose the `/flow-integration-test` evidence lane before final
   review. Visible, multi-step, auth/session/permission/tenant,
   provider/device/deploy, external-side-effect, or high-impact workflows

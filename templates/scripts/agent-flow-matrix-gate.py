@@ -76,6 +76,8 @@ REQUIRED_PLAN_MARKERS = (
 
 DESIGN_SYSTEM_APPLICABILITY_MARKER = "Design System Applicability"
 
+DESIGN_PRINCIPLES_COMPLIANCE_MARKER = "Design Principles Compliance"
+
 REQUIRED_PLAN_REVIEW_MARKERS = (
     "Missed Risk Review",
     "DB / Schema / Migration Review",
@@ -123,6 +125,43 @@ DEFAULT_BROWSER_RISKY_FILES = {
     "postcss.config.js",
     "postcss.config.mjs",
 }
+
+DEFAULT_DESIGN_PRINCIPLES_PREFIXES = (
+    "app/",
+    "pages/",
+    "components/",
+    "src/",
+    "lib/",
+    "hooks/",
+    "services/",
+    "features/",
+    "server/",
+    "packages/",
+    "apps/",
+)
+
+DEFAULT_DESIGN_PRINCIPLES_FILES: set[str] = set()
+
+DEFAULT_DESIGN_PRINCIPLES_EXCLUDED_SEGMENTS = (
+    "migrations",
+    "config",
+    "infra",
+    "docker",
+)
+
+DEFAULT_DESIGN_PRINCIPLES_EXCLUDED_EXTENSIONS = (
+    ".md",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".toml",
+    ".ini",
+    ".env",
+    ".sql",
+    ".csv",
+    ".txt",
+    ".lock",
+)
 
 DEFAULT_PRESENTATION_ONLY_PREFIXES = (
     "styles/",
@@ -259,6 +298,15 @@ WAIVER_REASON_MARKERS = (
     "対象外",
     "低リスク",
 )
+
+NONE_WAIVER_VALUES = {
+    "none",
+    "n/a",
+    "na",
+    "-",
+    "なし",
+    "該当なし",
+}
 
 OBSOLETE_WORKFLOW_PATHS = (
     ".claude/commands/kairo-design.md",
@@ -607,10 +655,11 @@ def validate_design_system_applicability(plan_text: str, errors: list[str]) -> N
         "design system found" in lower_section
         and re.search(r"design system found\s*\|\s*(no|none|not found|なし)", lower_section)
     )
+    # Note: bare "searched" would always match the "design system searched"
+    # check label itself, so only evidence-bearing markers are accepted here.
     if no_design_system and not any(
         marker in lower_section
         for marker in (
-            "searched",
             "paths inspected",
             "fallback",
             "existing source",
@@ -622,6 +671,152 @@ def validate_design_system_applicability(plan_text: str, errors: list[str]) -> N
             "Design System Applicability may record no design system found only "
             "when searched paths and fallback source/component evidence are documented."
         )
+
+
+def is_design_principles_path(path: str, config: dict) -> bool:
+    files = set(
+        config.get(
+            "design_principles_affecting_files",
+            sorted(DEFAULT_DESIGN_PRINCIPLES_FILES),
+        )
+    )
+    if path in files:
+        return True
+
+    prefixes = config_tuple(
+        config,
+        "design_principles_affecting_prefixes",
+        DEFAULT_DESIGN_PRINCIPLES_PREFIXES,
+    )
+    if not any(path.startswith(prefix) for prefix in prefixes):
+        return False
+
+    extensions = config_tuple(
+        config,
+        "design_principles_excluded_extensions",
+        DEFAULT_DESIGN_PRINCIPLES_EXCLUDED_EXTENSIONS,
+    )
+    if path.endswith(tuple(extensions)):
+        return False
+
+    excluded_segments = set(
+        config_tuple(
+            config,
+            "design_principles_excluded_segments",
+            DEFAULT_DESIGN_PRINCIPLES_EXCLUDED_SEGMENTS,
+        )
+    )
+    if excluded_segments.intersection(path.split("/")[:-1]):
+        return False
+
+    return True
+
+
+def is_concrete_waiver_text(value: str) -> bool:
+    value_lc = value.strip().lower()
+    if not value_lc or value_lc in WEAK_WAIVER_VALUES:
+        return False
+    if "todo" in value_lc or "tbd" in value_lc:
+        return False
+    return any(marker in value_lc for marker in WAIVER_REASON_MARKERS)
+
+
+def validate_design_principles_waivers(section: str, errors: list[str]) -> None:
+    waiver_index: int | None = None
+    for row in table_rows(section):
+        lower_cells = [cell.lower() for cell in row]
+        if lower_cells and lower_cells[0].startswith("required waivers"):
+            result = lower_cells[1] if len(row) > 1 else ""
+            evidence = row[2].strip() if len(row) > 2 else ""
+            if result.startswith("yes") and not is_concrete_waiver_text(evidence):
+                errors.append(
+                    "Design Principles Compliance waiver summary must include "
+                    "a concrete reason: " + (evidence or "(empty)")
+                )
+            continue
+        if any("waiver" in cell or "exception" in cell for cell in lower_cells):
+            waiver_index = next(
+                (
+                    idx
+                    for idx, cell in enumerate(lower_cells)
+                    if "waiver" in cell or "exception" in cell
+                ),
+                None,
+            )
+            continue
+        if waiver_index is None or waiver_index >= len(row):
+            continue
+        waiver = row[waiver_index].strip()
+        if waiver.lower() in NONE_WAIVER_VALUES:
+            continue
+        if not is_concrete_waiver_text(waiver):
+            errors.append(
+                "Design Principles Compliance waiver is too vague: "
+                + (waiver or "(empty)")
+            )
+
+
+def validate_design_principles_compliance(plan_text: str, errors: list[str]) -> None:
+    section = extract_section(plan_text, DESIGN_PRINCIPLES_COMPLIANCE_MARKER)
+    if not section.strip():
+        errors.append(
+            "Module/service/domain-affecting plans require a "
+            "Design Principles Compliance section."
+        )
+        return
+
+    if contains_placeholder(section):
+        errors.append(
+            "Design Principles Compliance still contains template placeholders."
+        )
+
+    rows = data_rows(section)
+    if not rows:
+        errors.append(
+            "Design Principles Compliance requires at least one concrete table row."
+        )
+        return
+
+    lower_section = section.lower()
+    required_phrases = (
+        "design principles searched",
+        "design principles found",
+        "applies to this plan",
+        "required waivers",
+    )
+    for phrase in required_phrases:
+        if phrase not in lower_section:
+            errors.append(
+                f"Design Principles Compliance is missing required check: {phrase}."
+            )
+
+    no_principles = (
+        "design principles found" in lower_section
+        and re.search(
+            r"design principles found\s*\|\s*(no|none|not found|なし)",
+            lower_section,
+        )
+    )
+    # Note: bare "searched" would always match the "design principles searched"
+    # check label itself, so only evidence-bearing markers are accepted here.
+    if no_principles and not any(
+        marker in lower_section
+        for marker in (
+            "paths inspected",
+            "fallback",
+            "existing source",
+            "existing convention",
+            "source convention",
+            "source pattern",
+        )
+    ):
+        errors.append(
+            "Design Principles Compliance may record no design principles found "
+            "only when searched paths and fallback source-convention evidence "
+            "are documented."
+        )
+
+    validate_design_principles_waivers(section, errors)
 
 
 def validate_questioning_decision(plan_text: str, errors: list[str]) -> None:
@@ -910,6 +1105,12 @@ def main() -> int:
     )
     if has_browser_change:
         validate_design_system_applicability(plan_text, errors)
+
+    has_design_principles_change = any(
+        is_design_principles_path(path, config) for path in risky_paths
+    )
+    if has_design_principles_change:
+        validate_design_principles_compliance(plan_text, errors)
 
     if has_browser_change and "Playwright Integration Test Plan" not in plan_text:
         errors.append(

@@ -79,6 +79,46 @@
     "storybook/",
     ".storybook/"
   ],
+  "design_principles_paths": [
+    "docs/agent-flow/design-principles.md",
+    "docs/agent-flow/design-principles/",
+    ".claude/docs/DESIGN.md",
+    "docs/architecture.md",
+    "architecture.md"
+  ],
+  "design_principles_affecting_prefixes": [
+    "app/",
+    "pages/",
+    "components/",
+    "src/",
+    "lib/",
+    "hooks/",
+    "services/",
+    "features/",
+    "server/",
+    "packages/",
+    "apps/"
+  ],
+  "design_principles_affecting_files": [],
+  "design_principles_excluded_segments": [
+    "migrations",
+    "config",
+    "infra",
+    "docker"
+  ],
+  "design_principles_excluded_extensions": [
+    ".md",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".toml",
+    ".ini",
+    ".env",
+    ".sql",
+    ".csv",
+    ".txt",
+    ".lock"
+  ],
   "presentation_only_prefixes": [
     "styles/",
     "src/styles/",

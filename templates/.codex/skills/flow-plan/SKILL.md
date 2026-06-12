@@ -62,6 +62,11 @@ readiness gate. Do not implement during this skill.
   the Frontend Design System Gate. When a repo-local or user-provided design
   system contains matching components, tokens, patterns, or voice rules, plan
   against those rules or record concrete waivers.
+- Behavior-changing plans that affect modules, services/actions, domain logic,
+  shared logic, or data ownership, or that introduce new classes/modules or
+  dependencies between modules, must run the Design Principles Gate. When a
+  repo-local or user-provided design-principles document contains matching
+  rules, plan against those rules or record concrete waivers.
 - Provider, auth, LIFF, LINE, Google, deploy, or smoke-test plans must separate
   local mock coverage, deployed-artifact checks, real provider/device happy
   paths, valid credential/session paths, and concrete blockers.
@@ -94,6 +99,7 @@ Phase 1: Scope
   -> residual risk preflight
   -> runtime causality gate when applicable
   -> frontend design system gate when applicable
+  -> design principles gate when applicable
   -> flow knowledge update check
   -> ask user only required questions
     ->
@@ -295,6 +301,60 @@ Add these sections to the plan when the gate is triggered:
 shows the plan has no frontend UI item that can map to a component/pattern, or
 no design system exists after searched-path review.
 
+## Design Principles Gate
+
+Run this gate before implementation design is frozen when the request affects:
+
+- modules, services/actions, domain logic, shared logic, or data ownership;
+- new classes/modules, new dependencies between modules, state transitions,
+  invariants, validation rules, or aggregate boundaries;
+- any refactor that moves logic between modules, services, or entities.
+
+Docs-only and display-only work does not trigger this gate.
+
+Search, in priority order:
+
+- explicit user-provided design-principles input,
+- `.agent-flow/config.json` `design_principles_paths`,
+- `docs/agent-flow/design-principles.md` and `docs/agent-flow/design-principles/`,
+- `.claude/docs/DESIGN.md`,
+- existing source conventions (module layout, ownership patterns, service
+  usage) relevant to the planned surface,
+- external architecture references only as fallback.
+
+If matching principles exist, the plan must apply them or record concrete
+waivers. Pay specific attention to the anti-pattern rules:
+
+- design splits justified only by vague "responsibility" wording must restate
+  owned data and invariants;
+- a new Service/Manager/coordinator class requires the Service Introduction
+  Rule evidence (what it does not own, what it coordinates, what side effects
+  it isolates);
+- constraints protecting an aggregate's invariant must be planned inside the
+  aggregate, not in callers.
+
+If no design-principles document is found, the plan must record the searched
+paths and the fallback source conventions used. If the document conflicts with
+existing source conventions, record the conflict and confirm with the user
+before freezing.
+
+Add this section to the plan when the gate is triggered:
+
+```markdown
+### Design Principles Compliance
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Design principles searched | Yes | {paths inspected} |
+| Design principles found | Yes/No/Partial | {source paths or reason none found} |
+| Applies to this plan | Yes/No/Partial | {modules/services/aggregates affected} |
+| Required waivers | Yes/No | {summary of concrete waivers or "None"} |
+
+| Principle / anti-pattern | Affected design element | How the plan applies it | Exception / waiver |
+| --- | --- | --- | --- |
+| {principle or anti-pattern rule} | {module/class/function} | {applied rule or fallback source convention} | {None or concrete reason} |
+```
+
 ## Bug Knowledge Pattern Reuse
 
 For bug/regression work, search `docs/agent-flow/bug-knowledge.md` before task
@@ -379,19 +439,20 @@ Use this structure unless the target repo already has a stricter local template:
 ### 2.3 Design Policy And Library Selection
 ### 2.4 Design System Applicability
 ### 2.5 Component Match Matrix
-### 2.6 Risks And Mitigations
-### 2.7 Residual Risk Preflight
-### 2.8 Runtime Causality Gate
-### 2.9 Bug Feedback Review
-### 2.10 Flow Knowledge Update
-### 2.11 Business Flow Matrix
-### 2.12 Regression Surface Matrix
-### 2.13 Test Design Matrix
-### 2.14 Integration Coverage Contract
-### 2.15 Plan Review Requirement
-### 2.16 Playwright Integration Test Plan
-### 2.17 Migration / Runtime Enforcement
-### 2.18 Open Questions
+### 2.6 Design Principles Compliance
+### 2.7 Risks And Mitigations
+### 2.8 Residual Risk Preflight
+### 2.9 Runtime Causality Gate
+### 2.10 Bug Feedback Review
+### 2.11 Flow Knowledge Update
+### 2.12 Business Flow Matrix
+### 2.13 Regression Surface Matrix
+### 2.14 Test Design Matrix
+### 2.15 Integration Coverage Contract
+### 2.16 Plan Review Requirement
+### 2.17 Playwright Integration Test Plan
+### 2.18 Migration / Runtime Enforcement
+### 2.19 Open Questions
 
 ## 3. Tasks
 - [ ] TASK-001 ...
@@ -411,6 +472,10 @@ Use this structure unless the target repo already has a stricter local template:
 - [ ] Frontend Design System Gate is complete or explicitly not triggered
 - [ ] Frontend plans include Design System Applicability and matching component
       rules or concrete waivers when a design system applies
+- [ ] Design Principles Gate is complete or explicitly not triggered
+- [ ] Module/service/domain plans include Design Principles Compliance with
+      searched paths, per-rule application, and concrete waivers when
+      principles apply
 - [ ] Onboarding/UI plans confirm step names, order, exclusions, action
       placement, resume/fallback path, and blocked evidence lanes
 - [ ] Provider/auth/deploy plans separate mock, deployed-artifact, real

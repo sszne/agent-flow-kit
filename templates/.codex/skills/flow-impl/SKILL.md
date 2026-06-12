@@ -42,6 +42,13 @@ DIRECT execution as specified, then run integration evidence and review gates.
 - For TDD tasks, write and run Red tests before production code.
 - Keep implementation inside the frozen scope. Ask the user before introducing
   an unplanned behavior or design choice.
+- Read repo-local `docs/agent-flow/design-principles.md` (and configured
+  `design_principles_paths`) before external architecture references. During
+  refactor/verify, re-check the anti-pattern rules: no vague-responsibility
+  splits without named data/invariant ownership, no new
+  Service/Manager/coordinator class without the plan's Service Introduction
+  Rule evidence, and no aggregate-internal constraint implemented outside the
+  aggregate.
 - Update both `plan.md` and `implementation_report.md` after each completed
   task.
 - Before final review, choose the `flow-integration-test` evidence lane.

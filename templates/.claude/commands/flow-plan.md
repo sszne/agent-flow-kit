@@ -10,7 +10,7 @@ User requirements from interactive questioning are combined with codebase analys
 - Do not force `/flow-plan` for display-only requests limited to minor style changes, layout adjustments, or visible text changes. Keep `/flow-plan` required when runtime behavior, data flow, permissions, API behavior, workflow order, validation, side effects, tests, install behavior, CI gates, or Agent Flow contracts may change.
 - Use `/flow-start` only when the work is primarily new-feature discovery or greenfield scope shaping. If the request modifies an existing runtime path, continue here.
 - Comments inside `<!-- -->` are AI instructions. `{}` denotes replacement text.
-- Architecture reference: fetch from (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/architecture.md). If unavailable, skip and note in plan.
+- Architecture reference: read repo-local `docs/agent-flow/design-principles.md` and configured `design_principles_paths` first. Fetch (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/architecture.md) only as a fallback reference when no repo-local design-principles document exists. On conflict, the repo-local document wins; record the conflict. If neither is available, skip and note in plan.
 - Code style reference: fetch from (https://raw.githubusercontent.com/sszne/sample-test/refs/heads/main/docs/code-style-review.md). If unavailable, skip and note in plan.
 - Plan template: use the template defined in this document (no external template fetch needed).
 - Save plan to `docs/flow/{feature_name}/plan.md`.
@@ -38,6 +38,11 @@ User requirements from interactive questioning are combined with codebase analys
   available. If a local or user-provided design system has matching components,
   tokens, patterns, or voice rules, plan against those rules or record concrete
   waivers.
+- For behavior-changing plans that affect modules, services/actions, domain
+  logic, shared logic, or data ownership, or that introduce new
+  classes/modules or dependencies between modules, run the Design Principles
+  Gate. If a repo-local design-principles document defines matching rules,
+  plan against those rules or record concrete waivers.
 - For provider/auth/deploy/smoke work, distinguish local mock coverage,
   deployed-artifact checks, real provider/device happy paths, valid
   credential/session paths, and concrete blockers. Do not use shallow checks
@@ -346,6 +351,43 @@ the plan must apply it or record a concrete waiver. If no design system is
 found, the plan must record searched paths and fallback source/component
 patterns.
 
+### Step 8.3: Design Principles Gate
+
+Run this gate before implementation design is frozen when the request affects:
+
+- modules, services/actions, domain logic, shared logic, or data ownership;
+- new classes/modules, new dependencies between modules, state transitions,
+  invariants, validation rules, or aggregate boundaries;
+- any refactor that moves logic between modules, services, or entities.
+
+Docs-only and display-only work does not trigger this gate.
+
+Search, in priority order:
+
+- explicit user-provided design-principles input,
+- `.agent-flow/config.json` `design_principles_paths`,
+- `docs/agent-flow/design-principles.md` and `docs/agent-flow/design-principles/`,
+- `.claude/docs/DESIGN.md`,
+- existing source conventions (module layout, ownership patterns, service
+  usage) relevant to the planned surface,
+- the external architecture URL only as a fallback reference.
+
+If matching principles exist, the plan must apply them or record concrete
+waivers. Pay specific attention to the anti-pattern rules:
+
+- design splits justified only by vague "responsibility" wording must restate
+  owned data and invariants;
+- a new Service/Manager/coordinator class requires the Service Introduction
+  Rule evidence (what it does not own, what it coordinates, what side effects
+  it isolates);
+- constraints protecting an aggregate's invariant must be planned inside the
+  aggregate, not in callers.
+
+If no design-principles document is found, the plan must record the searched
+paths and the fallback source conventions used. If the document conflicts with
+existing source conventions, record the conflict and confirm with the user
+before freezing.
+
 ### Step 9: Iterate
 
 If ambiguity remains after user answers, return to Step 3. Repeat until all requirements are clear. Re-run the Flow Knowledge Update Check whenever answers add or change business-flow, exception, permission, side-effect, or integration-scenario knowledge.
@@ -422,6 +464,7 @@ Generate additional sections based on these conditions:
 | Runtime Causality Gate | Production-only, deploy/runtime/provider, browser-network, auth/session, secret/binding, remote data, or external-runtime symptoms |
 | Design System Applicability | Frontend design, screens, components, routes, client UI, styles, public frontend assets, brand, tokens, component rules, or design-system attachments |
 | Component Match Matrix | Frontend Design System Gate finds matching components, tokens, patterns, voice rules, partial matches, or conflicts |
+| Design Principles Compliance | Behavior-changing work affecting modules, services/actions, domain logic, shared logic, data ownership, or new classes/modules/dependencies |
 | Playwright Integration Test Plan | Visible browser behavior OR multi-step business workflow |
 
 ### Step 13: Task decomposition
@@ -450,7 +493,12 @@ Goal: Verify plan completeness and consistency before freezing.
 
 ### Step 13: Architecture compliance
 
-Re-read the architecture document. Verify all design decisions comply. Note any deviations.
+Re-read the repo-local design-principles document (and the external
+architecture document only if it was used as fallback). Verify all design
+decisions comply, including the anti-pattern rules: no vague-responsibility
+splits, no Service-pattern abuse without Service Introduction Rule evidence,
+and no aggregate-internal constraints implemented outside the aggregate. Note
+any deviations.
 
 ### Step 14: Code style compliance
 
@@ -466,6 +514,9 @@ Verify traceability:
 - Every triggered residual-risk warning has a resolved countermeasure, setup task, or concrete blocker
 - Frontend design-system applicability is documented when frontend planning is
   triggered, including searched paths, component matches, and concrete waivers
+- Design-principles compliance is documented when module/service/domain
+  planning is triggered, including searched paths, per-rule application, and
+  concrete waivers
 - Design decisions are consistent with requirements
 - Task dependencies form a valid DAG (no cycles)
 - Every affected business flow maps to at least one test or documented low-risk/blocker reason
@@ -717,6 +768,7 @@ include the results in plan.md only where useful.
 | Questioning decision | Are questions required, and if not, what source evidence makes no questions safe? | `Questioning Decision`, `No Questions Rationale`, user answers, source/docs evidence |
 | Onboarding/UI precision | Do step names, order, excluded elements, action placement, resume path, and evidence lane need confirmation? | Existing UI/components, user request, screenshots/manuals, integration scenarios |
 | Design-system applicability | Does a repo-local or user-provided design system define matching tokens, components, patterns, or copy/voice rules? | `docs/agent-flow/design-system.md`, `docs/agent-flow/design-system/`, `.agent-flow/config.json`, `.claude/docs/DESIGN.md`, source components/styles |
+| Design-principles applicability | Does a repo-local or user-provided design-principles document define module, coupling, encapsulation, or data-ownership rules matching the planned design? | `docs/agent-flow/design-principles.md`, `docs/agent-flow/design-principles/`, `.agent-flow/config.json` `design_principles_paths`, `.claude/docs/DESIGN.md`, existing source conventions |
 | Provider/deploy evidence lane | Does the risk require local mock, deployed artifact, real provider/device, valid session, or blocker evidence? | Runtime Causality Gate, provider docs/config, smoke scripts, integration scenarios |
 | Regression surfaces | What adjacent shared flows can break even if not directly edited? | Shared partials/scripts/services/actions/schema/tests |
 | Minimal scope | What is the smallest codebase-conforming change that satisfies the intent? | Existing patterns and alternatives considered |
@@ -883,14 +935,28 @@ dedicated design section.
 | --- | --- | --- | --- | --- |
 | {UI item} | {exact-match / partial-match / no-match / conflict} | {token/component/pattern rule or fallback source pattern} | {file/path/section} | {None or concrete reason} |
 
-### 2.9 Business Flow Matrix
+### 2.9 Design Principles Compliance
+<!-- Required when behavior-changing work affects modules, services/actions, domain logic, shared logic, data ownership, or introduces new classes/modules/dependencies. If not triggered, write "Not triggered: {source-backed reason}." -->
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Design principles searched | Yes/No | {paths inspected, configured paths, or reason not triggered} |
+| Design principles found | Yes/No/Partial | {source paths or reason none found} |
+| Applies to this plan | Yes/No/Partial | {modules/services/aggregates affected or reason not applicable} |
+| Required waivers | Yes/No | {summary of concrete waivers or "None"} |
+
+| Principle / anti-pattern | Affected design element | How the plan applies it | Exception / waiver |
+| --- | --- | --- | --- |
+| {side-effect-free module / loose coupling / responsibility-ownership rule / service introduction rule / aggregate encapsulation} | {module/class/function} | {applied rule or fallback source convention} | {None or concrete reason} |
+
+### 2.10 Business Flow Matrix
 <!-- Required for behavior-changing work. This turns domain knowledge into implementation and test obligations. -->
 
 | Flow | Actor / scope | Entry point | Existing behavior | New behavior | Normal path | Error / exception paths | Permission / ownership / boundary paths | Side effects | Regression risk | Required test coverage |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | {Order/dealer/company/mail/PDF/job/search/status flow} | {role/tenant/company/customer scope} | {route/screen/API/job/mail/PDF} | {current behavior} | {expected behavior} | {happy workflow} | {validation, missing relation, external failure, rollback, not found} | {forbidden, cross-tenant, min/max/null/empty edge cases} | {mail/PDF/export/job/audit/cache/search/index changes} | {what could regress} | {Feature/API integration, Unit, Browser, Migration, Manual with reason} |
 
-### 2.10 Regression Surface Matrix
+### 2.11 Regression Surface Matrix
 <!-- Inspect indirect effects, not only directly edited files. -->
 
 | Surface | Affected? | Covered flows | Evidence | Required verification |
@@ -904,7 +970,7 @@ dedicated design section.
 | Auth/permissions/tenant scope | Yes/No | {flow IDs} | {middleware/policies/session inspected} | {permission integration/browser check/N/A} |
 | External APIs/storage/cache/search | Yes/No | {flow IDs} | {clients/adapters/config inspected} | {mocked-boundary integration test/N/A} |
 
-### 2.11 Test Design Matrix
+### 2.12 Test Design Matrix
 <!-- Red tests must be listed before implementation starts. -->
 
 | Test ID | Level | Case type | Target | Data setup / preconditions | Scenario | Assertions | Covers flow/risk | Evidence |
@@ -914,7 +980,7 @@ dedicated design section.
 | TEST-003 | Unit | Pure logic | {test file} | {input object/value} | {isolated rule} | {return/error value} | {flow/risk} | {command/report path} |
 | TEST-004 | Browser / Playwright | Browser evidence | {screen/spec} | {seeded user and route state} | {visible multi-step workflow} | {visible result and screenshots} | {flow/risk} | {index.html/screenshots} |
 
-### 2.12 Integration Coverage Contract
+### 2.13 Integration Coverage Contract
 <!-- Required for behavior-changing work. Every affected flow needs coverage or a named waiver before implementation starts. -->
 
 | Flow | Required coverage | Required case types | Waiver / blocker if not covered |
@@ -935,7 +1001,7 @@ Coverage rules:
 - Waivers must include a reason marker such as `because`, `reason`, `blocked by`, `out of scope`, `理由`, `根拠`, `ブロック`, or `対象外`.
 - `N/A`, `manual`, `low risk`, `TBD`, `later`, and blank waiver entries are invalid unless the row is fully covered and no waiver is being used.
 
-### 2.13 Plan Review Requirement
+### 2.14 Plan Review Requirement
 <!-- Required for behavior-changing work. -->
 
 - Requirement: Required / Optional
@@ -951,14 +1017,14 @@ search/cache, queues, jobs, schedules, or other side effects; public API
 contracts or shared runtime entrypoints; and any change the user or plan author
 marks as uncertain or high impact.
 
-### 2.14 Migration / Runtime Enforcement
+### 2.15 Migration / Runtime Enforcement
 <!-- Required when schema or deploy/startup assumptions are involved. -->
 
 - Migration needed: Yes/No
 - Migration enforcement path: {entrypoint/deploy/startup path or N/A}
 - Runtime validation command: `{command or N/A}`
 
-### 2.15 Playwright Integration Test Plan
+### 2.16 Playwright Integration Test Plan
 <!-- Required for visible browser behavior or multi-step business workflows. -->
 
 | Scenario ID | Business flow | Entry point | Major steps requiring screenshots | Expected result | Risk covered |
@@ -1009,6 +1075,8 @@ Evidence output:
 - [ ] Triggered runtime-causality checks classify code/environment/data/deploy/provider/inconclusive before behavior-changing implementation tasks
 - [ ] Frontend Design System Gate is documented, or explicitly not triggered with source-backed reason
 - [ ] Frontend plans include Design System Applicability, searched paths, component matches, and concrete waivers when a design system applies
+- [ ] Design Principles Gate is documented, or explicitly not triggered with source-backed reason
+- [ ] Module/service/domain plans include Design Principles Compliance with searched paths, per-rule application, and concrete waivers when principles apply
 - [ ] Bug Feedback Review is documented for bug/regression work, or explicitly unnecessary because this is not a bug/regression request
 - [ ] Flow Knowledge Update is documented for behavior-changing work, including target docs or a concrete feature-local reason
 - [ ] Required `docs/agent-flow/business-flows.md` and `docs/agent-flow/integration-scenarios.md` update tasks are included before implementation when reusable flow knowledge is found

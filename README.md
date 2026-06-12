@@ -209,6 +209,7 @@ After install, review:
 - `.claude/docs/DESIGN.md`
 - `docs/agent-flow/design-system.md`
 - `docs/agent-flow/design-system/`
+- `docs/agent-flow/design-principles.md`
 
 The default `.agent-flow/config.json` is tuned for common Next.js repositories.
 Adjust the path lists when installing into another stack.
@@ -268,6 +269,21 @@ searched paths and fallback source/component patterns.
 This keeps Payn-like design-system imports generic: the kit can preserve and
 apply a target repo's design-system rules, but it does not ship any brand's
 tokens or components as defaults.
+
+For behavior-changing work that affects modules, services, domain logic, shared
+logic, or data ownership, the plan must also run the Design Principles Gate.
+`flow-plan` reads repo-local `docs/agent-flow/design-principles.md` (and
+configured `design_principles_paths`) before any external architecture
+reference, then records a `Design Principles Compliance` section that applies
+matching rules or concrete waivers. The shipped default principles require
+side-effect-free loosely coupled modules and guard three anti-patterns:
+design splits justified only by vague "responsibility" wording, Service-pattern
+abuse that breaks encapsulation, and aggregate-internal constraints implemented
+outside the aggregate. `flow-impl` re-checks the same rules during architecture
+review, and the matrix gate requires the compliance section for
+module-affecting behavior plans (`design_principles_affecting_prefixes`, with
+`design_principles_excluded_segments`/`_extensions` so migration/config-only
+work under broad module roots does not trigger).
 
 Use `/flow-start` for new-feature discovery and greenfield scope shaping only.
 If discovery shows that an existing runtime path will change, switch to

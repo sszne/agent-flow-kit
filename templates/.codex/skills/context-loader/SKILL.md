@@ -23,6 +23,8 @@ Use at the start of every non-trivial repository task, especially:
   search/cache, external integrations, or shared business logic.
 - frontend planning or review that may depend on repo-local design-system
   rules, tokens, components, patterns, or brand guidance.
+- behavior-changing module/service/domain work that may depend on repo-local
+  design-principles rules for coupling, encapsulation, or data ownership.
 
 For tiny self-contained questions, load only the directly relevant files.
 
@@ -59,6 +61,15 @@ For tiny self-contained questions, load only the directly relevant files.
    - `.claude/docs/DESIGN.md`
    - existing source component/style/theme files directly relevant to the
      planned surface
+   If behavior-changing work affects modules, services/actions, domain logic,
+   shared logic, or data ownership, read design-principles context when it
+   exists:
+   - `.agent-flow/config.json` `design_principles_paths`
+   - `docs/agent-flow/design-principles.md`
+   - `docs/agent-flow/design-principles/`
+   - `.claude/docs/DESIGN.md`
+   - existing source conventions (module layout, ownership patterns, service
+     usage) directly relevant to the planned surface
 8. If a task involves a specific library and `.claude/docs/libraries/` contains
    relevant notes, read only the matching library files.
 9. Continue with the requested task using the loaded constraints.

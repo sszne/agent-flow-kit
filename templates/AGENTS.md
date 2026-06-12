@@ -14,6 +14,8 @@ At the start of every non-trivial repository task, load the local context:
 - `docs/agent-flow/design-system.md` and `docs/agent-flow/design-system/`
   when frontend design, screens, components, styles, brand, tokens, or
   component rules are in scope
+- `docs/agent-flow/design-principles.md` when behavior-changing work affects
+  modules, services, domain logic, shared logic, or data ownership
 - `docs/agent-flow/source-documents.md` when it exists
 - `docs/agent-flow/business-flow-integration-tests.md` when business-flow
   baseline operation tests are in scope
@@ -63,6 +65,14 @@ For frontend behavior-changing plans, `flow-plan` uses `flow-design` as a
 support skill when design-system guidance may apply. If local design-system
 components or tokens match the planned UI, the plan should apply them or record
 a concrete waiver.
+
+For behavior-changing plans that affect modules, services, domain logic, shared
+logic, or data ownership, `flow-plan` runs the Design Principles Gate against
+`docs/agent-flow/design-principles.md` (and configured
+`design_principles_paths`). Matching rules — including the
+vague-responsibility, Service Introduction Rule, and aggregate-encapsulation
+anti-pattern checks — must be applied or concretely waived, and the plan must
+include a `Design Principles Compliance` section.
 
 ## Implementation Gate
 
@@ -139,6 +149,11 @@ Frontend plans that affect screens, components, client UI, styles, or public
 frontend assets should include design-system applicability evidence when a
 design system is present. If no design system is found, record the searched
 paths and fallback source/component patterns.
+
+Plans that affect modules, services, domain logic, shared logic, or data
+ownership should include design-principles compliance evidence when a
+design-principles document is present. If none is found, record the searched
+paths and the fallback source conventions used.
 
 ## Working Style
 
